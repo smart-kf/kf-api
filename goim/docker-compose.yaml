@@ -1,0 +1,106 @@
+services:
+  kafka:
+#    image: docker.io/bitnami/kafka:3.9
+    image: bitnami/kafka:3.9
+    ports:
+      - "9092:9092"
+    volumes:
+      - "kafka_data:/bitnami"
+    environment:
+      # KRaft settings
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+      # Listeners
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+
+  redis:
+    image: bitnami/redis:4.0
+    environment:
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    ports:
+      - '6379:6379'
+    volumes:
+      - 'redis_data:/bitnami/redis/data'
+
+  discovery:
+    image: goim
+    ports:
+      - 7171:7171  # rpc
+
+    command:
+      - /app/dis
+      - -conf=discovery.toml
+    volumes:
+      - ./discovery.toml:/app/discovery.toml
+    restart: always
+
+  comet:
+    image: goim
+    ports:
+      - 3109:3109  # rpc
+      - 3101:3101  # tcp ??
+      - 3102:3102  # websocket
+    command:
+      - /app/comet
+      - -conf=/app/comet.toml
+      - -region=sh
+      - -zone=sh001
+      - -host=test1
+      - -deploy.env=dev
+    volumes:
+      - ./comet.toml:/app/comet.toml
+    depends_on:
+      - kafka
+      - discovery
+      - redis
+    restart: always
+
+  logic:
+    image: goim
+    ports:
+      - 3119:3119  # rpc
+      - 3111:3111  # http
+    depends_on:
+      - redis
+      - discovery
+      - kafka
+    command:
+      - /app/logic
+      - -conf=/app/logic.toml
+      - -region=sh
+      - -zone=sh001
+      - -host=test1
+      - -deploy.env=dev
+    volumes:
+      - ./logic.toml:/app/logic.toml
+    restart: always
+
+  job:
+    image: goim
+    depends_on:
+      - redis
+      - discovery
+      - kafka
+    command:
+      - /app/job
+      - -conf=/app/job.toml
+      - -region=sh
+      - -zone=sh001
+      - -host=test1
+      - -deploy.env=dev
+    volumes:
+      - ./job.toml:/app/job.toml
+    restart: always
+
+volumes:
+  kafka_data:
+    driver: local
+  redis_data:
+    driver: local
