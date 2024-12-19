@@ -1,0 +1,11 @@
+services:
+  sms:
+    image: sms:latest
+    volumes:
+      - ./prod/config.yaml:/app/config.yaml
+    command:
+      - /app/app
+    ports:
+      - "8081:8081"
+    restart: always
+

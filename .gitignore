@@ -1,0 +1,7 @@
+bin/
+logtest
+.idea/
+cache/*
+.idea/*
+*.xml
+node_modules
