@@ -1,4 +1,14 @@
-#
-#db:
-#  driver: mysql  # mysql / postgres / sqlite ...
-#  dsn: user:pass@tcp(127.0.0.1:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local
+jwtKey: abcdefg
+
+db:
+  driver: sqlite  # mysql / postgres / sqlite ...
+  dsn: ./test/sqlite.db
+
+
+debug: true
+
+
+billConfig:
+  accounts:
+    - username: admin
+      password: admin

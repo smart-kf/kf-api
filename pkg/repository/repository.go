@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"gorm.io/gorm"
 	"std-api/pkg/db"
 )
@@ -11,7 +12,7 @@ func NewBaseRepository() *BaseRepository {
 	return &BaseRepository{}
 }
 
-func (b *BaseRepository) getDB() *gorm.DB {
+func (b *BaseRepository) getDB(ctx context.Context) *gorm.DB {
 	db := db.DB()
-	return db
+	return db.WithContext(ctx)
 }

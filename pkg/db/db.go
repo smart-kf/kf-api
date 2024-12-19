@@ -2,9 +2,12 @@ package db
 
 import (
 	"github.com/clearcodecn/sqlite"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
+	"os"
+	"path/filepath"
 	"std-api/config"
 	"sync"
 )
@@ -23,6 +26,8 @@ func Load() *gorm.DB {
 		)
 		switch conf.DB.Driver {
 		case "sqlite":
+			dir := filepath.Dir(conf.DB.Dsn)
+			os.MkdirAll(dir, 0755)
 			db, err = gorm.Open(sqlite.Open(conf.DB.Dsn), &gorm.Config{})
 		case "mysql":
 			db, err = gorm.Open(mysql.Open(conf.DB.Dsn), &gorm.Config{})
@@ -36,18 +41,52 @@ func Load() *gorm.DB {
 		}
 		_db = db
 
+		//db.Use(xlogger.NewLoggerPlugin())
+
 		syncTable(_db)
+
+		go initBillAccounts()
 	})
 
 	return _db
 }
 
 func syncTable(db *gorm.DB) {
-	if err := db.AutoMigrate(&SomeTable{}); err != nil {
+	if err := db.AutoMigrate(
+		&BillAccount{},
+	); err != nil {
 		log.Fatal(err)
 	}
 }
 
 func DB() *gorm.DB {
 	return _db
+}
+
+func initBillAccounts() {
+	conf := config.GetConfig()
+	bac := conf.BillConfig.Accounts
+	if len(bac) == 0 {
+		return
+	}
+
+	for _, ac := range bac {
+		acc := BillAccount{
+			Username: ac.Username,
+		}
+
+		pass, _ := bcrypt.GenerateFromPassword([]byte(ac.Password), bcrypt.DefaultCost)
+		acc.Password = string(pass)
+		db := DB()
+		var dbAcc BillAccount
+		db.Where("username = ?", ac.Username).First(&dbAcc)
+
+		if dbAcc.ID > 0 {
+			if err := bcrypt.CompareHashAndPassword([]byte(dbAcc.Password), []byte(ac.Password)); err != nil {
+				db.Model(BillAccount{}).Where("id = ?", dbAcc.ID).Update("password", acc.Password)
+			}
+		} else {
+			db.Create(&acc)
+		}
+	}
 }

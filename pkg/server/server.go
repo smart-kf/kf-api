@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"std-api/config"
 	"std-api/pkg/controller"
+	"std-api/pkg/controller/bill"
 	"std-api/pkg/utils"
 )
 
@@ -34,20 +35,19 @@ func Run() error {
 	registerRouter(g)
 	swaggerAPI(g)
 
-	return g.Run(fmt.Sprintf("%s:%d", conf.Web.Addr, conf.Web.Port))
+	return g.Run(conf.Web.String())
 }
 
 func registerRouter(g *gin.Engine) {
+	api := g.Group("/api")
 
-}
+	// 计费路由
+	var bc bill.BillController
+	bg := api.Group("/bill")
+	{
+		bg.POST("/login", bc.Login)
+	}
 
-type DemoRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
-type DemoResponse struct {
-	Token string `json:"token"`
 }
 
 func swaggerAPI(g *gin.Engine) {
@@ -56,8 +56,15 @@ func swaggerAPI(g *gin.Engine) {
 
 	swag.JWT("access_token")
 	apiGroup := swag.Group("/api")
-	apiGroup.Get("/demo").Body(&DemoRequest{}).JSON(&DemoResponse{})
 
+	// 计费后台的swagger 文档.
+	bill.SwaggerDoc(apiGroup)
+
+	// swagger json 服务
 	g.GET("/_doc", gin.WrapH(swag))
-	g.GET("/doc", gin.WrapH(swaggos.UI("/_doc", "")))
+
+	// swagger ui 服务
+	g.Any("/doc/*action", gin.WrapH(swaggos.UI("/doc", "http://"+config.GetConfig().Web.String()+"/_doc")))
+
+	fmt.Println("swagger ui: " + "http://" + config.GetConfig().Web.String() + "/doc")
 }

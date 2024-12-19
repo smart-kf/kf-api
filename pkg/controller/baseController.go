@@ -24,18 +24,17 @@ func (b *BaseController) Success(ctx *gin.Context, obj any) {
 
 func (b *BaseController) Error(ctx *gin.Context, err error) {
 	var rsp BaseResponse
+	if config.GetConfig().Debug {
+		rsp.DebugInfo = err
+	}
 	if myError, ok := xerrors.IsError(err); ok {
 		rsp.Code = myError.Code
 		rsp.Message = myError.Msg
-
 		ctx.JSON(200, rsp)
 		return
 	}
 
 	rsp.Code = 500
 	rsp.Message = "internal server error"
-	if config.GetConfig().Debug {
-		rsp.DebugInfo = err
-	}
 	ctx.JSON(200, rsp)
 }

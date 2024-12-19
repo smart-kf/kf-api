@@ -5,3 +5,4 @@ cache/*
 .idea/*
 *.xml
 node_modules
+test/
