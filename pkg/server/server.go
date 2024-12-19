@@ -5,18 +5,16 @@ import (
 	xlogger "github.com/clearcodecn/log"
 	"github.com/clearcodecn/swaggos"
 	"github.com/gin-gonic/gin"
-	"net/http"
 	"std-api/config"
 	"std-api/pkg/controller"
 	"std-api/pkg/controller/bill"
+	"std-api/pkg/controller/kfbackend"
+	"std-api/pkg/controller/kffrontend"
 	"std-api/pkg/utils"
 )
 
-var httpServer http.Server
-
 func Run() error {
 	conf := config.GetConfig()
-
 	g := gin.New()
 	g.Use(gin.Recovery())
 
@@ -41,13 +39,24 @@ func Run() error {
 func registerRouter(g *gin.Engine) {
 	api := g.Group("/api")
 
-	// 计费路由
+	// 计费
 	var bc bill.BillController
 	bg := api.Group("/bill")
 	{
 		bg.POST("/login", bc.Login)
 	}
 
+	// 客服后台
+	kf := api.Group("/kf-be")
+	{
+		_ = kf
+	}
+
+	// 客服前台
+	kffe := api.Group("/kf-fe")
+	{
+		_ = kffe
+	}
 }
 
 func swaggerAPI(g *gin.Engine) {
@@ -59,6 +68,8 @@ func swaggerAPI(g *gin.Engine) {
 
 	// 计费后台的swagger 文档.
 	bill.SwaggerDoc(apiGroup)
+	kfbackend.SwaggerDoc(apiGroup)
+	kffrontend.SwaggerDoc(apiGroup)
 
 	// swagger json 服务
 	g.GET("/_doc", gin.WrapH(swag))
