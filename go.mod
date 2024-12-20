@@ -5,7 +5,7 @@ go 1.23.2
 require (
 	github.com/clearcodecn/log v1.0.3
 	github.com/clearcodecn/sqlite v1.4.0
-	github.com/clearcodecn/swaggos v0.0.6
+	github.com/clearcodecn/swaggos v0.0.7
 	github.com/gin-gonic/gin v1.10.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/make-money-fast/xconfig v0.0.0-20231220023435-03d97a0a1e92

@@ -7,10 +7,10 @@ import (
 )
 
 type BaseResponse struct {
-	Code      int    `json:"code"`
-	Message   string `json:"message"`
-	DebugInfo any    `json:"debug_info,omitempty"`
-	Data      any    `json:"data"`
+	Code      int    `json:"code" doc:"响应码:200=成功，400-499是业务错误, 500以上是服务器错误"`
+	Message   string `json:"message" doc:"错误提示"`
+	DebugInfo any    `json:"debug_info,omitempty" doc:"debug信息，开发环境才有，前端不要用这个字段做业务"`
+	Data      any    `json:"data" doc:"数据信息"`
 }
 
 type BaseController struct{}
