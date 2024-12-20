@@ -1,9 +1,11 @@
 package kfbackend
 
-import "std-api/pkg/controller"
+import (
+	"std-api/pkg/common"
+)
 
 type BaseController struct {
-	controller.BaseController
+	common.BaseController
 }
 
 func NewBaseController() *BaseController {

@@ -51,14 +51,6 @@ func SwaggerDoc(group *swaggos.Group) {
 }
 
 // TODO 临时放下 后面迁移到各个文件内
-type LoginRequest struct {
-	CardID   string `json:"cardID" binding:"required" doc:"卡密id"`
-	Password string `json:"password,omitempty" doc:"密码可选"`
-}
-
-type LoginResponse struct {
-	Notice string `json:"notice,omitempty" doc:"公告通知"`
-}
 
 type QRCodeRequest struct{}
 type QRCodeResponse struct {

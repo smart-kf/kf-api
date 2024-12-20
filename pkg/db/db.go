@@ -54,6 +54,8 @@ func Load() *gorm.DB {
 func syncTable(db *gorm.DB) {
 	if err := db.AutoMigrate(
 		&BillAccount{},
+		&KFCard{},
+		&BillLog{},
 	); err != nil {
 		log.Fatal(err)
 	}

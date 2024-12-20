@@ -26,7 +26,7 @@ type LoginResponse struct {
 	Token string `json:"token"`
 }
 
-func (c *BillController) Login(ctx *gin.Context) {
+func (c *BaseController) Login(ctx *gin.Context) {
 	var request LoginRequest
 	if err := ctx.ShouldBindJSON(&request); err != nil {
 		c.Error(ctx, err)
@@ -63,6 +63,7 @@ func (c *BillController) Login(ctx *gin.Context) {
 
 	j := jwt.New(jwt.SigningMethodHS256)
 	j.Claims = jwt.MapClaims{
+		"id":       bac.ID,
 		"username": bac.Username,
 	}
 	sign, err := j.SignedString([]byte(config.GetConfig().JwtKey))

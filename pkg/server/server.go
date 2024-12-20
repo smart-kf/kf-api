@@ -6,7 +6,7 @@ import (
 	"github.com/clearcodecn/swaggos"
 	"github.com/gin-gonic/gin"
 	"std-api/config"
-	"std-api/pkg/controller"
+	"std-api/pkg/common"
 	"std-api/pkg/controller/bill"
 	"std-api/pkg/controller/kfbackend"
 	"std-api/pkg/controller/kffrontend"
@@ -40,10 +40,19 @@ func registerRouter(g *gin.Engine) {
 	api := g.Group("/api")
 
 	// 计费
-	var bc bill.BillController
-	bg := api.Group("/bill")
+	var bc bill.BaseController
+	bgUnAuth := api.Group("/bill")
 	{
-		bg.POST("/login", bc.Login)
+		bgUnAuth.POST("/login", bc.Login)
+	}
+
+	bgAuth := api.Group("/bill", common.BillAuthMiddleware())
+	{
+		var cardController bill.CardController
+		cardGroup := bgAuth.Group("/card")
+		{
+			cardGroup.POST("/batch-add", cardController.BatchAddCard)
+		}
 	}
 
 	// 客服后台
@@ -61,9 +70,9 @@ func registerRouter(g *gin.Engine) {
 
 func swaggerAPI(g *gin.Engine) {
 	swag := swaggos.Default()
-	swag.Response(200, new(controller.BaseResponse))
+	swag.Response(200, new(common.BaseResponse))
 
-	swag.JWT("access_token")
+	swag.JWT("Authorization")
 	apiGroup := swag.Group("/api")
 
 	// 计费后台的swagger 文档.
