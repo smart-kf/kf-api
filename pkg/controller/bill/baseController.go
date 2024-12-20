@@ -1,11 +1,9 @@
 package bill
 
-import "std-api/pkg/controller"
+import (
+	"std-api/pkg/common"
+)
 
-type BillController struct {
-	controller.BaseController
-}
-
-func NewKfBaseController() *BillController {
-	return &BillController{}
+type BaseController struct {
+	common.BaseController
 }

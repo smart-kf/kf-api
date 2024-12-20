@@ -3,10 +3,12 @@ package main
 import (
 	"flag"
 	xlogger "github.com/clearcodecn/log"
+	"golang.org/x/sync/errgroup"
 	"log"
 	"std-api/config"
 	"std-api/pkg/db"
 	"std-api/pkg/server"
+	"time"
 )
 
 var configName string
@@ -21,7 +23,22 @@ func main() {
 	initLogger(conf)
 	db.Load()
 
-	log.Fatal(server.Run())
+	var (
+		eg       errgroup.Group
+		stopChan = make(chan struct{})
+	)
+	eg.Go(func() error {
+		task := db.InitBillLogBackgroundTask(1*time.Minute, 10000) // 1分钟清空buffer
+		task.Start(stopChan)
+		return nil
+	})
+
+	if err := server.Run(); err != nil {
+		close(stopChan)
+		return
+	}
+
+	log.Fatal(eg.Wait())
 }
 
 func initLogger(conf *config.Config) {
