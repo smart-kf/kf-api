@@ -53,39 +53,39 @@ func SwaggerDoc(group *swaggos.Group) {
 
 // TODO 临时放下 后面迁移到各个文件内
 type LoginRequest struct {
-	CardID   string `json:"cardID" binding:"required"` // 卡密id
-	Password string `json:"password"`                  // 密码可选
+	CardID   string `json:"cardID" binding:"required" doc:"卡密id"`
+	Password string `json:"password" doc:"密码可选"`
 }
 
 type LoginResponse struct {
-	Notice string `json:"notice"` // 公告通知
+	Notice string `json:"notice" doc:"公告通知"`
 }
 
 type QRCodeRequest struct{}
 type QRCodeResponse struct {
-	URL           string         `json:"qrcodeUrl"`     // 主站二维码图片地址
-	HealthAt      int64          `json:"healthAt"`      // 主站通过健康检查的时间
-	Enable        bool           `json:"enable"`        // 启用停用状态
-	EnableNewUser bool           `json:"enableNewUser"` // 启用停用新粉状态
-	Domains       []QRCodeDomain `json:"domains"`       // 域名列表
+	URL           string         `json:"qrcodeUrl" doc:"主站二维码图片地址"`
+	HealthAt      int64          `json:"healthAt" doc:"主站通过健康检查的时间"`
+	Enable        bool           `json:"enable" doc:"启用停用状态"`
+	EnableNewUser bool           `json:"enableNewUser" doc:"启用停用新粉状态"`
+	Domains       []QRCodeDomain `json:"domains" doc:"域名列表"`
 }
 
 type QRCodeDomain struct {
-	Domain   string `json:"domain"`   // 站点域名
-	HealthAt int64  `json:"healthAt"` // 通过健康检查的时间
-	CreateAt int64  `json:"createAt"` // 添加创建时间
-	Remark   string `json:"remark"`   // 备注
-	URL      string `json:"url"`      // 二维码图片地址
+	Domain   string `json:"domain" doc:"站点域名"`
+	HealthAt int64  `json:"healthAt" doc:"通过健康检查的时间"`
+	CreateAt int64  `json:"createAt" doc:"添加创建时间"`
+	Remark   string `json:"remark" doc:"备注"`
+	URL      string `json:"url" doc:"二维码图片地址"`
 }
 
 type QRCodeSwitchRequest struct{}
 type QRCodeSwitchResponse struct {
-	URL      string `json:"qrcodeUrl"` // 主站二维码图片地址
-	HealthAt int64  `json:"healthAt"`  // 主站通过健康检查的时间
+	URL      string `json:"qrcodeUrl" doc:"主站二维码图片地址"`
+	HealthAt int64  `json:"healthAt" doc:"主站通过健康检查的时间"`
 }
 
 type QRCodeOnOffRequest struct {
-	OnOff        *bool `json:"onoff"`        // 开关：所有二维码的所有用户都不能进入
-	OnOffNewUser *bool `json:"onoffNewUser"` // 开关：老用户可进，新用户不能进
+	OnOff        *bool `json:"onoff" doc:"开关：所有二维码的所有用户都不能进入"`
+	OnOffNewUser *bool `json:"onoffNewUser" doc:"开关：老用户可进，新用户不能进"`
 }
 type QRCodeOnOffResponse struct{}
