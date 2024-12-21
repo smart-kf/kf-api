@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	xlogger "github.com/clearcodecn/log"
 	"gorm.io/gorm"
 	"sync"
@@ -52,7 +53,7 @@ func AddBillLog(operator string, handleFunc string, content string) {
 	select {
 	case _billBackgroundTask.buffer <- log:
 	default:
-		xlogger.Warn("billLogTaskFull", xlogger.Any("log", log))
+		xlogger.Warn(context.Background(), "billLogTaskFull", xlogger.Any("log", log))
 	}
 }
 
@@ -92,8 +93,8 @@ func (b *BillLogBackGroundTask) Start(stopChan chan struct{}) {
 func (b *BillLogBackGroundTask) create(logs []*BillLog) {
 	db := DB()
 	if err := db.CreateInBatches(logs, len(logs)).Error; err != nil {
-		xlogger.Error("bill_log_task_create_failed", xlogger.Err(err))
+		xlogger.Error(context.Background(), "bill_log_task_create_failed", xlogger.Err(err))
 	} else {
-		xlogger.Info("bill_log_task_create", xlogger.Any("logsLength", len(logs)))
+		xlogger.Info(context.Background(), "bill_log_task_create", xlogger.Any("logsLength", len(logs)))
 	}
 }
