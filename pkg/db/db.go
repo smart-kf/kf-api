@@ -3,21 +3,19 @@ package db
 import (
 	"context"
 	xlogger "github.com/clearcodecn/log"
-	"github.com/clearcodecn/sqlite"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
-	"os"
-	"path/filepath"
 	"std-api/config"
 	"sync"
 )
 
 var (
-	o   sync.Once
-	_db *gorm.DB
+	o               sync.Once
+	_db             *gorm.DB
+	buildSqliteFunc func() (*gorm.DB, error)
 )
 
 func Load() *gorm.DB {
@@ -28,10 +26,13 @@ func Load() *gorm.DB {
 			err error
 		)
 		switch conf.DB.Driver {
+		// 服务器编译慢，不支持他了.
 		case "sqlite":
-			dir := filepath.Dir(conf.DB.Dsn)
-			os.MkdirAll(dir, 0755)
-			db, err = gorm.Open(sqlite.Open(conf.DB.Dsn), &gorm.Config{})
+			if buildSqliteFunc == nil {
+				panic(`sqlite is not support, please use -tag sqlite to build`)
+			} else {
+				db, err = buildSqliteFunc()
+			}
 		case "mysql":
 			db, err = gorm.Open(mysql.Open(conf.DB.Dsn), &gorm.Config{})
 		default:
