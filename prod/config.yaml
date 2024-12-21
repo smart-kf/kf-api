@@ -1,0 +1,15 @@
+jwtKey: G7h4pL9qZtW2
+debug: true
+
+db:
+  driver: mysql  # mysql / postgres / sqlite ...
+  dsn: "root:124x8Xawdasdx1r140xs$@tcp(mysql:3306)/kf?charset=utf8mb4&parseTime=True&loc=PRC"
+
+log:
+  level: debug    # debug / info / warn / error
+  format: json
+
+billConfig:
+  accounts:
+    - username: kfadmin
+      password: kfadmin123

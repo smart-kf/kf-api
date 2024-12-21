@@ -15,4 +15,3 @@ RUN apk add --no-cache tzdata
 ENV TZ=Asia/Shanghai
 WORKDIR /app
 COPY bin/app /app/
-COPY static /app/static

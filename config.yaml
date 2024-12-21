@@ -4,7 +4,6 @@ db:
   driver: sqlite  # mysql / postgres / sqlite ...
   dsn: ./test/sqlite.db
 
-
 debug: true
 
 
