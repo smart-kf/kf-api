@@ -9,8 +9,8 @@ services:
       - "8081:8081"
     restart: always
     networks:
-      - kf_network
+      - mysql_kf_network
 
 networks:
-  kf_network:
+  mysql_kf_network:
     external: true
