@@ -1,6 +1,6 @@
 services:
   sms:
-    image: sms:latest
+    image: kf-api:latest
     volumes:
       - ./prod/config.yaml:/app/config.yaml
     command:
@@ -8,4 +8,9 @@ services:
     ports:
       - "8081:8081"
     restart: always
+    networks:
+      - kf_network
 
+networks:
+  kf_network:
+    external: true
