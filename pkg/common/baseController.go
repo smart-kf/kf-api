@@ -51,6 +51,7 @@ func (b *BaseController) Error(ctx *gin.Context, err error) {
 		rsp.Code = myError.Code
 		rsp.Message = myError.Msg
 		ctx.JSON(200, rsp)
+		ctx.Abort()
 		return
 	}
 
@@ -60,6 +61,7 @@ func (b *BaseController) Error(ctx *gin.Context, err error) {
 		rsp.DebugInfo = err.Error()
 	}
 	ctx.JSON(200, rsp)
+	ctx.Abort()
 }
 
 func (b *BaseController) BindAndValidate(ctx *gin.Context, req any) bool {

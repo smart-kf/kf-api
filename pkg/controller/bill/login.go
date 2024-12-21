@@ -59,7 +59,7 @@ func (c *BaseController) Login(ctx *gin.Context) {
 	}
 
 	// 登录正确. 设置jwt - token
-	xlogger.Info("用户登录系统", xlogger.Any("req", request))
+	xlogger.Info(ctx, "用户登录系统", xlogger.Any("req", request))
 
 	j := jwt.New(jwt.SigningMethodHS256)
 	j.Claims = jwt.MapClaims{

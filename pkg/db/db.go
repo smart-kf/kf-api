@@ -1,7 +1,10 @@
 package db
 
 import (
+	"context"
+	xlogger "github.com/clearcodecn/log"
 	"github.com/clearcodecn/sqlite"
+	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -41,7 +44,7 @@ func Load() *gorm.DB {
 		}
 		_db = db
 
-		//db.Use(xlogger.NewLoggerPlugin())
+		db.Use(xlogger.NewLoggerPlugin())
 
 		syncTable(_db)
 
@@ -63,6 +66,34 @@ func syncTable(db *gorm.DB) {
 
 func DB() *gorm.DB {
 	return _db
+}
+
+var transactionKey = struct{}{}
+
+// Begin 开启事务
+func Begin(ctx context.Context) (*gorm.DB, context.Context) {
+	if ginCtx, ok := ctx.(*gin.Context); ok {
+		ctx = ginCtx.Request.Context()
+	}
+	db, ok := ctx.Value(transactionKey).(*gorm.DB)
+	if !ok {
+		db = DB()
+		db = db.Begin()
+		ctx = context.WithValue(ctx, transactionKey, db)
+	}
+	return db, ctx
+}
+
+func GetDBFromContext(ctx context.Context) *gorm.DB {
+	if ginCtx, ok := ctx.(*gin.Context); ok {
+		ctx = ginCtx.Request.Context()
+	}
+	db, ok := ctx.Value(transactionKey).(*gorm.DB)
+	if !ok {
+		db = DB()
+		db = db.WithContext(ctx)
+	}
+	return db
 }
 
 func initBillAccounts() {
