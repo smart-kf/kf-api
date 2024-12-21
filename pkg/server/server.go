@@ -86,7 +86,7 @@ func swaggerAPI(g *gin.Engine) {
 	g.GET("/_doc", gin.WrapH(swag))
 
 	// swagger ui 服务
-	g.Any("/doc/*action", gin.WrapH(swaggos.UI("/doc", "http://"+config.GetConfig().Web.String()+"/_doc")))
+	g.Any("/doc/*action", gin.WrapH(swaggos.UI("/doc", "/_doc")))
 
 	fmt.Println("swagger ui: " + "http://" + config.GetConfig().Web.String() + "/doc")
 }
