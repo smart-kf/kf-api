@@ -27,7 +27,7 @@ func Run() error {
 	g.Use(xlogger.GinLog(logConfig))
 
 	g.GET("/healthy", func(ctx *gin.Context) {
-		ctx.String(200, "ok")
+		ctx.String(200, "success")
 	})
 
 	registerRouter(g)
