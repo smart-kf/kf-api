@@ -1,7 +1,9 @@
 .PHONY: copy-config build run mv-tpl build-image reload
+tag=$(shell git describe --tags --always)
 
 build:
-	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/app cmd/server/main.go
+	echo "build $(tag)"
+	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "-X 'pkg/server.Version=$(tag)'" -o bin/app cmd/server/main.go
 
 build-image:build
 	@docker build -t kf-api .

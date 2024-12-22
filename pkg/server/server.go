@@ -13,6 +13,8 @@ import (
 	"std-api/pkg/utils"
 )
 
+const Version = "default"
+
 func Run() error {
 	conf := config.GetConfig()
 	g := gin.New()
@@ -28,6 +30,9 @@ func Run() error {
 
 	g.GET("/healthy", func(ctx *gin.Context) {
 		ctx.String(200, "success")
+	})
+	g.GET("/version", func(ctx *gin.Context) {
+		ctx.String(200, fmt.Sprintf("git-version is: %s", Version))
 	})
 
 	registerRouter(g)
