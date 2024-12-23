@@ -1,0 +1,54 @@
+# This workflow will build a golang project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+
+name: Go
+
+on:
+  # 在针对 `main` 分支的推送上运行。如果你
+  # 使用 `master` 分支作为默认分支，请将其更改为 `master`
+  push:
+    branches: [release]
+    tags:
+      - 'v*'  # 只在以 'v' 开头的标签时触发，可以根据需要更改
+
+  # 允许你从 Actions 选项卡手动运行此工作流程
+  workflow_dispatch:
+
+# 设置 GITHUB_TOKEN 的权限，以允许部署到 GitHub Pages
+permissions:
+  contents: write
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+
+    - name: Cache Go modules
+      uses: actions/cache@v3
+      with:
+        path: /tmp/gopath/pkg/mod
+        key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.mod', '**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-mod-
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.23.3'
+        
+    - name: Install dependencies
+      run: go mod tidy  # 安装依赖项
+
+    - name: Build
+      run: CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o app cmd/server/main.go
+     
+    - name: Create archive
+      run: |
+        tar -czvf app.tar.gz ./app  # 将 dist 目录压缩为 dist.tar.gz
+        
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: app.tar.gz
