@@ -3,6 +3,7 @@ package db
 import (
 	"gorm.io/gorm"
 	"std-api/pkg/constant"
+	"time"
 )
 
 type KFCard struct {
@@ -18,6 +19,9 @@ type KFCard struct {
 	Version       int                  `json:"version" gorm:"version" doc:"乐观锁"`
 }
 
+func (c KFCard) HasExpire() bool {
+	return time.Now().Unix() > c.ExpireTime
+}
 func (KFCard) TableName() string {
 	return "kf_card"
 }

@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"github.com/gin-gonic/gin"
 	zhongwen "github.com/go-playground/locales/zh"
 	ut "github.com/go-playground/universal-translator"
@@ -78,6 +79,14 @@ func (b *BaseController) BindAndValidate(ctx *gin.Context, req any) bool {
 	}
 	if v, ok := req.(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
+			b.Error(ctx, err)
+			return false
+		}
+	}
+	if v, ok := req.(interface {
+		Validate(ctx context.Context) error
+	}); ok {
+		if err := v.Validate(ctx.Request.Context()); err != nil {
 			b.Error(ctx, err)
 			return false
 		}

@@ -4,7 +4,13 @@ import "github.com/clearcodecn/swaggos"
 
 func SwaggerDoc(group *swaggos.Group) {
 	bg := group.Group("/kf-be").Tag("客服后台")
-	bg.Post("/login").Body(LoginRequest{}).JSON(LoginResponse{}).Description("登陆接口")
+
+	public := group.Group("/public").Tag("公开接口")
+	{
+		public.Get("/captchaId").JSON(GetQRCodeIDResponse{}).Description("获取验证码id")
+		public.Get("/captcha/:captchaId.png").Description("获取验证码图片")
+		bg.Post("/login").Body(LoginRequest{}).JSON(LoginResponse{}).Description("登陆接口").Tag("公开接口")
+	}
 
 	qrcode := bg.Group("/qrcode").Tag("二维码管理").
 		Header("authorization", "授权session", true)

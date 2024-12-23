@@ -82,7 +82,7 @@ func NewParamsErrors(s string) error {
 // NewCustomError 前端直接弹出后端的提示语
 func NewCustomError(s string) error {
 	return &Error{
-		Code: 401,
+		Code: 402,
 		Msg:  s,
 	}
 }

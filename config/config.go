@@ -3,13 +3,18 @@ package config
 import "fmt"
 
 type Config struct {
-	Debug  bool   `json:"debug"`
-	Web    Web    `json:"web"`
-	Log    Log    `json:"log"`
-	DB     Db     `json:"db"`
-	JwtKey string `json:"jwtKey"`
+	Debug         bool          `json:"debug"`
+	Web           Web           `json:"web"`
+	Log           Log           `json:"log"`
+	DB            Db            `json:"db"`
+	LevelDBConfig LevelDBConfig `json:"levelDB"`
+	JwtKey        string        `json:"jwtKey"`
+	BillConfig    BillConfig    `json:"billConfig"`
+	RedisConfig   RedisConfig   `json:"redis"`
+}
 
-	BillConfig BillConfig `json:"billConfig"`
+type LevelDBConfig struct {
+	Path string `json:"path"`
 }
 
 type Web struct {
@@ -38,5 +43,11 @@ type BillConfig struct {
 
 type BillAccount struct {
 	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type RedisConfig struct {
+	DB       int    `json:"db"`
+	Address  string `json:"address"`
 	Password string `json:"password"`
 }
