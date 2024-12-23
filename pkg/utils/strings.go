@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 )
@@ -21,4 +22,10 @@ func RandomCard() string {
 	}
 	// 返回生成的卡密
 	return cardKey
+}
+
+func RandomOrderNo() string {
+	s := time.Now().Format(`060102150405`)
+	s += fmt.Sprintf("%d", rand.Intn(10000)+100)
+	return s
 }

@@ -9,6 +9,7 @@ import (
 	"std-api/config"
 	"std-api/pkg/common"
 	"std-api/pkg/controller/bill"
+	bill2 "std-api/pkg/controller/billfrontend"
 	"std-api/pkg/controller/kfbackend"
 	"std-api/pkg/controller/kffrontend"
 	"std-api/pkg/utils"
@@ -88,6 +89,13 @@ func registerRouter(g *gin.Engine) {
 	{
 		kffe.GET("/qrcode/*action")
 	}
+
+	// 计费前台.
+	billFe := api.Group("/bill-fe")
+	{
+		var orderController bill2.OrderController
+		billFe.POST("/order/create", orderController.CreateOrder)
+	}
 }
 
 func swaggerAPI(g *gin.Engine) {
@@ -101,6 +109,7 @@ func swaggerAPI(g *gin.Engine) {
 	bill.SwaggerDoc(apiGroup)
 	kfbackend.SwaggerDoc(apiGroup)
 	kffrontend.SwaggerDoc(apiGroup)
+	bill2.SwaggerDoc(apiGroup)
 
 	// swagger json 服务
 	g.GET("/_doc", gin.WrapH(swag))

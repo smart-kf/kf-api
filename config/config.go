@@ -38,7 +38,8 @@ type Log struct {
 }
 
 type BillConfig struct {
-	Accounts []BillAccount `json:"accounts"`
+	OrderExpireTime int64         `json:"orderExpireTime" default:"600"` // 默认10分钟过期
+	Accounts        []BillAccount `json:"accounts"`
 }
 
 type BillAccount struct {
