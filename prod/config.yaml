@@ -5,6 +5,11 @@ db:
   driver: mysql  # mysql / postgres / sqlite ...
   dsn: "root:124x8Xawdasdx1r140xs$@tcp(mysql:3306)/kf?charset=utf8mb4&parseTime=True&loc=PRC"
 
+redis:
+  db: 1
+  address: redis:6379
+  password: ""
+
 web:
   addr: 0.0.0.0
   port: 8081
