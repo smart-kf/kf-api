@@ -6,6 +6,7 @@ import (
 	"golang.org/x/sync/errgroup"
 	"log"
 	"std-api/config"
+	"std-api/pkg/caches"
 	"std-api/pkg/db"
 	"std-api/pkg/server"
 	"time"
@@ -22,13 +23,20 @@ func main() {
 	conf := config.Load(configName)
 	initLogger(conf)
 	db.Load()
+	db.InitRedis()
 
+	caches.InitCacheInstances()
 	var (
 		eg       errgroup.Group
 		stopChan = make(chan struct{})
 	)
 	eg.Go(func() error {
-		task := db.InitBillLogBackgroundTask(1*time.Minute, 10000) // 1分钟清空buffer
+		task := db.InitBillLogBackgroundTask(1*time.Minute, 100) // 1分钟清空buffer
+		task.Start(stopChan)
+		return nil
+	})
+	eg.Go(func() error {
+		task := db.InitKFLogBackgroundTask(1*time.Minute, 10000)
 		task.Start(stopChan)
 		return nil
 	})

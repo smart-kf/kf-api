@@ -5,6 +5,7 @@ import (
 	xlogger "github.com/clearcodecn/log"
 	"github.com/clearcodecn/swaggos"
 	"github.com/gin-gonic/gin"
+	"github.com/make-money-fast/captcha"
 	"std-api/config"
 	"std-api/pkg/common"
 	"std-api/pkg/controller/bill"
@@ -44,6 +45,13 @@ func Run() error {
 func registerRouter(g *gin.Engine) {
 	api := g.Group("/api")
 
+	public := api.Group("/public")
+	{
+		var publicController kfbackend.PublicController
+		public.GET("/captchaId", publicController.GetCaptchaId)           // 获取验证码id
+		public.GET("/captcha/*action", gin.WrapH(captcha.Server(80, 40))) // 显示验证码图片
+	}
+
 	// 计费
 	var bc bill.BaseController
 	bgUnAuth := api.Group("/bill")
@@ -62,16 +70,23 @@ func registerRouter(g *gin.Engine) {
 		}
 	}
 
+	var authController kfbackend.AuthController
+	api.POST("/kf-be/login", authController.Login)
+
 	// 客服后台
-	kf := api.Group("/kf-be")
+	kf := api.Group("/kf-be", common.KFAuthMiddleware())
 	{
-		_ = kf
+
+		qrCodeGroup := kf.Group("/qrcode")
+		{
+			qrCodeGroup.GET("/")
+		}
 	}
 
 	// 客服前台
 	kffe := api.Group("/kf-fe")
 	{
-		_ = kffe
+		kffe.GET("/qrcode/*action")
 	}
 }
 

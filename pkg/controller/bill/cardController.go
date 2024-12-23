@@ -173,6 +173,7 @@ func (c *CardController) UpdateStatus(ctx *gin.Context) {
 		c.Error(ctx, err)
 		return
 	}
+	tx.Commit()
 	c.Success(ctx, nil)
 	return
 }
