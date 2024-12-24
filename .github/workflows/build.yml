@@ -1,35 +1,45 @@
-name: Build macOS Application
+name: Go
 
 on:
+  # 在针对 `main` 分支的推送上运行。如果你
+  # 使用 `master` 分支作为默认分支，请将其更改为 `master`
   push:
+    branches: [release]
     tags:
-      - 'v*'  # 仅在以 'v' 开头的标签时触发
-env:
-  APP_NAME: "kf-api"
+      - 'v*'  # 只在以 'v' 开头的标签时触发，可以根据需要更改
+
+  # 允许你从 Actions 选项卡手动运行此工作流程
+  workflow_dispatch:
+
+# 设置 GITHUB_TOKEN 的权限，以允许部署到 GitHub Pages
+permissions:
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        arch: [linux]  # amd64 for Intel, arm64 for M2
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: /tmp/gopath/pkg/mod
+          key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.mod', '**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-mod-
 
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v4
         with:
-          go-version: '1.23.2'  # 设置 Go 版本
+          go-version: '1.23.3'
 
-      - name: Build the application
-        run: |
-          go mod tidy
-          make build
+      - name: Install dependencies
+        run: go mod tidy  # 安装依赖项
 
-      - name: Create dist archive
+      - name: Build
+        run: make build
+
+      - name: Create archive
         run: |
           tar -czvf app.tar.gz ./bin/app  
 
@@ -38,7 +48,7 @@ jobs:
         with:
           files: app.tar.gz
 
-      - name: Send Curl Request
+      - name: Trigger Ci Build-image
         run: |
           TAG_NAME=$(git describe --tags --abbrev=0)
           REPO_NAME="${{ github.repository }}" 
