@@ -12,6 +12,7 @@ import (
 	bill2 "github.com/smart-fm/kf-api/pkg/controller/billfrontend"
 	"github.com/smart-fm/kf-api/pkg/controller/kfbackend"
 	"github.com/smart-fm/kf-api/pkg/controller/kffrontend"
+	notify2 "github.com/smart-fm/kf-api/pkg/controller/notify"
 	"github.com/smart-fm/kf-api/pkg/utils"
 	"github.com/smart-fm/kf-api/version"
 )
@@ -94,6 +95,13 @@ func registerRouter(g *gin.Engine) {
 	{
 		var orderController bill2.OrderController
 		billFe.POST("/order/create", orderController.CreateOrder)
+	}
+
+	// 内部调用: websocket on auth 回调.
+	notify := api.Group("/notify")
+	{
+		var nc notify2.NotifyController
+		notify.POST("websocket-auth", nc.WebsocketAuth)
 	}
 }
 
