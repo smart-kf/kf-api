@@ -98,10 +98,13 @@ func registerRouter(g *gin.Engine) {
 	}
 
 	// 内部调用: websocket on auth 回调.
-	notify := api.Group("/notify")
+	internal := g.Group("/internal")
 	{
-		var nc notify2.NotifyController
-		notify.POST("websocket-auth", nc.WebsocketAuth)
+		api := internal.Group("/api")
+		{
+			var nc notify2.NotifyController
+			api.POST("websocket-auth", nc.WebsocketAuth)
+		}
 	}
 }
 
