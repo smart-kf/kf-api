@@ -4,11 +4,11 @@ import (
 	"context"
 	xlogger "github.com/clearcodecn/log"
 	"github.com/gin-gonic/gin"
+	"github.com/smart-fm/kf-api/config"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
-	"std-api/config"
 	"sync"
 )
 

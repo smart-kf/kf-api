@@ -1,7 +1,7 @@
 package caches
 
 import (
-	"std-api/pkg/db"
+	"github.com/smart-fm/kf-api/pkg/db"
 	"sync"
 )
 

@@ -7,8 +7,8 @@ import (
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	"github.com/go-playground/validator/v10/translations/zh"
-	"std-api/config"
-	"std-api/pkg/xerrors"
+	"github.com/smart-fm/kf-api/config"
+	"github.com/smart-fm/kf-api/pkg/xerrors"
 )
 
 type BaseResponse struct {

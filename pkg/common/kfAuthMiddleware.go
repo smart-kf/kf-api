@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/golang-jwt/jwt/v5/request"
-	"std-api/config"
-	"std-api/pkg/xerrors"
+	"github.com/smart-fm/kf-api/config"
+	"github.com/smart-fm/kf-api/pkg/xerrors"
 )
 
 var kfCardIDKey = struct{}{}

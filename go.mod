@@ -1,4 +1,4 @@
-module std-api
+module github.com/smart-fm/kf-api
 
 go 1.23.2
 

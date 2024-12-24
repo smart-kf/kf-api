@@ -6,16 +6,15 @@ import (
 	"github.com/clearcodecn/swaggos"
 	"github.com/gin-gonic/gin"
 	"github.com/make-money-fast/captcha"
-	"std-api/config"
-	"std-api/pkg/common"
-	"std-api/pkg/controller/bill"
-	bill2 "std-api/pkg/controller/billfrontend"
-	"std-api/pkg/controller/kfbackend"
-	"std-api/pkg/controller/kffrontend"
-	"std-api/pkg/utils"
+	"github.com/smart-fm/kf-api/config"
+	"github.com/smart-fm/kf-api/pkg/common"
+	"github.com/smart-fm/kf-api/pkg/controller/bill"
+	bill2 "github.com/smart-fm/kf-api/pkg/controller/billfrontend"
+	"github.com/smart-fm/kf-api/pkg/controller/kfbackend"
+	"github.com/smart-fm/kf-api/pkg/controller/kffrontend"
+	"github.com/smart-fm/kf-api/pkg/utils"
+	"github.com/smart-fm/kf-api/version"
 )
-
-const Version = "default"
 
 func Run() error {
 	conf := config.GetConfig()
@@ -34,7 +33,7 @@ func Run() error {
 		ctx.String(200, "success")
 	})
 	g.GET("/version", func(ctx *gin.Context) {
-		ctx.String(200, fmt.Sprintf("git-version is: %s", Version))
+		ctx.String(200, fmt.Sprintf("git-version is: %s", version.Version))
 	})
 
 	registerRouter(g)

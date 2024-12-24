@@ -3,12 +3,12 @@ package main
 import (
 	"flag"
 	xlogger "github.com/clearcodecn/log"
+	"github.com/smart-fm/kf-api/config"
+	"github.com/smart-fm/kf-api/pkg/caches"
+	"github.com/smart-fm/kf-api/pkg/db"
+	"github.com/smart-fm/kf-api/pkg/server"
 	"golang.org/x/sync/errgroup"
 	"log"
-	"std-api/config"
-	"std-api/pkg/caches"
-	"std-api/pkg/db"
-	"std-api/pkg/server"
 	"time"
 )
 

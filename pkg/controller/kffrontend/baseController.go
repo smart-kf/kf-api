@@ -1,7 +1,7 @@
 package kffrontend
 
 import (
-	"std-api/pkg/common"
+	"github.com/smart-fm/kf-api/pkg/common"
 )
 
 type BaseController struct {

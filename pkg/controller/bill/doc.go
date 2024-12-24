@@ -2,7 +2,7 @@ package bill
 
 import (
 	"github.com/clearcodecn/swaggos"
-	"std-api/pkg/common"
+	"github.com/smart-fm/kf-api/pkg/common"
 )
 
 func SwaggerDoc(group *swaggos.Group) {
