@@ -4,10 +4,10 @@ import (
 	xlogger "github.com/clearcodecn/log"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/smart-fm/kf-api/config"
+	"github.com/smart-fm/kf-api/pkg/repository"
+	"github.com/smart-fm/kf-api/pkg/xerrors"
 	"golang.org/x/crypto/bcrypt"
-	"std-api/config"
-	"std-api/pkg/repository"
-	"std-api/pkg/xerrors"
 )
 
 type LoginRequest struct {

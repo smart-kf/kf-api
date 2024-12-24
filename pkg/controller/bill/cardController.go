@@ -2,12 +2,12 @@ package bill
 
 import (
 	"github.com/gin-gonic/gin"
-	"std-api/pkg/common"
-	"std-api/pkg/constant"
-	"std-api/pkg/db"
-	"std-api/pkg/repository"
-	"std-api/pkg/utils"
-	"std-api/pkg/xerrors"
+	"github.com/smart-fm/kf-api/pkg/common"
+	"github.com/smart-fm/kf-api/pkg/constant"
+	"github.com/smart-fm/kf-api/pkg/db"
+	"github.com/smart-fm/kf-api/pkg/repository"
+	"github.com/smart-fm/kf-api/pkg/utils"
+	"github.com/smart-fm/kf-api/pkg/xerrors"
 )
 
 type BatchAddCardRequest struct {

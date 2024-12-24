@@ -5,10 +5,10 @@ package db
 
 import (
 	"github.com/clearcodecn/sqlite"
+	"github.com/smart-fm/kf-api/config"
 	"gorm.io/gorm"
 	"os"
 	"path/filepath"
-	"std-api/config"
 )
 
 func init() {

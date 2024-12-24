@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 	"encoding/json"
-	"std-api/pkg/db"
+	"github.com/smart-fm/kf-api/pkg/db"
 	"time"
 )
 

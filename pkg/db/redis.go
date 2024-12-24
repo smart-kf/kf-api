@@ -3,7 +3,7 @@ package db
 import (
 	"context"
 	"github.com/redis/go-redis/v9"
-	"std-api/config"
+	"github.com/smart-fm/kf-api/config"
 	"sync"
 	"time"
 )

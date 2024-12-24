@@ -2,8 +2,8 @@ package repository
 
 import (
 	"context"
+	"github.com/smart-fm/kf-api/pkg/db"
 	"gorm.io/gorm"
-	"std-api/pkg/db"
 )
 
 type BaseRepository struct{}

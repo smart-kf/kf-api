@@ -1,8 +1,8 @@
 package db
 
 import (
+	"github.com/smart-fm/kf-api/pkg/constant"
 	"gorm.io/gorm"
-	"std-api/pkg/constant"
 	"time"
 )
 

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	xlogger "github.com/clearcodecn/log"
 	"github.com/redis/go-redis/v9"
-	"std-api/pkg/utils"
+	"github.com/smart-fm/kf-api/pkg/utils"
 	"time"
 )
 
