@@ -3,7 +3,7 @@ module github.com/smart-fm/kf-api
 go 1.23.2
 
 require (
-	github.com/clearcodecn/log v1.1.0
+	github.com/clearcodecn/log v1.1.1
 	github.com/clearcodecn/sqlite v1.4.0
 	github.com/clearcodecn/swaggos v0.0.7
 	github.com/gin-gonic/gin v1.10.0

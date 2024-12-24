@@ -4,14 +4,17 @@ debug: true
 # CREATE DATABASE kf CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 db:
   driver: mysql  # mysql / postgres / sqlite ...
-  dsn: "root:root@tcp(localhost:3306)/kf?charset=utf8mb4&parseTime=True&loc=PRC"
+  dsn: "root:124x8Xawdasdx1r140xs$@tcp(localhost:3306)/kf?charset=utf8mb4&parseTime=True&loc=PRC"
 
 redis:
   db: 0
   address: localhost:6379
-  password: ""
+  password: "238XSfh98xa"
 
 billConfig:
   accounts:
     - username: admin
       password: admin
+
+# kf: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjYXJkSWQiOiJUTS1FYWZ2ZnA4dmVJIn0.x3AOg5FHKq5xzebl-PPF4gSPfMMoeeD0XPcduTdg_Wc
+# 计费: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiJ9.m1RLVZTk7YY99_j0OtdDbbO6DvpJCLepPlv8sFsu79E

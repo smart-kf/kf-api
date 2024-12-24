@@ -60,6 +60,9 @@ func syncTable(db *gorm.DB) {
 		&BillAccount{},
 		&KFCard{},
 		&BillLog{},
+		&KFLog{},
+		&KFSettings{},
+		&Orders{},
 	); err != nil {
 		log.Fatal(err)
 	}
@@ -69,7 +72,7 @@ func DB() *gorm.DB {
 	return _db
 }
 
-var transactionKey = struct{}{}
+var transactionKey = "ctx-transaction-key"
 
 // Begin 开启事务
 func Begin(ctx context.Context) (*gorm.DB, context.Context) {

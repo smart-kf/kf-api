@@ -2,6 +2,7 @@ package common
 
 import (
 	"context"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/golang-jwt/jwt/v5/request"
@@ -11,7 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var billAccountInfoKey = struct{}{}
+var billAccountInfoKey = "ctx-key-bill-account"
 
 func BillAuthMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
@@ -51,4 +52,26 @@ func GetBillAccount(ctx *gin.Context) db.BillAccount {
 		return *acc
 	}
 	return db.BillAccount{Username: "unknown"}
+}
+
+func VerifyKFBackendToken(s string) (*db.BillAccount, error) {
+	token, err := jwt.Parse(s, func(token *jwt.Token) (interface{}, error) {
+		return []byte(config.GetConfig().JwtKey), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if !token.Valid {
+		return nil, errors.New("token invalid")
+	}
+
+	claims := token.Claims.(jwt.MapClaims)
+
+	username, _ := claims["username"].(string)
+	uid, _ := claims["id"].(float64)
+	return &db.BillAccount{
+		Model:    gorm.Model{ID: uint(uid)},
+		Username: username,
+	}, err
 }

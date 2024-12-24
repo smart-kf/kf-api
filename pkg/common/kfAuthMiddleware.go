@@ -2,6 +2,7 @@ package common
 
 import (
 	"context"
+	"errors"
 	xlogger "github.com/clearcodecn/log"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -10,7 +11,7 @@ import (
 	"github.com/smart-fm/kf-api/pkg/xerrors"
 )
 
-var kfCardIDKey = struct{}{}
+var kfCardIDKey = "kf-card-key"
 
 func KFAuthMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
@@ -46,4 +47,21 @@ func GetKFCardID(ctx *gin.Context) string {
 	}
 	xlogger.Warn(ctx.Request.Context(), "GetKFCardID-failed, 未从context中获取到cardID,请检查路由设置")
 	return ""
+}
+
+func VerifyKFToken(s string) (string, error) {
+	token, err := jwt.Parse(s, func(token *jwt.Token) (interface{}, error) {
+		return []byte(config.GetConfig().JwtKey), nil
+	})
+	if err != nil {
+		return "", err
+	}
+
+	if !token.Valid {
+		return "", errors.New("token invalid")
+	}
+
+	claims := token.Claims.(jwt.MapClaims)
+	cardID := claims["cardId"].(string)
+	return cardID, err
 }
