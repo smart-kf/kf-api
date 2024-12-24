@@ -1,5 +1,5 @@
 services:
-  sms:
+  kf-api:
     image: kf-api:latest
     volumes:
       - ./prod/config.yaml:/app/config.yaml
@@ -14,3 +14,5 @@ services:
 networks:
   mysql_kf_network:
     external: true
+  kf_service_network:  # 组网，将goim2添加到这个组网，就可以实现内网通信.
+    driver: bridge

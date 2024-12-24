@@ -8,7 +8,7 @@ db:
 redis:
   db: 1
   address: redis:6379
-  password: ""
+  password: "G4t!9zQ#xA7$kRp2"
 
 web:
   addr: 0.0.0.0
