@@ -6,7 +6,7 @@ build:
 	echo "build $(tag)"
 	@$(env) go build -ldflags "-X 'github.com/smart-fm/kf-api/version.Version=$(tag)'" -o bin/app cmd/server/main.go
 
-build-image:build
+build-image:
 	@docker build -t kf-api .
 
 reload:
