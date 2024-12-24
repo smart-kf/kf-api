@@ -10,6 +10,7 @@ services:
     restart: always
     networks:
       - mysql_kf_network
+      - kf_service_network
 
 networks:
   mysql_kf_network:
