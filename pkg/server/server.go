@@ -4,6 +4,7 @@ import (
 	"fmt"
 	xlogger "github.com/clearcodecn/log"
 	"github.com/clearcodecn/swaggos"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/make-money-fast/captcha"
 	"github.com/smart-fm/kf-api/config"
@@ -21,6 +22,7 @@ func Run() error {
 	conf := config.GetConfig()
 	g := gin.New()
 	g.Use(gin.Recovery())
+	g.Use(cors.Default())
 
 	var logConfig xlogger.GinLogConfigure
 	logConfig.LogIP(utils.ClientIP)
