@@ -20,8 +20,9 @@ type LevelDBConfig struct {
 }
 
 type Web struct {
-	Addr string `json:"addr" default:"127.0.0.1"`
-	Port int    `json:"port" default:"8081"`
+	Addr      string `json:"addr" default:"127.0.0.1"`
+	Port      int    `json:"port" default:"8081"`
+	StaticDir string `json:"staticDir" default:"static"`
 }
 
 func (w Web) String() string {

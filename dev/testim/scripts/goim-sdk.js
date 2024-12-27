@@ -131,6 +131,15 @@
                             }
                         }
                         break;
+                    case 100: // 收到新消息.
+                        var msgBody = textDecoder.decode(data.slice(headerLen, packetLen));
+                        if(options.debug) {
+                            console.log("receive-Single->Message100--->", msgBody)
+                        }
+                        if(options.onMessage) {
+                            options.onMessage(msgBody)
+                        }
+                        break
                     default:
                         var msgBody = textDecoder.decode(data.slice(headerLen, packetLen));
                         if(options.debug) {

@@ -11,6 +11,7 @@ import (
 	"github.com/smart-fm/kf-api/pkg/common"
 	"github.com/smart-fm/kf-api/pkg/controller/bill"
 	bill2 "github.com/smart-fm/kf-api/pkg/controller/billfrontend"
+	dev2 "github.com/smart-fm/kf-api/pkg/controller/dev"
 	"github.com/smart-fm/kf-api/pkg/controller/kfbackend"
 	"github.com/smart-fm/kf-api/pkg/controller/kffrontend"
 	notify2 "github.com/smart-fm/kf-api/pkg/controller/notify"
@@ -38,6 +39,8 @@ func Run() error {
 	g.GET("/version", func(ctx *gin.Context) {
 		ctx.String(200, fmt.Sprintf("git-version is: %s", version.Version))
 	})
+
+	g.Static("/static", conf.Web.StaticDir)
 
 	registerRouter(g)
 	swaggerAPI(g)
@@ -108,6 +111,13 @@ func registerRouter(g *gin.Engine) {
 			api.POST("websocket-auth", nc.WebsocketAuth)
 		}
 	}
+
+	// dev push接口.
+	dev := g.Group("/dev")
+	{
+		var dc dev2.DevController
+		dev.GET("/push", dc.PushMsg)
+	}
 }
 
 func swaggerAPI(g *gin.Engine) {
@@ -122,6 +132,7 @@ func swaggerAPI(g *gin.Engine) {
 	kfbackend.SwaggerDoc(apiGroup)
 	kffrontend.SwaggerDoc(apiGroup)
 	bill2.SwaggerDoc(apiGroup)
+	dev2.SwaggerDoc(apiGroup)
 
 	// swagger json 服务
 	g.GET("/_doc", gin.WrapH(swag))

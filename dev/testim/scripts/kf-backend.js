@@ -36,7 +36,6 @@ new Vue({
                 userInfo: this.userInfo,
                 debug: true,
                 onMessage(msg) {
-                    alert(msg)
                     that.receiveMessages.push(msg)
                 },
                 onClose() {
