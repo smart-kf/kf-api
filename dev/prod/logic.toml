@@ -41,6 +41,7 @@
 [kafka]
     topic = "goim-push-topic"
     brokers = ["kafka:9092"]
+    receiveMessageTopic = "im_message"
 
 [redis]
     network = "tcp"
@@ -57,7 +58,8 @@
 ### websocket 连接创建回调
 [auth]
     enable = true
-    authUrl = "http://kf-api:8081/internal/api/websocket-auth"
+    # authUrl = "http://kf-api:8081/internal/api/websocket-auth"
+    authUrl = "http://192.168.101.12:8081/internal/api/websocket-auth"  # 改成本机局域网的ip地址
     authMethod = "POST"
     authOkCode = 200
     timeout = 60

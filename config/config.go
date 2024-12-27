@@ -11,6 +11,8 @@ type Config struct {
 	JwtKey        string        `json:"jwtKey"`
 	BillConfig    BillConfig    `json:"billConfig"`
 	RedisConfig   RedisConfig   `json:"redis"`
+	Kafka         Kafka         `json:"kafka"`
+	HttpClient    HttpClient    `json:"httpClient"`
 }
 
 type LevelDBConfig struct {
@@ -51,4 +53,16 @@ type RedisConfig struct {
 	DB       int    `json:"db"`
 	Address  string `json:"address"`
 	Password string `json:"password"`
+}
+
+type Kafka struct {
+	Addrs          []string `json:"addrs"`
+	ImMessageTopic string   `json:"imMessageTopic"`
+	ImMessageGroup string   `json:"imMessageGroup"`
+}
+
+type HttpClient struct {
+	LogicAddress string `json:"logicAddress"` // logic 服务 http 地址
+	Timeout      int    `json:"timeout"`
+	Proxy        string `json:"proxy"`
 }

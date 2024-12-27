@@ -22,3 +22,14 @@ billConfig:
   accounts:
     - username: kfadmin
       password: kfadmin123
+
+kafka:
+  addrs:
+    - kafka:9092
+  imMessageTopic: im_message
+  imMessageGroup: im_message_group
+
+httpClient:
+  logicAddress: http://logic:3111
+  timeout: 60
+  proxy:

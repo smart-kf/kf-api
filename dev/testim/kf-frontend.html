@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>客服前台</title>
+    <link rel="stylesheet" href="./css/element.css">
+    <script src="./scripts/vue2.min.js"></script>
+    <script src="./scripts/elememt.js"></script>
+    <script src="./scripts/goim-sdk.js"></script>
+</head>
+<body>
+<div id="app">
+    <p>Websocket连接状态: {{ status }}</p>
+
+    <el-input v-model="token"></el-input>
+    <el-button>连接websocket</el-button>
+</div>
+
+<script src="./scripts/kf-frontend.js"></script>
+</body>
+</html>

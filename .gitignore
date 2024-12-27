@@ -6,3 +6,4 @@ cache/*
 *.xml
 node_modules
 test/
+.DS_Store

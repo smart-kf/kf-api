@@ -63,6 +63,7 @@ func syncTable(db *gorm.DB) {
 		&KFLog{},
 		&KFSettings{},
 		&Orders{},
+		&KFMessage{},
 	); err != nil {
 		log.Fatal(err)
 	}

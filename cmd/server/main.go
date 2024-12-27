@@ -1,10 +1,12 @@
 package main
 
 import (
+	"context"
 	"flag"
 	xlogger "github.com/clearcodecn/log"
 	"github.com/smart-fm/kf-api/config"
 	"github.com/smart-fm/kf-api/pkg/caches"
+	"github.com/smart-fm/kf-api/pkg/consumer/imMessage"
 	"github.com/smart-fm/kf-api/pkg/db"
 	"github.com/smart-fm/kf-api/pkg/server"
 	"golang.org/x/sync/errgroup"
@@ -38,6 +40,19 @@ func main() {
 	eg.Go(func() error {
 		task := db.InitKFLogBackgroundTask(1*time.Minute, 10000)
 		task.Start(stopChan)
+		return nil
+	})
+	eg.Go(func() error {
+		consumer, err := imMessage.NewImMessageConsumer(stopChan)
+		if err != nil {
+			xlogger.Error(context.Background(), "NewImMessageConsumer failed", xlogger.Err(err))
+			return err
+		}
+
+		if err := consumer.Consume(); err != nil {
+			xlogger.Error(context.Background(), "start ImMessageConsumer failed", xlogger.Err(err))
+			return err
+		}
 		return nil
 	})
 
