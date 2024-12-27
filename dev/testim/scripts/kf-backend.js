@@ -4,7 +4,7 @@ const room_id = "chat://room1";
 const platform = "kf-backend";
 
 new Vue({
-    el:"#app",
+    el: "#app",
     data() {
         return {
             token: token,
@@ -31,7 +31,7 @@ new Vue({
                 wsUrl: "ws://127.0.0.1:3102/sub",
                 token: this.token,
                 maxRetryTime: 10,
-                delay:1500 ,
+                delay: 1500,
                 platform: "kf-backend",
                 userInfo: this.userInfo,
                 debug: true,
@@ -50,22 +50,28 @@ new Vue({
             }
         },
         sendMsg(msg) { // 服务器会向此客户端推送一条消息,
-            console.log(Object.getOwnPropertyNames(this.im));
+            if (this.status == "failed") {
+                alert("请先创建websocket链接")
+                return
+            }
             this.im.sendMsg({
                 "type": "msg",
                 "data": {
                     "msgType": "text",
-                    "guestName": "",
-                    "guestAvatar": "",
                     "guestId": 2,
-                    "msgTime": 0, //时间戳
                     "kfId": 1,
                     "content": this.content,
-                    "city": "",
-                    "ip": "",
                     "isKf": 1, //   1=客服消息，2=客户消息
                 }
             })
+            this.content = '';
+        },
+        sendToMyself(msg) { // 服务器会向此客户端推送一条消息,
+            if (this.status == "failed") {
+                alert("请先创建websocket链接")
+                return
+            }
+            fetch("https://")
             this.content = '';
         }
     }

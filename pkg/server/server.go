@@ -116,7 +116,7 @@ func registerRouter(g *gin.Engine) {
 	dev := g.Group("/dev")
 	{
 		var dc dev2.DevController
-		dev.GET("/push", dc.PushMsg)
+		dev.POST("/push", dc.PushMsg)
 	}
 }
 
