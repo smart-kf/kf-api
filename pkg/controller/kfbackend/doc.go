@@ -15,7 +15,7 @@ func SwaggerDoc(group *swaggos.Group) {
 	qrcode := bg.Group("/qrcode").Tag("二维码管理").
 		Header("authorization", "授权session", true)
 	{
-		qrcode.Post("/").
+		qrcode.Get("/").
 			Body(QRCodeRequest{}).JSON(QRCodeResponse{}).
 			Description("获取二维码和域名列表的接口")
 
@@ -64,12 +64,6 @@ type QRCodeDomain struct {
 	CreateAt int64  `json:"createAt,omitempty" doc:"添加创建时间 毫秒"`
 	Remark   string `json:"remark,omitempty" doc:"备注"`
 	URL      string `json:"url,omitempty" doc:"二维码图片地址"`
-}
-
-type QRCodeSwitchRequest struct{}
-type QRCodeSwitchResponse struct {
-	URL      string `json:"qrcodeUrl,omitempty" doc:"主站二维码图片地址"`
-	HealthAt int64  `json:"healthAt,omitempty" doc:"主站通过健康检查的时间 毫秒"`
 }
 
 type QRCodeOnOffRequest struct {

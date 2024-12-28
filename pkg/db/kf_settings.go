@@ -16,6 +16,7 @@ type KFSettings struct {
 	Notice               string `json:"notice" gorm:"column:notice"`                                // 滚动公告. maxLength 255
 	NewMessageVoice      bool   `json:"newMessageVoice" gorm:"column:new_message_voice"`            // 消息提示音.
 	QRCodeEnabled        bool   `json:"qrCodeEnabled" gorm:"column:qrcode_enabled"`                 // 二维码是否启用
+	QRCodeVersion        int    `json:"qrCodeVersion" gorm:"column:qrcode_version"`                 // 二维码版本 每次切换后更新
 	QRCodeEnabledNewUser bool   `json:"qrCodeEnabledNewUser" gorm:"column:qrcode_enabled_new_user"` // 启用停用新粉状态
 }
 

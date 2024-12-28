@@ -87,6 +87,7 @@ func registerRouter(g *gin.Engine) {
 		qrCodeGroup := kf.Group("/qrcode")
 		{
 			qrCodeGroup.GET("/", qrcodeController.List)
+			qrCodeGroup.POST("/switch", qrcodeController.Switch)
 		}
 	}
 

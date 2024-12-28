@@ -24,7 +24,7 @@ func (r *KFSettingRepository) GetByCardID(ctx context.Context, cardID string) (*
 }
 
 // SaveOne save一条数据
-func (r *KFCardRepository) SaveOne(ctx context.Context, setting *db.KFSettings) error {
+func (r *KFSettingRepository) SaveOne(ctx context.Context, setting *db.KFSettings) error {
 	tx := db.GetDBFromContext(ctx)
 	res := tx.Where("card_id = ?", setting.CardID).Save(setting)
 	if res.Error != nil {

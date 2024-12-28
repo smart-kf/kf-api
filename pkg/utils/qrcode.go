@@ -18,7 +18,7 @@ const QRCodeSize = 396
 // QRCodeMidPicSize 二维码中间图的尺寸 长91 宽91
 const QRCodeMidPicSize = 91
 
-// DrawQRCodeNX 不存在该二维码id时则进行绘制保存 id:二维码唯一id content:识别二维码出来的内容
+// DrawQRCodeNX 租户不存在该二维码content时则进行绘制保存 cardID:卡密id content:识别二维码出来的内容
 func DrawQRCodeNX(cardID, content string) (url string, err error) {
 	if len(content) == 0 {
 		return "", errors.New("待绘制二维码的信息为空")
