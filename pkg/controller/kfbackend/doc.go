@@ -58,15 +58,6 @@ func SwaggerDoc(group *swaggos.Group) {
 
 // TODO 临时放下 后面迁移到各个文件内
 
-type QRCodeRequest struct{}
-type QRCodeResponse struct {
-	URL           string         `json:"qrcodeUrl,omitempty" doc:"主站二维码图片地址"`
-	HealthAt      int64          `json:"healthAt,omitempty" doc:"主站通过健康检查的时间 毫秒"`
-	Enable        bool           `json:"enable,omitempty" doc:"启用停用状态"`
-	EnableNewUser bool           `json:"enableNewUser,omitempty" doc:"启用停用新粉状态"`
-	Domains       []QRCodeDomain `json:"domains,omitempty" doc:"域名列表"`
-}
-
 type QRCodeDomain struct {
 	Domain   string `json:"domain,omitempty" doc:"站点域名"`
 	HealthAt int64  `json:"healthAt,omitempty" doc:"通过健康检查的时间 毫秒"`

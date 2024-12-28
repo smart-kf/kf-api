@@ -83,9 +83,10 @@ func registerRouter(g *gin.Engine) {
 	kf := api.Group("/kf-be", common.KFAuthMiddleware())
 	{
 
+		var qrcodeController kfbackend.QRCodeController
 		qrCodeGroup := kf.Group("/qrcode")
 		{
-			qrCodeGroup.GET("/")
+			qrCodeGroup.GET("/", qrcodeController.List)
 		}
 	}
 
