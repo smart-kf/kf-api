@@ -1,10 +1,12 @@
 package kfbackend
 
 import (
+	"fmt"
 	xlogger "github.com/clearcodecn/log"
 	"github.com/gin-gonic/gin"
 	"github.com/smart-fm/kf-api/pkg/common"
 	"github.com/smart-fm/kf-api/pkg/repository"
+	"github.com/smart-fm/kf-api/pkg/utils"
 )
 
 type QRCodeController struct {
@@ -46,9 +48,16 @@ func (c *QRCodeController) List(ctx *gin.Context) {
 		enableNewUser = setting.QRCodeEnabledNewUser
 	}
 
-	// TODO 二维码资源图
+	baseDomain := "base.domain"                          // TODO from 配置
+	chatH5 := fmt.Sprintf("https://%s/todo", baseDomain) // TODO 前端客服聊天C端入口地址
+	static, err := utils.DrawQRCodeNX(cardID, chatH5)
+	if err != nil {
+		c.Error(ctx, err)
+		return
+	}
+
 	c.Success(ctx, QRCodeResponse{
-		URL:           "",
+		URL:           fmt.Sprintf("https://%s%s", baseDomain, static),
 		HealthAt:      0,
 		Enable:        enable,
 		EnableNewUser: enableNewUser,
