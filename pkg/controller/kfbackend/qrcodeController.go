@@ -48,8 +48,8 @@ func (c *QRCodeController) List(ctx *gin.Context) {
 		enableNewUser = setting.QRCodeEnabledNewUser
 	}
 
-	baseDomain := "base.domain"                          // TODO from 配置
-	chatH5 := fmt.Sprintf("https://%s/todo", baseDomain) // TODO 前端客服聊天C端入口地址
+	baseDomain := "base.domain"                          // TODO 配置
+	chatH5 := fmt.Sprintf("https://%s/todo", baseDomain) // TODO 配置 前端客服聊天C端入口地址
 	static, err := utils.DrawQRCodeNX(cardID, chatH5)
 	if err != nil {
 		c.Error(ctx, err)
@@ -57,7 +57,7 @@ func (c *QRCodeController) List(ctx *gin.Context) {
 	}
 
 	c.Success(ctx, QRCodeResponse{
-		URL:           fmt.Sprintf("https://%s%s", baseDomain, static),
+		URL:           fmt.Sprintf("https://%s/%s", baseDomain, static),
 		HealthAt:      0,
 		Enable:        enable,
 		EnableNewUser: enableNewUser,
