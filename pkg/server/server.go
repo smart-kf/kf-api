@@ -88,6 +88,7 @@ func registerRouter(g *gin.Engine) {
 		{
 			qrCodeGroup.GET("/", qrcodeController.List)
 			qrCodeGroup.POST("/switch", qrcodeController.Switch)
+			qrCodeGroup.POST("/on-off", qrcodeController.OnOff)
 		}
 	}
 

@@ -124,3 +124,49 @@ func (c *QRCodeController) Switch(ctx *gin.Context) {
 		HealthAt: 0,
 	})
 }
+
+type QRCodeOnOffRequest struct {
+	OnOff        *bool `json:"onoff" doc:"开关：所有二维码的所有用户都不能进入"`
+	OnOffNewUser *bool `json:"onoffNewUser" doc:"开关：老用户可进，新用户不能进"`
+}
+type QRCodeOnOffResponse struct{}
+
+// OnOff 二维码功能开关
+func (c *QRCodeController) OnOff(ctx *gin.Context) {
+	reqCtx := ctx.Request.Context()
+	cardID := common.GetKFCardID(ctx)
+
+	var req QRCodeOnOffRequest
+	if !c.BindAndValidate(ctx, &req) {
+		return
+	}
+
+	var kfsetting repository.KFSettingRepository
+	setting, ok, err := kfsetting.GetByCardID(reqCtx, cardID)
+	if err != nil {
+		xlogger.Error(reqCtx, "查询客服设置失败", xlogger.Err(err), xlogger.Any("cardId", cardID))
+		c.Error(ctx, err)
+		return
+	}
+
+	if !ok {
+		setting.CardID = cardID
+	}
+
+	if req.OnOffNewUser != nil {
+		setting.QRCodeEnabledNewUser = *req.OnOffNewUser
+	}
+
+	if req.OnOff != nil {
+		setting.QRCodeEnabled = *req.OnOff
+	}
+
+	err = kfsetting.SaveOne(reqCtx, setting)
+	if err != nil {
+		xlogger.Error(reqCtx, "保存客服设置失败", xlogger.Err(err), xlogger.Any("cardId", cardID))
+		c.Error(ctx, err)
+		return
+	}
+
+	c.Success(ctx, QRCodeOnOffResponse{})
+}

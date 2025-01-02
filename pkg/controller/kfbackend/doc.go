@@ -66,12 +66,6 @@ type QRCodeDomain struct {
 	URL      string `json:"url,omitempty" doc:"二维码图片地址"`
 }
 
-type QRCodeOnOffRequest struct {
-	OnOff        *bool `json:"onoff" doc:"开关：所有二维码的所有用户都不能进入"`
-	OnOffNewUser *bool `json:"onoffNewUser" doc:"开关：老用户可进，新用户不能进"`
-}
-type QRCodeOnOffResponse struct{}
-
 type ChatListRequest struct {
 	SearchBy string `json:"searchBy" doc:"模糊搜索 用户id/昵称/手机号/备注"`
 	ListType int    `json:"listType" doc:"列表类型 0:全部(默认) 1:消息未读 2:拉黑访客"`
