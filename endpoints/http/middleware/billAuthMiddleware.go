@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"errors"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -58,28 +57,4 @@ func GetBillAccount(ctx *gin.Context) dao.BillAccount {
 		return *acc
 	}
 	return dao.BillAccount{Username: "unknown"}
-}
-
-func VerifyKFBackendToken(s string) (*dao.BillAccount, error) {
-	token, err := jwt.Parse(
-		s, func(token *jwt.Token) (interface{}, error) {
-			return []byte(config.GetConfig().JwtKey), nil
-		},
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	if !token.Valid {
-		return nil, errors.New("token invalid")
-	}
-
-	claims := token.Claims.(jwt.MapClaims)
-
-	username, _ := claims["username"].(string)
-	uid, _ := claims["id"].(float64)
-	return &dao.BillAccount{
-		Model:    gorm.Model{ID: uint(uid)},
-		Username: username,
-	}, err
 }

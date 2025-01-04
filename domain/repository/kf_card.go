@@ -8,11 +8,12 @@ import (
 
 	xlogger "github.com/clearcodecn/log"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
+	"github.com/smart-fm/kf-api/endpoints/common"
 	"github.com/smart-fm/kf-api/endpoints/common/constant"
 	"github.com/smart-fm/kf-api/infrastructure/mysql"
 	"github.com/smart-fm/kf-api/infrastructure/mysql/dao"
-	"github.com/smart-fm/kf-api/pkg/common"
 )
 
 const (
@@ -114,5 +115,27 @@ func (r *KFCardRepository) FindByCardID(ctx context.Context, cardID string) (*da
 		return nil, false, err
 	}
 	setCacheByKey(ctx, cacheKey, &card, 10*time.Minute)
+	return &card, true, nil
+}
+
+func (r *KFCardRepository) FindFirstCardByDay(ctx context.Context, day int) (*dao.KFCard, bool, error) {
+	tx := mysql.GetDBFromContext(ctx)
+	var card dao.KFCard
+	res := tx.Clauses(
+		clause.Locking{
+			Strength: clause.LockingStrengthUpdate,
+		},
+	).Where(
+		"day = ? and sale_status = ? and card_type = ?",
+		day,
+		constant.SaleStatusOnSale,
+		constant.CardTypeNormal,
+	).First(&card)
+	if err := res.Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, false, nil
+		}
+		return nil, false, err
+	}
 	return &card, true, nil
 }

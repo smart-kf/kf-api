@@ -70,6 +70,9 @@ func syncTable(db *gorm.DB) {
 		&dao.KFSettings{},
 		&dao.Orders{},
 		&dao.KFMessage{},
+		&dao.KFQRCode{},
+		&dao.KFQRCodeDomain{},
+		&dao.BillDomain{},
 	); err != nil {
 		log.Fatal(err)
 	}

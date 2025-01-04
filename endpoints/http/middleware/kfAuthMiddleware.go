@@ -2,15 +2,12 @@ package middleware
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
 	xlogger "github.com/clearcodecn/log"
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
 
-	"github.com/smart-fm/kf-api/config"
 	"github.com/smart-fm/kf-api/infrastructure/redis"
 	"github.com/smart-fm/kf-api/pkg/xerrors"
 )
@@ -44,21 +41,16 @@ func GetKFCardID(ctx *gin.Context) string {
 	return ""
 }
 
-func VerifyKFToken(s string) (string, error) {
-	token, err := jwt.Parse(
-		s, func(token *jwt.Token) (interface{}, error) {
-			return []byte(config.GetConfig().JwtKey), nil
-		},
-	)
+func VerifyKFBackendToken(ctx context.Context, token string) error {
+	redisClient := redis.GetRedisClient()
+	_, err := redisClient.Get(ctx, fmt.Sprintf("kfbe.%s", token)).Result()
 	if err != nil {
-		return "", err
+		return err
 	}
+	return nil
+}
 
-	if !token.Valid {
-		return "", errors.New("token invalid")
-	}
-
-	claims := token.Claims.(jwt.MapClaims)
-	cardID := claims["cardId"].(string)
-	return cardID, err
+// TODO:: VerifyKFToken 前台用户的token
+func VerifyKFToken(ctx context.Context, s string) error {
+	return nil
 }

@@ -2,7 +2,8 @@ package dev
 
 import (
 	"github.com/clearcodecn/swaggos"
-	"github.com/smart-fm/kf-api/pkg/common"
+
+	"github.com/smart-fm/kf-api/endpoints/common"
 )
 
 func SwaggerDoc(group *swaggos.Group) {

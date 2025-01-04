@@ -2,12 +2,14 @@ package repository
 
 import (
 	"context"
+	"math/rand"
 
 	"gorm.io/gorm"
 
+	"github.com/smart-fm/kf-api/endpoints/common"
+	"github.com/smart-fm/kf-api/endpoints/common/constant"
 	"github.com/smart-fm/kf-api/infrastructure/mysql"
 	"github.com/smart-fm/kf-api/infrastructure/mysql/dao"
-	"github.com/smart-fm/kf-api/pkg/common"
 )
 
 type BillDomainRepository struct {
@@ -69,4 +71,21 @@ func (r *BillDomainRepository) List(ctx context.Context, options *ListDomainOpti
 func (r *BillDomainRepository) DeleteByID(ctx context.Context, id int64) error {
 	tx := mysql.GetDBFromContext(ctx)
 	return tx.Where("id = ?", id).Delete(&dao.BillDomain{}).Error
+}
+
+func (r *BillDomainRepository) FindFirstPublic(ctx context.Context) (*dao.BillDomain, bool, error) {
+	tx := mysql.GetDBFromContext(ctx)
+
+	var domain []*dao.BillDomain
+	err := tx.Where("is_public = ? and status = ?", true, constant.DomainStatusNormal).Find(&domain).Error
+
+	if err != nil {
+		return nil, false, err
+	}
+
+	if len(domain) == 0 {
+		return nil, false, nil
+	}
+
+	return domain[rand.Intn(len(domain))], true, nil
 }

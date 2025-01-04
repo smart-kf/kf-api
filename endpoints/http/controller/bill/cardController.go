@@ -8,6 +8,7 @@ import (
 	"github.com/smart-fm/kf-api/endpoints/cron/billlog"
 	"github.com/smart-fm/kf-api/endpoints/http/middleware"
 	"github.com/smart-fm/kf-api/endpoints/http/vo/bill"
+	"github.com/smart-fm/kf-api/infrastructure/caches"
 	"github.com/smart-fm/kf-api/infrastructure/mysql"
 	"github.com/smart-fm/kf-api/infrastructure/mysql/dao"
 	"github.com/smart-fm/kf-api/pkg/utils"
@@ -24,14 +25,17 @@ func (c *CardController) BatchAddCard(ctx *gin.Context) {
 		return
 	}
 	var cards []*dao.KFCard
+	oneDayCardPrice := caches.BillSettingCacheInstance.OneDayCardPrice()
+	price := int64(oneDayCardPrice * req.Days)
 	for i := 0; i < req.Num; i++ {
 		cards = append(
 			cards, &dao.KFCard{
-				CardID:      utils.RandomCard(),
+				CardID:      utils.RandomCard(10),
 				SaleStatus:  constant.SaleStatusOnSale,
 				LoginStatus: constant.LoginStatusUnLogin,
 				CardType:    req.CardType,
 				Day:         req.Days,
+				Price:       price,
 			},
 		)
 	}

@@ -1,23 +1,16 @@
 package bill
 
 import (
-	"regexp"
-
-	"github.com/smart-fm/kf-api/pkg/common"
-	"github.com/smart-fm/kf-api/pkg/xerrors"
+	"github.com/smart-fm/kf-api/endpoints/common"
 )
 
 type AddDomainRequest struct {
 	TopName  string `json:"topName" binding:"required" validate:"required" doc:"顶级域名"`
-	Status   int    `json:"status" binding:"required" validate:"required,oneOf=1 2" doc:"域名状态: 1=正常，2=禁用"`
+	Status   int    `json:"status" binding:"required" validate:"required,oneof=1 2" doc:"域名状态: 1=正常，2=禁用"`
 	IsPublic *bool  `json:"isPublic" binding:"required" validate:"required" doc:"true=公共域名,false=私有域名"`
 }
 
 func (r *AddDomainRequest) Validate() error {
-	reg := regexp.MustCompile("\\b[a-zA-Z0-9-]+\\.(?:[a-zA-Z]{2,63})\\b")
-	if !reg.MatchString(r.TopName) {
-		return xerrors.NewParamsErrors("域名错误,非顶级域名")
-	}
 	return nil
 }
 

@@ -5,7 +5,7 @@ import (
 
 	"github.com/make-money-fast/captcha"
 
-	"github.com/smart-fm/kf-api/pkg/caches"
+	"github.com/smart-fm/kf-api/infrastructure/caches"
 	"github.com/smart-fm/kf-api/pkg/xerrors"
 )
 

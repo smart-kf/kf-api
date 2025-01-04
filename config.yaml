@@ -33,5 +33,17 @@ httpClient:
   timeout: 60
   proxy:
 
-# kf: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjYXJkSWQiOiJUTS1FYWZ2ZnA4dmVJIn0.x3AOg5FHKq5xzebl-PPF4gSPfMMoeeD0XPcduTdg_Wc
-# 计费: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiJ9.m1RLVZTk7YY99_j0OtdDbbO6DvpJCLepPlv8sFsu79E
+
+## 卡密套餐，按天划分
+cardPackages:
+  - id: "daily"
+    price: 10
+    day: 1
+
+  - id: "weekly"
+    price: 50
+    day: 7
+
+  - id: "monthly"
+    price: 180
+    day: 30

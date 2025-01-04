@@ -15,6 +15,7 @@ import (
 	"github.com/smart-fm/kf-api/endpoints/http/controller/kfbackend"
 	"github.com/smart-fm/kf-api/endpoints/http/controller/kffrontend"
 	notify2 "github.com/smart-fm/kf-api/endpoints/http/controller/notify"
+	"github.com/smart-fm/kf-api/endpoints/http/controller/qrcode"
 	"github.com/smart-fm/kf-api/pkg/version"
 
 	"github.com/smart-fm/kf-api/config"
@@ -112,11 +113,20 @@ func registerRouter(g *gin.Engine) {
 		kffe.GET("/qrcode/*action")
 	}
 
+	// 二维码入口.
+	{
+		var qrCodeControlelr qrcode.QRCodeController
+		{
+			g.Any("/s/*action", qrCodeControlelr.Scan)
+		}
+	}
+
 	// 计费前台.
 	billFe := api.Group("/bill-fe")
 	{
 		var orderController bill2.OrderController
 		billFe.POST("/order/create", orderController.CreateOrder)
+		billFe.POST("/order/notify", orderController.Notify) // TODO:: 加密处理
 	}
 
 	// 内部调用: websocket on auth 回调.

@@ -1,8 +1,8 @@
 package bill
 
 import (
+	"github.com/smart-fm/kf-api/endpoints/common"
 	"github.com/smart-fm/kf-api/endpoints/common/constant"
-	"github.com/smart-fm/kf-api/pkg/common"
 	"github.com/smart-fm/kf-api/pkg/xerrors"
 )
 

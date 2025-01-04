@@ -1,98 +1,4 @@
 services:
-  discovery:
-    image: goim
-    ports:
-      - 127.0.0.1:7171:7171  # rpc
-    command:
-      - /app/dis
-      - -conf=discovery.toml
-    volumes:
-      - ./prod/discovery.toml:/app/discovery.toml
-    restart: always
-    networks:
-      - kf_network
-
-  comet:
-    image: goim
-    ports:
-      - 127.0.0.1:3109:3109  # rpc
-      - 127.0.0.1:3101:3101  # tcp ??
-      - 127.0.0.1:3102:3102  # websocket
-    command:
-      - /app/comet
-      - -conf=/app/comet.toml
-      - -region=sh
-      - -zone=sh001
-      - -host=test1
-      - -deploy.env=dev
-      - -alsologtostderr
-    volumes:
-      - ./prod/comet.toml:/app/comet.toml
-    depends_on:
-      - discovery
-    restart: always
-    networks:
-      - kf_network
-
-  logic:
-    image: goim
-    ports:
-      - 127.0.0.1:3119:3119  # rpc
-      - 127.0.0.1:3111:3111  # http
-    depends_on:
-      - discovery
-    command:
-      - /app/logic
-      - -conf=/app/logic.toml
-      - -region=sh
-      - -zone=sh001
-      - -host=test1
-      - -deploy.env=dev
-      - -alsologtostderr
-    volumes:
-      - ./prod/logic.toml:/app/logic.toml
-    restart: always
-    networks:
-      - kf_network
-
-  job:
-    image: goim
-    depends_on:
-      - discovery
-    command:
-      - /app/job
-      - -conf=/app/job.toml
-      - -region=sh
-      - -zone=sh001
-      - -host=test1
-      - -deploy.env=dev
-      - -alsologtostderr
-    volumes:
-      - ./prod/job.toml:/app/job.toml
-    restart: always
-    networks:
-      - kf_network
-  kafka:
-    image: bitnami/kafka:3.9
-    ports:
-      - "192.168.101.12:9092:9092"  # 这里的ip改成电脑的局域网ip
-    volumes:
-      - "./data/kafka_data:/bitnami"
-    restart: always
-    environment:
-      # KRaft settings
-      - KAFKA_CFG_NODE_ID=0
-      - KAFKA_CFG_PROCESS_ROLES=controller,broker
-      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
-      # Listeners
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://192.168.101.12:9092   # 这里的ip改成电脑的局域网ip
-      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
-      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
-    networks:
-      - kf_network
-
   redis:
     image: bitnami/redis
     environment:
@@ -123,12 +29,27 @@ services:
     networks:
       - kf_network
 
-  testim:
-    image: nginx
+  nsq:
+    image: nsqio/nsq
     ports:
-      - "8082:80"
+      - 127.0.0.1:4150:4150  # tcp
+    command:
+      - /nsqd
+      - --data-path=/data
     volumes:
-      - ./testim:/usr/share/nginx/html
+      - ./data/nsq-data:/data
+    networks:
+      - kf_network
+
+  nsq-admin:
+    image: nsqio/nsq
+    ports:
+      - 127.0.0.1:4171:4171  # rpc
+    command:
+      - /nsqadmin
+      - -nsqd-http-address=nsq:4151
+    networks:
+      - kf_network
 
 networks:
   kf_network:

@@ -42,22 +42,23 @@ func (c *NotifyController) WebsocketAuth(ctx *gin.Context) {
 		ctx.AbortWithStatus(400)
 		return
 	}
+	reqCtx := ctx.Request.Context()
 	var (
 		err error
 	)
 	switch req.GetPlatform() {
 	case "kf-backend": // 后台
-		_, err = middleware.VerifyKFBackendToken(req.GetToken())
+		err = middleware.VerifyKFBackendToken(reqCtx, req.GetToken())
 	case "kf": // 前台
-		_, err = middleware.VerifyKFToken(req.GetToken())
+		err = middleware.VerifyKFToken(reqCtx, req.GetToken())
 	default:
 		err = errors.New("invalid platform")
 	}
 	if err != nil {
-		xlogger.Info(ctx.Request.Context(), "websocket auth failed: "+err.Error())
+		xlogger.Info(reqCtx, "websocket auth failed: "+err.Error())
 		c.Error(ctx, err)
 		return
 	}
-	xlogger.Info(ctx.Request.Context(), "websocket auth success:"+req.GetIP())
+	xlogger.Info(reqCtx, "websocket auth success:"+req.GetIP())
 	c.Success(ctx, gin.H{})
 }
