@@ -22,11 +22,11 @@ billConfig:
       password: admin
 
 
-kafka:
+nsq:
   addrs:
-    - 192.168.101.12:9092
-  imMessageTopic: im_message
-  imMessageGroup: im_message_group
+    - 127.0.0.1:4150
+  messageTopic: im_message
+  messageTopicGroup: im_message_group
 
 httpClient:
   logicAddress: http://127.0.0.1:3111

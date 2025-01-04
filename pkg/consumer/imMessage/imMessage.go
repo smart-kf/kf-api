@@ -3,10 +3,9 @@ package imMessage
 import (
 	"context"
 	"encoding/binary"
+
 	"github.com/IBM/sarama"
 	xlogger "github.com/clearcodecn/log"
-	"github.com/smart-fm/kf-api/config"
-	"time"
 )
 
 type ImMessageConsumer struct {
@@ -23,25 +22,26 @@ func NewImMessageConsumer(stopChan chan struct{}) (*ImMessageConsumer, error) {
 }
 
 func (c *ImMessageConsumer) Consume() error {
-	conf := config.GetConfig().Kafka
-	config := sarama.NewConfig()
-	config.Version = sarama.V1_0_0_0
-	config.Consumer.Return.Errors = true
-	config.Consumer.Offsets.Initial = sarama.OffsetNewest
-	config.Consumer.Group.Session.Timeout = 20 * time.Second
-	config.Consumer.Group.Heartbeat.Interval = 6 * time.Second
-	config.Consumer.MaxProcessingTime = 500 * time.Millisecond
-	config.Net.DialTimeout = time.Second * 10
-
-	cg, err := sarama.NewConsumerGroup(conf.Addrs, conf.ImMessageGroup, config)
-	if err != nil {
-		return err
-	}
-	ctx, cancel := context.WithCancel(context.Background())
-
-	c.ctx = ctx
-	c.cancelFunc = cancel
-	return cg.Consume(ctx, []string{conf.ImMessageTopic}, c)
+	// conf := config.GetConfig().Kafka
+	// config := sarama.NewConfig()
+	// config.Version = sarama.V1_0_0_0
+	// config.Consumer.Return.Errors = true
+	// config.Consumer.Offsets.Initial = sarama.OffsetNewest
+	// config.Consumer.Group.Session.Timeout = 20 * time.Second
+	// config.Consumer.Group.Heartbeat.Interval = 6 * time.Second
+	// config.Consumer.MaxProcessingTime = 500 * time.Millisecond
+	// config.Net.DialTimeout = time.Second * 10
+	//
+	// cg, err := sarama.NewConsumerGroup(conf.Addrs, conf.ImMessageGroup, config)
+	// if err != nil {
+	// 	return err
+	// }
+	// ctx, cancel := context.WithCancel(context.Background())
+	//
+	// c.ctx = ctx
+	// c.cancelFunc = cancel
+	// return cg.Consume(ctx, []string{conf.ImMessageTopic}, c)
+	return nil
 }
 
 func (c *ImMessageConsumer) Setup(session sarama.ConsumerGroupSession) error {

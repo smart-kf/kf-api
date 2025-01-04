@@ -1,17 +1,21 @@
 package main
 
 import (
-	"context"
 	"flag"
-	xlogger "github.com/clearcodecn/log"
-	"github.com/smart-fm/kf-api/config"
-	"github.com/smart-fm/kf-api/pkg/caches"
-	"github.com/smart-fm/kf-api/pkg/consumer/imMessage"
-	"github.com/smart-fm/kf-api/pkg/db"
-	"github.com/smart-fm/kf-api/pkg/server"
-	"golang.org/x/sync/errgroup"
 	"log"
 	"time"
+
+	xlogger "github.com/clearcodecn/log"
+	"golang.org/x/sync/errgroup"
+
+	"github.com/smart-fm/kf-api/config"
+	"github.com/smart-fm/kf-api/endpoints/cron/billlog"
+	"github.com/smart-fm/kf-api/endpoints/cron/kflog"
+	"github.com/smart-fm/kf-api/endpoints/http"
+	"github.com/smart-fm/kf-api/infrastructure/mysql"
+	"github.com/smart-fm/kf-api/infrastructure/nsq"
+	"github.com/smart-fm/kf-api/infrastructure/redis"
+	"github.com/smart-fm/kf-api/pkg/caches"
 )
 
 var configName string
@@ -24,39 +28,37 @@ func main() {
 	flag.Parse()
 	conf := config.Load(configName)
 	initLogger(conf)
-	db.Load()
-	db.InitRedis()
+	mysql.Load()
+	redis.InitRedis()
+	nsq.InitNSQ()
 
 	caches.InitCacheInstances()
 	var (
 		eg       errgroup.Group
 		stopChan = make(chan struct{})
 	)
-	eg.Go(func() error {
-		task := db.InitBillLogBackgroundTask(1*time.Minute, 100) // 1分钟清空buffer
-		task.Start(stopChan)
-		return nil
-	})
-	eg.Go(func() error {
-		task := db.InitKFLogBackgroundTask(1*time.Minute, 10000)
-		task.Start(stopChan)
-		return nil
-	})
-	eg.Go(func() error {
-		consumer, err := imMessage.NewImMessageConsumer(stopChan)
-		if err != nil {
-			xlogger.Error(context.Background(), "NewImMessageConsumer failed", xlogger.Err(err))
-			return err
-		}
+	eg.Go(
+		func() error {
+			task := billlog.InitBillLogBackgroundTask(1*time.Minute, 100) // 1分钟清空buffer
+			task.Start(stopChan)
+			return nil
+		},
+	)
+	eg.Go(
+		func() error {
+			task := kflog.InitKFLogBackgroundTask(1*time.Minute, 10000)
+			task.Start(stopChan)
+			return nil
+		},
+	)
+	eg.Go(
+		func() error {
+			nsq.StartConsume(stopChan)
+			return nil
+		},
+	)
 
-		if err := consumer.Consume(); err != nil {
-			xlogger.Error(context.Background(), "start ImMessageConsumer failed", xlogger.Err(err))
-			return err
-		}
-		return nil
-	})
-
-	if err := server.Run(); err != nil {
+	if err := http.Run(); err != nil {
 		close(stopChan)
 		return
 	}
@@ -65,18 +67,20 @@ func main() {
 }
 
 func initLogger(conf *config.Config) {
-	//xlogger.AddHook(func(ctx context.Context) xlogger.Field {
+	// xlogger.AddHook(func(ctx context.Context) xlogger.Field {
 	//	reqid, ok := ctx.Value("reqid").(string)
 	//	if !ok {
 	//		return xlogger.Field{}
 	//	}
 	//	return xlogger.Any("reqid", reqid)
-	//})
-	logger, err := xlogger.NewLog(xlogger.Config{
-		Level:  conf.Log.Level,
-		Format: conf.Log.Format,
-		File:   conf.Log.File,
-	})
+	// })
+	logger, err := xlogger.NewLog(
+		xlogger.Config{
+			Level:  conf.Log.Level,
+			Format: conf.Log.Format,
+			File:   conf.Log.File,
+		},
+	)
 
 	if err != nil {
 		panic(err)

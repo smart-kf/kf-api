@@ -4,7 +4,7 @@ go 1.23.2
 
 require (
 	github.com/IBM/sarama v1.43.3
-	github.com/clearcodecn/log v1.1.1
+	github.com/clearcodecn/log v1.1.2
 	github.com/clearcodecn/sqlite v1.4.0
 	github.com/clearcodecn/swaggos v0.0.7
 	github.com/gin-contrib/cors v1.7.2
@@ -71,6 +71,7 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
+	github.com/nsqio/go-nsq v1.1.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
 	github.com/pierrec/lz4/v4 v4.1.21 // indirect
 	github.com/pkg/errors v0.9.1 // indirect

@@ -11,7 +11,7 @@ type Config struct {
 	JwtKey        string        `json:"jwtKey"`
 	BillConfig    BillConfig    `json:"billConfig"`
 	RedisConfig   RedisConfig   `json:"redis"`
-	Kafka         Kafka         `json:"kafka"`
+	NSQ           NSQ           `json:"nsq"`
 	HttpClient    HttpClient    `json:"httpClient"`
 }
 
@@ -56,10 +56,11 @@ type RedisConfig struct {
 	Password string `json:"password"`
 }
 
-type Kafka struct {
-	Addrs          []string `json:"addrs"`
-	ImMessageTopic string   `json:"imMessageTopic"`
-	ImMessageGroup string   `json:"imMessageGroup"`
+type NSQ struct {
+	Addrs             []string `json:"addrs"`
+	Timeout           int      `json:"timeout" default:"60"`
+	MessageTopic      string   `json:"messageTopic"`
+	MessageTopicGroup string   `json:"messageTopicGroup"`
 }
 
 type HttpClient struct {

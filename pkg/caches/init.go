@@ -1,8 +1,9 @@
 package caches
 
 import (
-	"github.com/smart-fm/kf-api/pkg/db"
 	"sync"
+
+	"github.com/smart-fm/kf-api/infrastructure/redis"
 )
 
 var (
@@ -12,8 +13,10 @@ var (
 )
 
 func InitCacheInstances() {
-	cacheOnce.Do(func() {
-		BillSettingCacheInstance = &BillSettingCache{}
-		CaptchaCacheInstance = NewCaptchaCache(db.GetRedisClient())
-	})
+	cacheOnce.Do(
+		func() {
+			BillSettingCacheInstance = &BillSettingCache{}
+			CaptchaCacheInstance = NewCaptchaCache(redis.GetRedisClient())
+		},
+	)
 }

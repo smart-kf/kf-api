@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>客服后台</title>
+    <link rel="stylesheet" href="css/element.css">
+    <link rel="stylesheet" href="css/bootstrap.css">
+</head>
+<body>
+<div id="app" class="container">
+    <h1>客服后台</h1>
+   <div class="d-flex">
+       <div class="w-50">
+           <el-card>
+               <el-row :gutter="20">
+                   <el-col :span="6">
+                       <p>Websocket连接状态: {{ status }}</p>
+                   </el-col>
+               </el-row>
+               <div>
+                   <div class="w-75">
+                       token:
+                       <el-input v-model="token" ></el-input>
+                   </div>
+                   <div class="w-75 mt-2">
+                       用户id：
+                       <el-input v-model="userInfo.mid"></el-input>
+                   </div>
+                   <div class="w-75 mt-2">
+                       房间id
+                       <el-input v-model="userInfo.room_id"></el-input>
+                   </div>
+                   <div class="w-75 mt-2">
+                       platform:
+                       <el-input v-model="userInfo.platform"></el-input>
+                   </div>
+               </div>
+
+               <p>接收信息的来源用户：{{ userInfo.accepts }}</p>
+               <el-button class="mt-2" type="primary" @click="connect">连接websocket</el-button>
+               </el-col>
+               </el-row>
+           </el-card>
+       </div>
+       <div class="w-50 mx-2">
+           <el-card>
+               <h3>SendMessage</h3>
+               <el-input v-model="content"></el-input>
+               <br>
+               <el-button class="mt-2" type="primary" @click="sendMsg">发送</el-button>
+               <el-button class="mt-2" type="primary" @click="sendToMyself">ws接收</el-button>
+           </el-card>
+           <el-card class="mt-2">
+               <h3>MessageBox</h3>
+               <p v-for="item in receiveMessages">
+                   {{ item }}
+               </p>
+           </el-card>
+       </div>
+   </div>
+    <el-card class="mt-2">
+        <h3>Error Msg</h3>
+        <p>error = {{ error }}</p>
+    </el-card>
+</div>
+<script src="scripts/vue2.min.js"></script>
+<script src="scripts/elememt.js"></script>
+<script src="scripts/goim-sdk.js"></script>
+<script src="scripts/kf-backend.js"></script>
+</body>
+</html>
