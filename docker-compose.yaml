@@ -2,7 +2,7 @@ services:
   kf-api:
     image: kf-api:latest
     volumes:
-      - ./prod/config.yaml:/app/config.yaml
+      - ./data/prod/config.yaml:/app/config.yaml
     command:
       - /app/app
     ports:

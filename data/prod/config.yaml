@@ -23,13 +23,27 @@ billConfig:
     - username: kfadmin
       password: kfadmin123
 
-kafka:
+nsq:
   addrs:
-    - kafka:9092
-  imMessageTopic: im_message
-  imMessageGroup: im_message_group
+    - nsq:4150
+  messageTopic: im_message
+  messageTopicGroup: im_message_group
 
 httpClient:
   logicAddress: http://logic:3111
   timeout: 60
   proxy:
+
+## 卡密套餐，按天划分
+cardPackages:
+  - id: "daily"
+    price: 10
+    day: 1
+
+  - id: "weekly"
+    price: 50
+    day: 7
+
+  - id: "monthly"
+    price: 180
+    day: 30
