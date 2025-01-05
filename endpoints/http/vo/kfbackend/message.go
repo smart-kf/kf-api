@@ -2,14 +2,6 @@ package kfbackend
 
 // TODO 临时放下 后面迁移到各个文件内
 
-type QRCodeDomain struct {
-	Domain   string `json:"domain,omitempty" doc:"站点域名"`
-	HealthAt int64  `json:"healthAt,omitempty" doc:"通过健康检查的时间 毫秒"`
-	CreateAt int64  `json:"createAt,omitempty" doc:"添加创建时间 毫秒"`
-	Remark   string `json:"remark,omitempty" doc:"备注"`
-	URL      string `json:"url,omitempty" doc:"二维码图片地址"`
-}
-
 type ChatListRequest struct {
 	SearchBy string `json:"searchBy" doc:"模糊搜索 用户id/昵称/手机号/备注"`
 	ListType int    `json:"listType" doc:"列表类型 0:全部(默认) 1:消息未读 2:拉黑访客"`

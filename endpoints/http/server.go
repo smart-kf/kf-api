@@ -106,6 +106,12 @@ func registerRouter(g *gin.Engine) {
 			qrCodeGroup.POST("/switch", qrcodeController.Switch)
 			qrCodeGroup.POST("/on-off", qrcodeController.OnOff)
 		}
+
+		var settingController kfbackend.SettingController
+		settingGroup := kf.Group("/sysConf")
+		{
+			settingGroup.GET("/", settingController.Get)
+		}
 	}
 
 	// 客服前台

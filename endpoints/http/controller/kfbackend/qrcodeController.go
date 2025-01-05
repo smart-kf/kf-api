@@ -2,13 +2,13 @@ package kfbackend
 
 import (
 	"fmt"
+	"github.com/smart-fm/kf-api/infrastructure/mysql/dao"
 
 	xlogger "github.com/clearcodecn/log"
 	"github.com/gin-gonic/gin"
 
-	repository2 "github.com/smart-fm/kf-api/domain/repository"
+	"github.com/smart-fm/kf-api/domain/repository"
 	"github.com/smart-fm/kf-api/endpoints/http/middleware"
-	"github.com/smart-fm/kf-api/endpoints/http/vo/kfbackend"
 	"github.com/smart-fm/kf-api/pkg/utils"
 )
 
@@ -18,11 +18,19 @@ type QRCodeController struct {
 
 type QRCodeRequest struct{}
 type QRCodeResponse struct {
-	URL           string                   `json:"qrcodeUrl,omitempty" doc:"主站二维码图片地址"`
-	HealthAt      int64                    `json:"healthAt,omitempty" doc:"主站通过健康检查的时间 毫秒"`
-	Enable        bool                     `json:"enable,omitempty" doc:"启用停用状态"`
-	EnableNewUser bool                     `json:"enableNewUser,omitempty" doc:"启用停用新粉状态"`
-	Domains       []kfbackend.QRCodeDomain `json:"domains,omitempty" doc:"域名列表"`
+	URL           string         `json:"qrcodeUrl,omitempty" doc:"主站二维码图片地址"`
+	HealthAt      int64          `json:"healthAt,omitempty" doc:"主站通过健康检查的时间 毫秒"`
+	Enable        bool           `json:"enable,omitempty" doc:"启用停用状态"`
+	EnableNewUser bool           `json:"enableNewUser,omitempty" doc:"启用停用新粉状态"`
+	Domains       []QRCodeDomain `json:"domains,omitempty" doc:"域名列表"`
+}
+
+type QRCodeDomain struct {
+	Domain   string `json:"domain,omitempty" doc:"站点域名"`
+	HealthAt int64  `json:"healthAt,omitempty" doc:"通过健康检查的时间 毫秒"`
+	CreateAt int64  `json:"createAt,omitempty" doc:"添加创建时间 毫秒"`
+	Remark   string `json:"remark,omitempty" doc:"备注"`
+	URL      string `json:"url,omitempty" doc:"二维码图片地址"`
 }
 
 func (c *QRCodeController) List(ctx *gin.Context) {
@@ -35,7 +43,7 @@ func (c *QRCodeController) List(ctx *gin.Context) {
 
 	cardID := middleware.GetKFCardID(ctx)
 
-	var kfsetting repository2.KFSettingRepository
+	var kfsetting repository.KFSettingRepository
 	setting, ok, err := kfsetting.GetByCardID(reqCtx, cardID)
 	if err != nil {
 		xlogger.Error(reqCtx, "查询客服设置失败", xlogger.Err(err), xlogger.Any("cardId", cardID))
@@ -73,7 +81,7 @@ func (c *QRCodeController) List(ctx *gin.Context) {
 			EnableNewUser: enableNewUser,
 
 			// TODO 计费域名
-			Domains: []kfbackend.QRCodeDomain{},
+			Domains: []QRCodeDomain{},
 		},
 	)
 }
@@ -89,7 +97,7 @@ func (c *QRCodeController) Switch(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
 	cardID := middleware.GetKFCardID(ctx)
 
-	var kfsetting repository2.KFSettingRepository
+	var kfsetting repository.KFSettingRepository
 	setting, ok, err := kfsetting.GetByCardID(reqCtx, cardID)
 	if err != nil {
 		xlogger.Error(reqCtx, "查询客服设置失败", xlogger.Err(err), xlogger.Any("cardId", cardID))
@@ -98,6 +106,7 @@ func (c *QRCodeController) Switch(ctx *gin.Context) {
 	}
 
 	if !ok {
+		setting = &dao.KFSettings{}
 		setting.CardID = cardID
 	}
 
@@ -141,7 +150,7 @@ type QRCodeOnOffResponse struct{}
 // OnOff 二维码功能开关
 func (c *QRCodeController) OnOff(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
-	cardID := common.GetKFCardID(ctx)
+	cardID := middleware.GetKFCardID(ctx)
 
 	var req QRCodeOnOffRequest
 	if !c.BindAndValidate(ctx, &req) {
@@ -157,6 +166,7 @@ func (c *QRCodeController) OnOff(ctx *gin.Context) {
 	}
 
 	if !ok {
+		setting = &dao.KFSettings{}
 		setting.CardID = cardID
 	}
 
