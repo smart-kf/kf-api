@@ -55,6 +55,7 @@ func SwaggerDoc(group *swaggos.Group) {
 	sysConf := bg.Group("/sysConf").Tag("系统配置").
 		Header("authorization", "授权session", true)
 	{
-		sysConf.Get("/").Body(GetSysConfRequest{}).JSON(GetSysConfResponse{})
+		sysConf.Get("/").JSON(GetSysConfResponse{})
+		sysConf.Post("/").Body(GetSysConfRequest{}).JSON(GetSysConfResponse{})
 	}
 }

@@ -111,6 +111,7 @@ func registerRouter(g *gin.Engine) {
 		settingGroup := kf.Group("/sysConf")
 		{
 			settingGroup.GET("/", settingController.Get)
+			settingGroup.POST("/", settingController.Post)
 		}
 	}
 
