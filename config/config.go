@@ -1,6 +1,8 @@
 package config
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Config struct {
 	Debug         bool          `json:"debug"`
@@ -11,8 +13,9 @@ type Config struct {
 	JwtKey        string        `json:"jwtKey"`
 	BillConfig    BillConfig    `json:"billConfig"`
 	RedisConfig   RedisConfig   `json:"redis"`
-	Kafka         Kafka         `json:"kafka"`
+	NSQ           NSQ           `json:"nsq"`
 	HttpClient    HttpClient    `json:"httpClient"`
+	CardPackages  []CardPackage `json:"cardPackages"`
 }
 
 type LevelDBConfig struct {
@@ -56,10 +59,11 @@ type RedisConfig struct {
 	Password string `json:"password"`
 }
 
-type Kafka struct {
-	Addrs          []string `json:"addrs"`
-	ImMessageTopic string   `json:"imMessageTopic"`
-	ImMessageGroup string   `json:"imMessageGroup"`
+type NSQ struct {
+	Addrs             []string `json:"addrs"`
+	Timeout           int      `json:"timeout" default:"60"`
+	MessageTopic      string   `json:"messageTopic"`
+	MessageTopicGroup string   `json:"messageTopicGroup"`
 }
 
 type HttpClient struct {
@@ -67,3 +71,22 @@ type HttpClient struct {
 	Timeout      int    `json:"timeout"`
 	Proxy        string `json:"proxy"`
 }
+
+type CardPackage struct {
+	Id    string `json:"id"`
+	Price int64  `json:"price"` // 精确到具体多少U，数据库存储  会带上 4个0
+	Day   int    `json:"day"`
+}
+
+func (c Config) GetPackageByID(id string) (CardPackage, bool) {
+	for _, item := range c.CardPackages {
+		if item.Id == id {
+			return item, true
+		}
+	}
+	return CardPackage{}, false
+}
+
+var (
+	qrcodeDomainIndex int64 = 0
+)

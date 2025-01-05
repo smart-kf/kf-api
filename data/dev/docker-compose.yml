@@ -1,0 +1,56 @@
+services:
+  redis:
+    image: bitnami/redis
+    environment:
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+      - REDIS_PASSWORD="238XSfh98xa"
+    ports:
+      - '127.0.0.1:6379:6379'
+    restart: always
+    volumes:
+      - './data/redis_data:/bitnami/redis/data'
+    networks:
+      - kf_network
+
+  mysql:
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci --explicit_defaults_for_timestamp=true --lower_case_table_names=1
+    environment:
+      MYSQL_ROOT_PASSWORD: 124x8Xawdasdx1r140xs$
+      MYSQL_ROOT_HOST: '%'
+    ports:
+      - '127.0.0.1:3306:3306'
+    image: mysql
+    labels:
+      createdBy: Apps
+    restart: always
+    volumes:
+      - ./data/mysql_data/:/var/lib/mysql
+    networks:
+      - kf_network
+
+  nsq:
+    image: nsqio/nsq
+    ports:
+      - 127.0.0.1:4150:4150  # tcp
+    command:
+      - /nsqd
+      - --data-path=/data
+    volumes:
+      - ./data/nsq-data:/data
+    networks:
+      - kf_network
+
+  nsq-admin:
+    image: nsqio/nsq
+    ports:
+      - 127.0.0.1:4171:4171  # rpc
+    command:
+      - /nsqadmin
+      - -nsqd-http-address=nsq:4151
+    networks:
+      - kf_network
+
+networks:
+  kf_network:
+    external: true

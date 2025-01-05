@@ -1,0 +1,90 @@
+### 1. 计费登录
+POST {{ host }}/api/bill/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+
+> {%
+    // 将响应中的 token 存储到变量 {{token}} 中
+    var token = response.body.data.token;
+    client.global.set("token",token);
+%}
+
+
+###2. 批量增加 1天卡.
+POST {{ host }}/api/bill/card/batch-add
+Content-Type: application/json
+Authorization: {{ token }}
+
+{
+  "cardType": 1,
+  "days": 1,
+  "num": 35
+}
+
+###2. 批量增加 7天卡.
+POST {{ host }}/api/bill/card/batch-add
+Content-Type: application/json
+Authorization: {{ token }}
+
+{
+  "cardType": 1,
+  "days": 7,
+  "num": 15
+}
+
+###2. 批量增加 30天卡.
+POST {{ host }}/api/bill/card/batch-add
+Content-Type: application/json
+Authorization: {{ token }}
+
+{
+  "cardType": 1,
+  "days": 30,
+  "num": 12
+}
+
+###2. 获取卡密列表
+POST {{ host }}/api/bill/card/list
+Content-Type: application/json
+Authorization: {{ token }}
+
+{
+  "page": 1,
+  "pageSize": 20
+}
+
+
+### 3. 添加公共域名.
+POST {{ host }}/api/bill/domain/add
+Content-Type: application/json
+Authorization: {{ token }}
+
+{
+  "topName": "localhost:8083",
+  "status": 1,
+  "isPublic": true
+}
+
+### 3. 域名列表
+POST {{ host }}/api/bill/domain/list
+Content-Type: application/json
+Authorization: {{ token }}
+
+{
+  "page": 1,
+  "pageSize": 20
+}
+
+
+### 3. 删除域名
+POST {{ host }}/api/bill/domain/del
+Content-Type: application/json
+Authorization: {{ token }}
+
+{
+  "id": 3
+}

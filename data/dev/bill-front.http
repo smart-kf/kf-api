@@ -1,0 +1,22 @@
+###1. 提交订单
+POST {{ host }}/api/bill-fe/order/create
+Content-Type: application/json
+Authorization: {{ token }}
+
+{
+  "packageId": "daily"
+}
+
+> {%
+    // 将响应中的 orderNo 存储到变量 {{orderNo}} 中
+    var orderNo = response.body.data.orderNo;
+    client.global.set("orderNo",orderNo);
+%}
+
+### 2. 异步触发订单支付成功
+POST {{ host }}/api/bill-fe/order/notify
+Content-Type: application/json
+
+{
+  "orderNo": "{{orderNo}}"
+}

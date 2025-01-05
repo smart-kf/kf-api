@@ -1,0 +1,49 @@
+jwtKey: G7h4pL9qZtW2
+debug: true
+
+db:
+  driver: mysql  # mysql / postgres / sqlite ...
+  dsn: "root:124x8Xawdasdx1r140xs$@tcp(mysql:3306)/kf?charset=utf8mb4&parseTime=True&loc=PRC"
+
+redis:
+  db: 1
+  address: redis:6379
+  password: "238XSfh98xa"
+
+web:
+  addr: 0.0.0.0
+  port: 8081
+
+log:
+  level: debug    # debug / info / warn / error
+  format: json
+
+billConfig:
+  accounts:
+    - username: kfadmin
+      password: kfadmin123
+
+nsq:
+  addrs:
+    - nsq:4150
+  messageTopic: im_message
+  messageTopicGroup: im_message_group
+
+httpClient:
+  logicAddress: http://logic:3111
+  timeout: 60
+  proxy:
+
+## 卡密套餐，按天划分
+cardPackages:
+  - id: "daily"
+    price: 10
+    day: 1
+
+  - id: "weekly"
+    price: 50
+    day: 7
+
+  - id: "monthly"
+    price: 180
+    day: 30
