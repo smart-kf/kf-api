@@ -104,6 +104,20 @@ func registerRouter(g *gin.Engine) {
 		{
 			qrCodeGroup.GET("/", qrcodeController.List)
 			qrCodeGroup.POST("/switch", qrcodeController.Switch)
+			qrCodeGroup.POST("/on-off", qrcodeController.OnOff)
+		}
+
+		var chatController kfbackend.ChatController
+		chatGroup := kf.Group("/chat")
+		{
+			chatGroup.GET("/list", chatController.List)
+		}
+
+		var sysConfController kfbackend.SysConfController
+		settingGroup := kf.Group("/sysConf")
+		{
+			settingGroup.GET("/", sysConfController.Get)
+			settingGroup.POST("/", sysConfController.Post)
 		}
 	}
 

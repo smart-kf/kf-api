@@ -1,6 +1,15 @@
 package kfbackend
 
-// TODO 临时放下 后面迁移到各个文件内
+import "github.com/smart-fm/kf-api/endpoints/common"
+
+type QRCodeRequest struct{}
+type QRCodeResponse struct {
+	URL           string         `json:"qrcodeUrl,omitempty" doc:"主站二维码图片地址"`
+	HealthAt      int64          `json:"healthAt,omitempty" doc:"主站通过健康检查的时间 毫秒"`
+	Enable        bool           `json:"enable,omitempty" doc:"启用停用状态"`
+	EnableNewUser bool           `json:"enableNewUser,omitempty" doc:"启用停用新粉状态"`
+	Domains       []QRCodeDomain `json:"domains,omitempty" doc:"域名列表"`
+}
 
 type QRCodeDomain struct {
 	Domain   string `json:"domain,omitempty" doc:"站点域名"`
@@ -10,6 +19,12 @@ type QRCodeDomain struct {
 	URL      string `json:"url,omitempty" doc:"二维码图片地址"`
 }
 
+type QRCodeSwitchRequest struct{}
+type QRCodeSwitchResponse struct {
+	URL      string `json:"qrcodeUrl,omitempty" doc:"主站二维码图片地址"`
+	HealthAt int64  `json:"healthAt,omitempty" doc:"主站通过健康检查的时间 毫秒"`
+}
+
 type QRCodeOnOffRequest struct {
 	OnOff        *bool `json:"onoff" doc:"开关：所有二维码的所有用户都不能进入"`
 	OnOffNewUser *bool `json:"onoffNewUser" doc:"开关：老用户可进，新用户不能进"`
@@ -17,9 +32,9 @@ type QRCodeOnOffRequest struct {
 type QRCodeOnOffResponse struct{}
 
 type ChatListRequest struct {
-	SearchBy string `json:"searchBy" doc:"模糊搜索 用户id/昵称/手机号/备注"`
-	ListType int    `json:"listType" doc:"列表类型 0:全部(默认) 1:消息未读 2:拉黑访客"`
-	ScrollID string `json:"scrollID" doc:"滚页id 即上页最后一条会话的最近聊天时间 请求首页时不传"`
+	SearchBy             string `json:"searchBy" doc:"模糊搜索 用户id/昵称/手机号/备注"`
+	ListType             int    `json:"listType" doc:"列表类型 0:全部(默认) 1:消息未读 2:拉黑访客"`
+	common.ScrollRequest `json:",inline"`
 }
 
 type ChatListResponse struct {
