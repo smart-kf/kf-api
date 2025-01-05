@@ -20,15 +20,15 @@ func SwaggerDoc(group *swaggos.Group) {
 		Header("authorization", "授权session", true)
 	{
 		qrcode.Post("/").
-			Body(QRCodeRequest{}).JSON(QRCodeResponse{}).
+			Body(kfbackend.QRCodeRequest{}).JSON(kfbackend.QRCodeResponse{}).
 			Description("获取二维码和域名列表的接口")
 
 		qrcode.Post("/switch").
-			Body(QRCodeSwitchRequest{}).JSON(QRCodeSwitchResponse{}).
+			Body(kfbackend.QRCodeSwitchRequest{}).JSON(kfbackend.QRCodeSwitchResponse{}).
 			Description("更换二维码")
 
 		qrcode.Post("/on-off").
-			Body(QRCodeOnOffRequest{}).JSON(QRCodeOnOffResponse{}).
+			Body(kfbackend.QRCodeOnOffRequest{}).JSON(kfbackend.QRCodeOnOffResponse{}).
 			Description("二维码功能开关")
 	}
 
@@ -56,6 +56,6 @@ func SwaggerDoc(group *swaggos.Group) {
 		Header("authorization", "授权session", true)
 	{
 		sysConf.Get("/").JSON(GetSysConfResponse{})
-		sysConf.Post("/").Body(GetSysConfRequest{}).JSON(GetSysConfResponse{})
+		sysConf.Post("/").Body(PostSysConfRequest{}).JSON(PostSysConfResponse{})
 	}
 }

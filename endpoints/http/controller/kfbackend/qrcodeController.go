@@ -2,6 +2,7 @@ package kfbackend
 
 import (
 	"fmt"
+	"github.com/smart-fm/kf-api/endpoints/http/vo/kfbackend"
 	"github.com/smart-fm/kf-api/infrastructure/mysql/dao"
 
 	xlogger "github.com/clearcodecn/log"
@@ -16,25 +17,8 @@ type QRCodeController struct {
 	BaseController
 }
 
-type QRCodeRequest struct{}
-type QRCodeResponse struct {
-	URL           string         `json:"qrcodeUrl,omitempty" doc:"主站二维码图片地址"`
-	HealthAt      int64          `json:"healthAt,omitempty" doc:"主站通过健康检查的时间 毫秒"`
-	Enable        bool           `json:"enable,omitempty" doc:"启用停用状态"`
-	EnableNewUser bool           `json:"enableNewUser,omitempty" doc:"启用停用新粉状态"`
-	Domains       []QRCodeDomain `json:"domains,omitempty" doc:"域名列表"`
-}
-
-type QRCodeDomain struct {
-	Domain   string `json:"domain,omitempty" doc:"站点域名"`
-	HealthAt int64  `json:"healthAt,omitempty" doc:"通过健康检查的时间 毫秒"`
-	CreateAt int64  `json:"createAt,omitempty" doc:"添加创建时间 毫秒"`
-	Remark   string `json:"remark,omitempty" doc:"备注"`
-	URL      string `json:"url,omitempty" doc:"二维码图片地址"`
-}
-
 func (c *QRCodeController) List(ctx *gin.Context) {
-	var req QRCodeRequest
+	var req kfbackend.QRCodeRequest
 	if !c.BindAndValidate(ctx, &req) {
 		return
 	}
@@ -74,22 +58,16 @@ func (c *QRCodeController) List(ctx *gin.Context) {
 	}
 
 	c.Success(
-		ctx, QRCodeResponse{
+		ctx, kfbackend.QRCodeResponse{
 			URL:           fmt.Sprintf("https://%s/%s", baseDomain, static),
 			HealthAt:      0,
 			Enable:        enable,
 			EnableNewUser: enableNewUser,
 
 			// TODO 计费域名
-			Domains: []QRCodeDomain{},
+			Domains: []kfbackend.QRCodeDomain{},
 		},
 	)
-}
-
-type QRCodeSwitchRequest struct{}
-type QRCodeSwitchResponse struct {
-	URL      string `json:"qrcodeUrl,omitempty" doc:"主站二维码图片地址"`
-	HealthAt int64  `json:"healthAt,omitempty" doc:"主站通过健康检查的时间 毫秒"`
 }
 
 // Switch 更换二维码图片
@@ -134,25 +112,19 @@ func (c *QRCodeController) Switch(ctx *gin.Context) {
 	}
 
 	c.Success(
-		ctx, QRCodeSwitchResponse{
+		ctx, kfbackend.QRCodeSwitchResponse{
 			URL:      fmt.Sprintf("https://%s/%s", baseDomain, resource),
 			HealthAt: 0,
 		},
 	)
 }
 
-type QRCodeOnOffRequest struct {
-	OnOff        *bool `json:"onoff" doc:"开关：所有二维码的所有用户都不能进入"`
-	OnOffNewUser *bool `json:"onoffNewUser" doc:"开关：老用户可进，新用户不能进"`
-}
-type QRCodeOnOffResponse struct{}
-
 // OnOff 二维码功能开关
 func (c *QRCodeController) OnOff(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
 	cardID := middleware.GetKFCardID(ctx)
 
-	var req QRCodeOnOffRequest
+	var req kfbackend.QRCodeOnOffRequest
 	if !c.BindAndValidate(ctx, &req) {
 		return
 	}
@@ -185,5 +157,5 @@ func (c *QRCodeController) OnOff(ctx *gin.Context) {
 		return
 	}
 
-	c.Success(ctx, QRCodeOnOffResponse{})
+	c.Success(ctx, kfbackend.QRCodeOnOffResponse{})
 }

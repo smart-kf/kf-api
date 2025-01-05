@@ -8,7 +8,7 @@ import (
 	"github.com/smart-fm/kf-api/infrastructure/mysql/dao"
 )
 
-type SettingController struct {
+type SysConfController struct {
 	BaseController
 }
 
@@ -26,7 +26,7 @@ type GetSysConfResponse struct {
 	NewMessageVoice bool   `json:"newMessageVoice" doc:"消息提示音"`
 }
 
-func (c *SettingController) Get(ctx *gin.Context) {
+func (c *SysConfController) Get(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
 	cardID := middleware.GetKFCardID(ctx)
 
@@ -75,7 +75,7 @@ type PostSysConfRequest struct {
 
 type PostSysConfResponse struct{}
 
-func (c *SettingController) Post(ctx *gin.Context) {
+func (c *SysConfController) Post(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
 	cardID := middleware.GetKFCardID(ctx)
 
