@@ -64,6 +64,7 @@ type NSQ struct {
 	Timeout           int      `json:"timeout" default:"60"`
 	MessageTopic      string   `json:"messageTopic"`
 	MessageTopicGroup string   `json:"messageTopicGroup"`
+	OrderExpireTopic  string   `json:"orderExpireTopic"`
 }
 
 type HttpClient struct {

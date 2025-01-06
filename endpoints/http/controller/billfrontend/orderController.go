@@ -11,6 +11,7 @@ import (
 	"github.com/smart-fm/kf-api/endpoints/common/constant"
 	"github.com/smart-fm/kf-api/endpoints/http/vo/billfront"
 	"github.com/smart-fm/kf-api/endpoints/http/vo/billfrontend"
+	"github.com/smart-fm/kf-api/endpoints/nsq/producer"
 	"github.com/smart-fm/kf-api/infrastructure/mysql"
 	"github.com/smart-fm/kf-api/infrastructure/mysql/dao"
 	"github.com/smart-fm/kf-api/infrastructure/redis"
@@ -58,6 +59,9 @@ func (c *BaseController) CreateOrder(ctx *gin.Context) {
 		}
 	}
 
+	var orderExpireDelay = config.GetConfig().BillConfig.OrderExpireTime
+	var orderExpireTime = time.Now().UnixMicro() + orderExpireDelay*1000 // 使用毫秒.
+
 	// 1. 创建订单.
 	var order = dao.Orders{
 		CardID:         "",
@@ -68,7 +72,7 @@ func (c *BaseController) CreateOrder(ctx *gin.Context) {
 		Price:          cardPackage.Price * 1000,    // 1 后面4个0
 		Status:         constant.OrderStatusCreated, //
 		ConfirmTime:    0,
-		ExpireTime:     time.Now().UnixMicro() + config.GetConfig().BillConfig.OrderExpireTime*1000, // 使用毫秒.
+		ExpireTime:     orderExpireTime,
 		Ip:             utils.ClientIP(ctx),
 		Area:           "", // TODO:: ip2region
 		Version:        1,
@@ -90,6 +94,19 @@ func (c *BaseController) CreateOrder(ctx *gin.Context) {
 	); err != nil {
 		c.Error(ctx, err)
 		xlogger.Error(reqCtx, "createOrder-ZAdd-失败:"+no, xlogger.Err(err))
+		return
+	}
+
+	var (
+		topic = config.GetConfig().NSQ.OrderExpireTopic
+	)
+
+	if err := producer.NSQProducer.DeferredPublish(
+		topic, time.Duration(orderExpireDelay)*time.Second,
+		[]byte(order.OrderNo),
+	); err != nil {
+		c.Error(ctx, err)
+		xlogger.Error(reqCtx, "createOrder-DeferredPublish-失败:"+no, xlogger.Err(err))
 		return
 	}
 
