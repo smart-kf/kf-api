@@ -32,10 +32,18 @@ type QRCodeOnOffRequest struct {
 type QRCodeOnOffResponse struct{}
 
 type ChatListRequest struct {
-	SearchBy             string `json:"searchBy" doc:"模糊搜索 用户id/昵称/手机号/备注"`
-	ListType             int    `json:"listType" doc:"列表类型 0:全部(默认) 1:消息未读 2:拉黑访客"`
+	SearchBy             string       `json:"searchBy" doc:"模糊搜索 用户id/昵称/手机号/备注"`
+	ListType             ChatListType `json:"listType" doc:"列表类型 0:全部(默认) 1:消息未读 2:拉黑访客"`
 	common.ScrollRequest `json:",inline"`
 }
+
+type ChatListType int8
+
+const (
+	ChatListTypeDefault ChatListType = 0
+	ChatListTypeUnread  ChatListType = 1
+	ChatListTypeBlock   ChatListType = 2
+)
 
 type ChatListResponse struct {
 	Chats []Chat `json:"chats,omitempty" doc:"会话列表"`

@@ -9,6 +9,10 @@ type KFExternalUser struct {
 	gorm.Model
 	ID            string `json:"id" gorm:"primaryKey;column:id;unique" doc:"访客id"`
 	CardID        string `json:"cardID" gorm:"column:card_id" doc:"卡密id"`
+	Avatar        string `json:"avatar" gorm:"column:avatar" doc:"头像"`
+	NickName      string `json:"nickName" gorm:"column:nick_name" doc:"昵称"`
+	PhoneNumber   string `json:"phoneNumber" gorm:"column:phone_number" doc:"手机号"`
+	Remark        string `json:"remark" gorm:"column:remark" doc:"备注"`
 	UserAgent     string `json:"userAgent" gorm:"column:user_agent" doc:"浏览器属性"`
 	City          string `json:"city" gorm:"column:city" doc:"城市"`
 	IP            string `json:"ip" gorm:"column:ip" doc:"ip"`

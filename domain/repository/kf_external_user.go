@@ -2,8 +2,10 @@ package repository
 
 import (
 	"context"
+	"errors"
 	xlogger "github.com/clearcodecn/log"
 	"github.com/smart-fm/kf-api/endpoints/common"
+	"github.com/smart-fm/kf-api/endpoints/http/vo/kfbackend"
 	"github.com/smart-fm/kf-api/infrastructure/mysql"
 	"github.com/smart-fm/kf-api/infrastructure/mysql/dao"
 )
@@ -23,14 +25,33 @@ func (r *KFExternalUserRepository) SaveOne(ctx context.Context, chat *dao.KFExte
 type ListExtUserOption struct {
 	CardID        string
 	SearchBy      string
-	ListType      int
+	ListType      kfbackend.ChatListType
 	ScrollRequest *common.ScrollRequest
 }
 
-func (r *KFExternalUserRepository) List(ctx context.Context, options *ListExtUserOption) ([]*dao.KFExternalUser, int64, error) {
-	tx := mysql.GetDBFromContext(ctx)
-	if options.CardID != "" {
-		tx = tx.Where("card_id = ?", options.CardID)
+func (r *KFExternalUserRepository) List(ctx context.Context, options *ListExtUserOption) ([]*dao.KFExternalUser, error) {
+	tx := mysql.GetDBFromContext(ctx).Debug()
+
+	if len(options.CardID) == 0 {
+		return nil, errors.New("cardID is required")
 	}
+
+	tx = tx.Where("card_id = ?", options.CardID)
+
+	// 用户id/昵称/手机号/备注
+	if options.SearchBy != "" {
+		tx.Where(tx.Where("nick_name LIKE ?", "%"+options.SearchBy+"%").
+			Or("id LIKE ?", "%"+options.SearchBy+"%").
+			Or("phone_number LIKE ?", "%"+options.SearchBy+"%").
+			Or("remark LIKE ?", "%"+options.SearchBy+"%"))
+	}
+
+	switch options.ListType {
+	case kfbackend.ChatListTypeUnread:
+		tx = tx.Where("unread_msg_cnt > 0") // 未读消息
+	case kfbackend.ChatListTypeBlock:
+		tx = tx.Where("block_at > 0") // 用拉黑时间来判断
+	}
+
 	return common.Scroll[*dao.KFExternalUser](tx, options.ScrollRequest)
 }
