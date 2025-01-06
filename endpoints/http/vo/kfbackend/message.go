@@ -1,6 +1,9 @@
 package kfbackend
 
-import "github.com/smart-fm/kf-api/endpoints/common"
+import (
+	"github.com/smart-fm/kf-api/endpoints/common"
+	"github.com/smart-fm/kf-api/infrastructure/mysql/dao"
+)
 
 type QRCodeRequest struct{}
 type QRCodeResponse struct {
@@ -32,10 +35,18 @@ type QRCodeOnOffRequest struct {
 type QRCodeOnOffResponse struct{}
 
 type ChatListRequest struct {
-	SearchBy             string `json:"searchBy" doc:"模糊搜索 用户id/昵称/手机号/备注"`
-	ListType             int    `json:"listType" doc:"列表类型 0:全部(默认) 1:消息未读 2:拉黑访客"`
+	SearchBy             string       `json:"searchBy" doc:"模糊搜索 用户id/昵称/手机号/备注"`
+	ListType             ChatListType `json:"listType" doc:"列表类型 0:全部(默认) 1:消息未读 2:拉黑访客"`
 	common.ScrollRequest `json:",inline"`
 }
+
+type ChatListType int8
+
+const (
+	ChatListTypeDefault ChatListType = 0
+	ChatListTypeUnread  ChatListType = 1
+	ChatListTypeBlock   ChatListType = 2
+)
 
 type ChatListResponse struct {
 	Chats []Chat `json:"chats,omitempty" doc:"会话列表"`
@@ -56,42 +67,24 @@ type Chat struct {
 	UnreadMsgCnt int64        `json:"unreadMsgCnt" doc:"未读消息数"`
 }
 
-type MaterialType int8
-
-const (
-	MaterialTypeText  MaterialType = iota // 文本
-	MaterialTypeVoice                     // 语音
-	MaterialTypeImage                     // 图片
-	MaterialTypeVideo                     // 视频
-	MaterialTypeUrl                       // 网址
-	MaterialTypeFile                      // 其他文件
-)
-
-// ChatObjType 聊天对象的类型
-type ChatObjType int8
-
-const (
-	ChatObjTypeSys          ChatObjType = iota // 系统
-	ChatObjTypeExternalUser                    // 访客 即用户/粉丝
-	ChatObjTypeUser                            // 员工 即客服
-)
-
 type Message struct {
-	Content  Material    `json:"content" doc:"消息的内容"`
-	From     string      `json:"from" doc:"发送方id"`
-	FromType ChatObjType `json:"fromType" doc:"发送方类型 0:系统 1:访客 2:客服"`
-	To       string      `json:"to" doc:"接收方id"`
-	ToType   ChatObjType `json:"toType" doc:"接收方类型 0:系统 1:访客 2:客服"`
+	ID       uint64          `json:"id" doc:"消息自增id 可用作排序"`
+	Content  string          `json:"content" doc:"消息的内容"`
+	From     string          `json:"from" doc:"发送方id"`
+	FromType dao.ChatObjType `json:"fromType" doc:"发送方类型 0:系统 1:访客 2:客服"`
+	To       string          `json:"to" doc:"接收方id"`
+	ToType   dao.ChatObjType `json:"toType" doc:"接收方类型 0:系统 1:访客 2:客服"`
+	CreateAt int64           `json:"create_at" doc:"消息创建时间 单位毫秒 可用作合并时间窗口"`
 }
 
 type Material struct {
-	Type  MaterialType `json:"type" doc:"资源类型 0:文本 1:语音 2:图片 3:视频 4:网址 5:其他文件"`
-	Text  Text         `json:"text,omitempty" doc:"文本"`
-	Voice Voice        `json:"voice,omitempty" doc:"语音" `
-	Image Image        `json:"image,omitempty" doc:"图片"`
-	Video Video        `json:"video,omitempty" doc:"视频"`
-	URL   URL          `json:"url,omitempty" doc:"网址"`
-	File  File         `json:"file,omitempty" doc:"文件"`
+	Type  dao.MaterialType `json:"type" doc:"资源类型 0:文本 1:语音 2:图片 3:视频 4:网址 5:其他文件"`
+	Text  Text             `json:"text,omitempty" doc:"文本"`
+	Voice Voice            `json:"voice,omitempty" doc:"语音" `
+	Image Image            `json:"image,omitempty" doc:"图片"`
+	Video Video            `json:"video,omitempty" doc:"视频"`
+	URL   URL              `json:"url,omitempty" doc:"网址"`
+	File  File             `json:"file,omitempty" doc:"文件"`
 }
 
 type Text struct {
