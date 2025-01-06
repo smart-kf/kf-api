@@ -42,6 +42,7 @@ require (
 	github.com/go-openapi/jsonreference v0.19.4 // indirect
 	github.com/go-openapi/spec v0.19.9 // indirect
 	github.com/go-openapi/swag v0.19.9 // indirect
+	github.com/go-resty/resty/v2 v2.16.2 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect

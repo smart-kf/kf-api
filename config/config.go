@@ -68,9 +68,9 @@ type NSQ struct {
 }
 
 type HttpClient struct {
-	LogicAddress string `json:"logicAddress"` // logic 服务 http 地址
-	Timeout      int    `json:"timeout"`
-	Proxy        string `json:"proxy"`
+	SocketServerClient string `json:"socketServerAddress"`
+	Timeout            int    `json:"timeout"`
+	Proxy              string `json:"proxy"`
 }
 
 type CardPackage struct {

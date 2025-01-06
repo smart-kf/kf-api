@@ -29,7 +29,7 @@ nsq:
   messageTopicGroup: im_message_group
 
 httpClient:
-  logicAddress: http://127.0.0.1:3111
+  socketServerAddress: http://127.0.0.1:9000
   timeout: 60
   proxy:
 
