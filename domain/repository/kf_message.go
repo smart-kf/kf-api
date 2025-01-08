@@ -23,11 +23,7 @@ func (r *KFMessageRepository) SaveOne(ctx context.Context, chat *dao.KFMessage) 
 
 type ListMsgOption struct {
 	CardID        string
-	Type          *dao.MessageType
-	From          *string
-	FromType      *dao.ChatObjType
-	To            *string
-	ToType        *dao.ChatObjType
+	FromTos       []string
 	ScrollRequest *common.ScrollRequest
 }
 
@@ -38,27 +34,14 @@ func (r *KFMessageRepository) List(ctx context.Context, options *ListMsgOption) 
 		return nil, errors.New("cardID is required")
 	}
 
+	if len(options.FromTos) == 0 {
+		return nil, errors.New("fromTos is required")
+	}
+
 	tx = tx.Where("card_id = ?", options.CardID)
 
-	if options.From != nil {
-		tx = tx.Where("from = ?", options.From)
-	}
-
-	if options.FromType != nil {
-		tx = tx.Where("from_type = ?", options.FromType)
-	}
-
-	if options.To != nil {
-		tx = tx.Where("to = ?", options.To)
-	}
-
-	if options.ToType != nil {
-		tx = tx.Where("to_type = ?", options.ToType)
-	}
-
-	if options.Type != nil {
-		tx = tx.Where("type = ?", options.Type)
-	}
+	tx = tx.Where("from in ?", options.FromTos)
+	tx = tx.Where("to in ?", options.FromTos)
 
 	return common.Scroll[*dao.KFMessage](tx, options.ScrollRequest)
 }

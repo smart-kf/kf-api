@@ -9,9 +9,9 @@ type KFMessage struct {
 	gorm.Model
 	ID       uint64      `gorm:"primaryKey;type;bigint unsigned;autoIncrement"`    // 消息自增id
 	Type     MessageType `gorm:"column:type;type:tinyint(4)" json:"type"`          // 消息类型
-	From     string      `gorm:"column:from" json:"from"`                          // 发送方id
+	From     string      `gorm:"column:from;type:varchar(255)" json:"from"`        // 发送方id 存成字符串方便统一查询
 	FromType ChatObjType `gorm:"column:from_type;type:tinyint(4)" json:"fromType"` // 发送方类型
-	To       string      `gorm:"column:to" json:"to"`                              // 接收方id
+	To       string      `gorm:"column:to;type:varchar(255)" json:"to"`            // 接收方id 存成字符串方便统一查询
 	ToType   ChatObjType `gorm:"column:to_type;type:tinyint(4)" json:"toType"`     // 接收方类型
 	ReadAt   int64       `gorm:"column:read_at" json:"read_at"`                    // 接收方已读消息的时间
 	Content  string      `gorm:"column:content;type:longtext;" json:"content"`     // 内容.

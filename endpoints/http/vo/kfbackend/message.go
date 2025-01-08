@@ -68,10 +68,7 @@ type Chat struct {
 }
 
 type MsgListRequest struct {
-	From                 *string          `json:"from,omitempty" doc:"发送方id 选填"`
-	FromType             *dao.ChatObjType `json:"fromType,omitempty" doc:"发送方类型 0:系统 1:访客 2:客服  选填"`
-	To                   *string          `json:"to,omitempty" doc:"接收方id  选填"`
-	ToType               *dao.ChatObjType `json:"toType,omitempty" doc:"接收方类型 0:系统 1:访客 2:客服  选填"`
+	FromTos              []string `json:"fromTos" doc:"发送方id和接收方id数组 即一个会话中客服和粉丝的ids"`
 	common.ScrollRequest `json:",inline"`
 }
 

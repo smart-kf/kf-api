@@ -73,17 +73,19 @@ func (c *ChatController) Msgs(ctx *gin.Context) {
 		return
 	}
 
+	if len(req.FromTos) == 0 {
+		c.Success(ctx, kfbackend.MsgListResponse{})
+		return
+	}
+
 	reqCtx := ctx.Request.Context()
 	cardID := middleware.GetKFCardID(ctx)
 
 	var repo repository.KFMessageRepository
 
 	extUsers, err := repo.List(reqCtx, &repository.ListMsgOption{
-		CardID:   cardID,
-		From:     req.From,
-		FromType: req.FromType,
-		To:       req.To,
-		ToType:   req.ToType,
+		CardID:  cardID,
+		FromTos: req.FromTos,
 		ScrollRequest: &common.ScrollRequest{
 			Key:      "id",
 			Asc:      req.Asc,
@@ -147,16 +149,7 @@ func extUser2ChatVO(u *dao.KFExternalUser, lastMsgMap map[uint64]*dao.KFMessage)
 
 	msg, ok := lastMsgMap[u.LastMsgID]
 	if ok {
-		chat.LastMessage = kfbackend.Message{
-			ID:       msg.ID,
-			Content:  msg.Content,
-			From:     msg.From,
-			FromType: msg.FromType,
-			To:       msg.To,
-			ToType:   msg.ToType,
-			ReadAt:   msg.IsRead,
-			CreateAt: msg.CreatedAt.Unix(),
-		}
+		chat.LastMessage = msg2VO(msg)
 	}
 
 	return chat
