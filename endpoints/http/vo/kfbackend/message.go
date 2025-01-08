@@ -63,8 +63,27 @@ type Chat struct {
 	Type         ChatType     `json:"type" doc:"会话类型 0:单聊(默认) 1:群聊(暂不做)"`
 	ExternalUser ExternalUser `json:"externalUser" doc:"外部访客信息"`
 	LastChatAt   int64        `json:"lastChatAt" doc:"最近聊天时间 毫秒"`
-	LastMessage  Message      `json:"LastMessage" doc:"最近一次聊天的消息内容"`
+	LastMessage  Message      `json:"lastMessage" doc:"最近一次聊天的消息内容"`
 	UnreadMsgCnt int64        `json:"unreadMsgCnt" doc:"未读消息数"`
+}
+
+type MsgListRequest struct {
+	From                 *string          `json:"from,omitempty" doc:"发送方id 选填"`
+	FromType             *dao.ChatObjType `json:"fromType,omitempty" doc:"发送方类型 0:系统 1:访客 2:客服  选填"`
+	To                   *string          `json:"to,omitempty" doc:"接收方id  选填"`
+	ToType               *dao.ChatObjType `json:"toType,omitempty" doc:"接收方类型 0:系统 1:访客 2:客服  选填"`
+	common.ScrollRequest `json:",inline"`
+}
+
+type MsgListResponse struct {
+	Messages []Message `json:"messages" doc:"消息列表"`
+}
+
+type ReadMsgRequest struct {
+	MsgIDs []uint64 `json:"msgIDs" doc:"已读的消息ids"`
+}
+
+type ReadMsgResponse struct {
 }
 
 type Message struct {
@@ -74,7 +93,8 @@ type Message struct {
 	FromType dao.ChatObjType `json:"fromType" doc:"发送方类型 0:系统 1:访客 2:客服"`
 	To       string          `json:"to" doc:"接收方id"`
 	ToType   dao.ChatObjType `json:"toType" doc:"接收方类型 0:系统 1:访客 2:客服"`
-	CreateAt int64           `json:"create_at" doc:"消息创建时间 单位毫秒 可用作合并时间窗口"`
+	ReadAt   int64           `json:"readAt" doc:"接收方是否已读 如果已读则存有已读时间 单位秒"`
+	CreateAt int64           `json:"create_at" doc:"消息创建时间 单位秒 可用作合并时间窗口"`
 }
 
 type Material struct {

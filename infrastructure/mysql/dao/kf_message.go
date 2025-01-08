@@ -13,8 +13,8 @@ type KFMessage struct {
 	FromType ChatObjType `gorm:"column:from_type;type:tinyint(4)" json:"fromType"` // 发送方类型
 	To       string      `gorm:"column:to" json:"to"`                              // 接收方id
 	ToType   ChatObjType `gorm:"column:to_type;type:tinyint(4)" json:"toType"`     // 接收方类型
-
-	Content string `gorm:"column:content;type:longtext;" json:"content"` // 内容.
+	ReadAt   int64       `gorm:"column:read_at" json:"read_at"`                    // 接收方已读消息的时间
+	Content  string      `gorm:"column:content;type:longtext;" json:"content"`     // 内容.
 }
 
 type MessageType int8

@@ -1,7 +1,6 @@
 package common
 
 import (
-	"errors"
 	"github.com/modern-go/reflect2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -14,7 +13,7 @@ const (
 
 type ScrollRequest struct {
 	Key      string      `json:"-"` // 基于哪个键滚页 必填
-	Asc      bool        `json:"-"`
+	Asc      bool        `json:"asc,omitempty" doc:"是否是升序"`
 	ScrollID interface{} `json:"scrollID,omitempty" doc:"滚页的id"`
 	PageSize *uint       `json:"pageSize,omitempty" doc:"分页大小,默认20"`
 }
@@ -27,16 +26,18 @@ func (r *ScrollRequest) GetPageSize() int64 {
 }
 
 func Scroll[T schema.Tabler](db *gorm.DB, request *ScrollRequest) ([]T, error) {
-	if len(request.Key) == 0 {
-		return nil, errors.New("key is required")
-	}
-
 	var res []T
 
-	order := clause.OrderBy{Columns: []clause.OrderByColumn{
-		{Column: clause.Column{Name: request.Key}, Desc: !request.Asc},
-		{Column: clause.Column{Name: "id"}, Desc: false}, // 组合排序
-	}}
+	var orderCols []clause.OrderByColumn
+
+	if len(request.Key) == 0 || request.Key == "id" { // 未指定key 则按id滚页
+		orderCols = append(orderCols, clause.OrderByColumn{Column: clause.Column{Name: "id"}, Desc: !request.Asc})
+	} else { // 指定key滚页时 和id组合排序
+		orderCols = append(orderCols, clause.OrderByColumn{Column: clause.Column{Name: request.Key}, Desc: !request.Asc})
+		orderCols = append(orderCols, clause.OrderByColumn{Column: clause.Column{Name: "id"}, Desc: false})
+	}
+
+	order := clause.OrderBy{Columns: orderCols}
 
 	if reflect2.IsNil(request.ScrollID) {
 		result := db.

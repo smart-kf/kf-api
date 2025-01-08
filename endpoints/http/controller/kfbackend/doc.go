@@ -36,6 +36,8 @@ func SwaggerDoc(group *swaggos.Group) {
 		Header("authorization", "授权session", true)
 	{
 		chat.Post("/list").Body(kfbackend.ChatListRequest{}).JSON(kfbackend.ChatListResponse{}).Description("会话列表")
+		chat.Post("/msgs").Body(kfbackend.MsgListRequest{}).JSON(kfbackend.MsgListResponse{}).Description("消息列表")
+		chat.Post("/msgs/read").Body(kfbackend.ReadMsgRequest{}).JSON(kfbackend.ReadMsgResponse{}).Description("上报已读消息")
 	}
 
 	msgLib := bg.Group("/msgLib").Tag("话术管理").

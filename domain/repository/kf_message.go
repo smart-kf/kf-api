@@ -23,6 +23,11 @@ func (r *KFMessageRepository) SaveOne(ctx context.Context, chat *dao.KFMessage) 
 
 type ListMsgOption struct {
 	CardID        string
+	Type          *dao.MessageType
+	From          *string
+	FromType      *dao.ChatObjType
+	To            *string
+	ToType        *dao.ChatObjType
 	ScrollRequest *common.ScrollRequest
 }
 
@@ -34,6 +39,26 @@ func (r *KFMessageRepository) List(ctx context.Context, options *ListMsgOption) 
 	}
 
 	tx = tx.Where("card_id = ?", options.CardID)
+
+	if options.From != nil {
+		tx = tx.Where("from = ?", options.From)
+	}
+
+	if options.FromType != nil {
+		tx = tx.Where("from_type = ?", options.FromType)
+	}
+
+	if options.To != nil {
+		tx = tx.Where("to = ?", options.To)
+	}
+
+	if options.ToType != nil {
+		tx = tx.Where("to_type = ?", options.ToType)
+	}
+
+	if options.Type != nil {
+		tx = tx.Where("type = ?", options.Type)
+	}
 
 	return common.Scroll[*dao.KFMessage](tx, options.ScrollRequest)
 }
@@ -60,4 +85,14 @@ func (r *KFMessageRepository) ByIDs(ctx context.Context, cardID string, ids ...u
 	}
 
 	return res, nil
+}
+
+func (r *KFMessageRepository) BatchUpdateReadAt(ctx context.Context, ids []uint64, readAt int64) error {
+	tx := mysql.GetDBFromContext(ctx)
+	res := tx.Model(&dao.KFMessage{}).Where("id in ?", ids).Where("read_at <= 0").Updates(dao.KFMessage{ReadAt: readAt})
+	if err := res.Error; err != nil {
+		xlogger.Error(ctx, "BatchUpdateReadAt-failed", xlogger.Err(err))
+		return err
+	}
+	return nil
 }
