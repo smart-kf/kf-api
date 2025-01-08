@@ -9,6 +9,7 @@ import (
 	"github.com/smart-fm/kf-api/endpoints/http/middleware"
 	"github.com/smart-fm/kf-api/endpoints/http/vo/kfbackend"
 	"github.com/smart-fm/kf-api/infrastructure/mysql/dao"
+	"time"
 )
 
 type ChatController struct {
@@ -66,6 +67,146 @@ func (c *ChatController) List(ctx *gin.Context) {
 	})
 }
 
+func (c *ChatController) Msgs(ctx *gin.Context) {
+	var req kfbackend.MsgListRequest
+	if !c.BindAndValidate(ctx, &req) {
+		return
+	}
+
+	if len(req.FromTos) == 0 {
+		c.Success(ctx, kfbackend.MsgListResponse{})
+		return
+	}
+
+	reqCtx := ctx.Request.Context()
+	cardID := middleware.GetKFCardID(ctx)
+
+	var repo repository.KFMessageRepository
+
+	extUsers, err := repo.List(reqCtx, &repository.ListMsgOption{
+		CardID:  cardID,
+		FromTos: req.FromTos,
+		ScrollRequest: &common.ScrollRequest{
+			Key:      "id",
+			Asc:      req.Asc,
+			ScrollID: req.ScrollID,
+			PageSize: req.PageSize,
+		},
+	})
+	if err != nil {
+		xlogger.Error(reqCtx, "查询客服设置失败", xlogger.Err(err), xlogger.Any("cardId", cardID))
+		c.Error(ctx, err)
+		return
+	}
+
+	msgs := lo.Map(extUsers, func(item *dao.KFMessage, index int) kfbackend.Message {
+		return msg2VO(item)
+	})
+
+	c.Success(ctx, kfbackend.MsgListResponse{
+		Messages: msgs,
+	})
+}
+
+func (c *ChatController) MsgsRead(ctx *gin.Context) {
+	var req kfbackend.ReadMsgRequest
+	if !c.BindAndValidate(ctx, &req) {
+		return
+	}
+
+	if len(req.MsgIDs) == 0 {
+		// do nothing
+		c.Success(ctx, kfbackend.ReadMsgResponse{})
+		return
+	}
+
+	reqCtx := ctx.Request.Context()
+	cardID := middleware.GetKFCardID(ctx)
+
+	var repo repository.KFMessageRepository
+
+	err := repo.BatchUpdateReadAt(reqCtx, req.MsgIDs, time.Now().Unix())
+	if err != nil {
+		xlogger.Error(reqCtx, "更新已读时间失败", xlogger.Err(err), xlogger.Any("cardId", cardID), xlogger.Any("ids", req.MsgIDs))
+		c.Error(ctx, err)
+		return
+	}
+
+	c.Success(ctx, kfbackend.ReadMsgResponse{})
+}
+
+func (c *ChatController) ExtUserOp(ctx *gin.Context) {
+	var req kfbackend.BatchOpExtUserRequest
+	if !c.BindAndValidate(ctx, &req) {
+		return
+	}
+
+	if len(req.ExternalUserIDs) == 0 {
+		// do nothing
+		c.Success(ctx, kfbackend.BatchOpExtUserResponse{})
+		return
+	}
+
+	reqCtx := ctx.Request.Context()
+	cardID := middleware.GetKFCardID(ctx)
+
+	var repo repository.KFExternalUserRepository
+
+	u := dao.KFExternalUser{}
+	switch req.Op {
+	case kfbackend.ExtUserOpTop:
+		u.TopAt = time.Now().Unix()
+	case kfbackend.ExtUserOpTopUndo:
+		u.TopAt = 0
+	case kfbackend.ExtUserOpBlock:
+		u.BlockAt = time.Now().Unix()
+	case kfbackend.ExtUserOpBlockUndo:
+		u.BlockAt = 0
+	}
+
+	err := repo.BatchUpdate(reqCtx, req.ExternalUserIDs, u)
+	if err != nil {
+		xlogger.Error(reqCtx, "更新访客失败", xlogger.Err(err), xlogger.Any("cardId", cardID), xlogger.Any("ids", req.ExternalUserIDs))
+		c.Error(ctx, err)
+		return
+	}
+
+	c.Success(ctx, kfbackend.BatchOpExtUserResponse{})
+}
+
+func (c *ChatController) ExtUserUpdate(ctx *gin.Context) {
+	var req kfbackend.UpdateExtUserRequest
+	if !c.BindAndValidate(ctx, &req) {
+		return
+	}
+
+	if req.ID <= 0 {
+		// do nothing
+		c.Success(ctx, kfbackend.UpdateExtUserResponse{})
+		return
+	}
+
+	reqCtx := ctx.Request.Context()
+	cardID := middleware.GetKFCardID(ctx)
+
+	var repo repository.KFExternalUserRepository
+
+	u := dao.KFExternalUser{
+		Remark:      req.Remark,
+		PhoneNumber: req.PhoneNumber,
+		NickName:    req.NickName,
+	}
+
+	err := repo.BatchUpdate(reqCtx, []uint{req.ID}, u)
+	if err != nil {
+		xlogger.Error(reqCtx, "更新访客失败", xlogger.Err(err), xlogger.Any("cardId", cardID), xlogger.Any("ids", req.ID))
+		c.Error(ctx, err)
+		return
+	}
+
+	c.Success(ctx, kfbackend.BatchOpExtUserResponse{})
+}
+
 func extUser2ChatVO(u *dao.KFExternalUser, lastMsgMap map[uint64]*dao.KFMessage) kfbackend.Chat {
 	chat := kfbackend.Chat{
 		Type: kfbackend.ChatTypeSingle,
@@ -80,16 +221,23 @@ func extUser2ChatVO(u *dao.KFExternalUser, lastMsgMap map[uint64]*dao.KFMessage)
 
 	msg, ok := lastMsgMap[u.LastMsgID]
 	if ok {
-		chat.LastMessage = kfbackend.Message{
-			ID:       msg.ID,
-			Content:  msg.Content,
-			From:     msg.From,
-			FromType: msg.FromType,
-			To:       msg.To,
-			ToType:   msg.ToType,
-			CreateAt: msg.CreatedAt.Unix(),
-		}
+		chat.LastMessage = msg2VO(msg)
 	}
 
 	return chat
+}
+
+func msg2VO(m *dao.KFMessage) kfbackend.Message {
+	vo := kfbackend.Message{
+		ID:       m.ID,
+		Content:  m.Content,
+		From:     m.From,
+		FromType: m.FromType,
+		To:       m.To,
+		ToType:   m.ToType,
+		ReadAt:   m.ReadAt,
+		CreateAt: m.CreatedAt.Unix(),
+	}
+
+	return vo
 }

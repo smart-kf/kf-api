@@ -110,7 +110,11 @@ func registerRouter(g *gin.Engine) {
 		var chatController kfbackend.ChatController
 		chatGroup := kf.Group("/chat")
 		{
-			chatGroup.GET("/list", chatController.List)
+			chatGroup.POST("/list", chatController.List)
+			chatGroup.POST("/msgs", chatController.Msgs)
+			chatGroup.POST("/msgs/read", chatController.MsgsRead)
+			chatGroup.POST("/extUsers/op", chatController.ExtUserOp)
+			chatGroup.POST("/extUser/update", chatController.ExtUserUpdate)
 		}
 
 		var sysConfController kfbackend.SysConfController
