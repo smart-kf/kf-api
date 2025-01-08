@@ -135,6 +135,78 @@ func (c *ChatController) MsgsRead(ctx *gin.Context) {
 	c.Success(ctx, kfbackend.ReadMsgResponse{})
 }
 
+func (c *ChatController) ExtUserOp(ctx *gin.Context) {
+	var req kfbackend.BatchOpExtUserRequest
+	if !c.BindAndValidate(ctx, &req) {
+		return
+	}
+
+	if len(req.ExternalUserIDs) == 0 {
+		// do nothing
+		c.Success(ctx, kfbackend.BatchOpExtUserResponse{})
+		return
+	}
+
+	reqCtx := ctx.Request.Context()
+	cardID := middleware.GetKFCardID(ctx)
+
+	var repo repository.KFExternalUserRepository
+
+	u := dao.KFExternalUser{}
+	switch req.Op {
+	case kfbackend.ExtUserOpTop:
+		u.TopAt = time.Now().Unix()
+	case kfbackend.ExtUserOpTopUndo:
+		u.TopAt = 0
+	case kfbackend.ExtUserOpBlock:
+		u.BlockAt = time.Now().Unix()
+	case kfbackend.ExtUserOpBlockUndo:
+		u.BlockAt = 0
+	}
+
+	err := repo.BatchUpdate(reqCtx, req.ExternalUserIDs, u)
+	if err != nil {
+		xlogger.Error(reqCtx, "更新访客失败", xlogger.Err(err), xlogger.Any("cardId", cardID), xlogger.Any("ids", req.ExternalUserIDs))
+		c.Error(ctx, err)
+		return
+	}
+
+	c.Success(ctx, kfbackend.BatchOpExtUserResponse{})
+}
+
+func (c *ChatController) ExtUserUpdate(ctx *gin.Context) {
+	var req kfbackend.UpdateExtUserRequest
+	if !c.BindAndValidate(ctx, &req) {
+		return
+	}
+
+	if req.ID <= 0 {
+		// do nothing
+		c.Success(ctx, kfbackend.UpdateExtUserResponse{})
+		return
+	}
+
+	reqCtx := ctx.Request.Context()
+	cardID := middleware.GetKFCardID(ctx)
+
+	var repo repository.KFExternalUserRepository
+
+	u := dao.KFExternalUser{
+		Remark:      req.Remark,
+		PhoneNumber: req.PhoneNumber,
+		NickName:    req.NickName,
+	}
+
+	err := repo.BatchUpdate(reqCtx, []uint{req.ID}, u)
+	if err != nil {
+		xlogger.Error(reqCtx, "更新访客失败", xlogger.Err(err), xlogger.Any("cardId", cardID), xlogger.Any("ids", req.ID))
+		c.Error(ctx, err)
+		return
+	}
+
+	c.Success(ctx, kfbackend.BatchOpExtUserResponse{})
+}
+
 func extUser2ChatVO(u *dao.KFExternalUser, lastMsgMap map[uint64]*dao.KFMessage) kfbackend.Chat {
 	chat := kfbackend.Chat{
 		Type: kfbackend.ChatTypeSingle,

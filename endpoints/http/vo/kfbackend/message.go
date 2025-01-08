@@ -83,6 +83,34 @@ type ReadMsgRequest struct {
 type ReadMsgResponse struct {
 }
 
+type BatchOpExtUserRequest struct {
+	ExternalUserIDs []uint    `json:"externalUserIDs" doc:"粉丝ids"`
+	Op              ExtUserOp `json:"op" doc:"操作 1:置顶 2:取消置顶 3:拉黑 4:取消拉黑"`
+}
+
+type ExtUserOp int8
+
+const (
+	_ ExtUserOp = iota
+	ExtUserOpTop
+	ExtUserOpTopUndo
+	ExtUserOpBlock
+	ExtUserOpBlockUndo
+)
+
+type BatchOpExtUserResponse struct {
+}
+
+type UpdateExtUserRequest struct {
+	ID          uint   `json:"id" doc:"粉丝id"`
+	Remark      string `json:"remark" doc:"备注"`
+	PhoneNumber string `json:"phoneNumber" doc:"手机号"`
+	NickName    string `json:"nickName" doc:"昵称"`
+}
+
+type UpdateExtUserResponse struct {
+}
+
 type Message struct {
 	ID       uint64          `json:"id" doc:"消息自增id 可用作排序"`
 	Content  string          `json:"content" doc:"消息的内容"`
