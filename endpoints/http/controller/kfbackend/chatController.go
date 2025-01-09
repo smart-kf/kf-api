@@ -25,7 +25,7 @@ func (c *ChatController) List(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
 	cardID := middleware.GetKFCardID(ctx)
 
-	var repo repository.KFExternalUserRepository
+	var repo repository.KFUserRepository
 
 	extUsers, err := repo.List(reqCtx, &repository.ListExtUserOption{
 		CardID:   cardID,
@@ -44,7 +44,7 @@ func (c *ChatController) List(ctx *gin.Context) {
 		return
 	}
 
-	msgIDs := lo.Map(extUsers, func(item *dao.KFExternalUser, index int) uint64 {
+	msgIDs := lo.Map(extUsers, func(item *dao.KfUser, index int) uint64 {
 		return item.LastMsgID
 	})
 
@@ -58,7 +58,7 @@ func (c *ChatController) List(ctx *gin.Context) {
 		return item.ID, item
 	})
 
-	chats := lo.Map(extUsers, func(item *dao.KFExternalUser, index int) kfbackend.Chat {
+	chats := lo.Map(extUsers, func(item *dao.KfUser, index int) kfbackend.Chat {
 		return extUser2ChatVO(item, lastMsgMap)
 	})
 
@@ -135,66 +135,66 @@ func (c *ChatController) MsgsRead(ctx *gin.Context) {
 	c.Success(ctx, kfbackend.ReadMsgResponse{})
 }
 
-func (c *ChatController) ExtUserOp(ctx *gin.Context) {
-	var req kfbackend.BatchOpExtUserRequest
+func (c *ChatController) UserOp(ctx *gin.Context) {
+	var req kfbackend.BatchOpUserRequest
 	if !c.BindAndValidate(ctx, &req) {
 		return
 	}
 
-	if len(req.ExternalUserIDs) == 0 {
+	if len(req.UserIDs) == 0 {
 		// do nothing
-		c.Success(ctx, kfbackend.BatchOpExtUserResponse{})
+		c.Success(ctx, kfbackend.BatchOpUserResponse{})
 		return
 	}
 
 	reqCtx := ctx.Request.Context()
 	cardID := middleware.GetKFCardID(ctx)
 
-	var repo repository.KFExternalUserRepository
+	var repo repository.KFUserRepository
 
-	u := dao.KFExternalUser{}
+	u := dao.KfUser{}
 	switch req.Op {
-	case kfbackend.ExtUserOpTop:
+	case kfbackend.UserOpTop:
 		u.TopAt = time.Now().Unix()
-	case kfbackend.ExtUserOpTopUndo:
+	case kfbackend.UserOpTopUndo:
 		u.TopAt = 0
-	case kfbackend.ExtUserOpBlock:
+	case kfbackend.UserOpBlock:
 		u.BlockAt = time.Now().Unix()
-	case kfbackend.ExtUserOpBlockUndo:
+	case kfbackend.UserOpBlockUndo:
 		u.BlockAt = 0
 	}
 
-	err := repo.BatchUpdate(reqCtx, req.ExternalUserIDs, u)
+	err := repo.BatchUpdate(reqCtx, req.UserIDs, u)
 	if err != nil {
-		xlogger.Error(reqCtx, "更新访客失败", xlogger.Err(err), xlogger.Any("cardId", cardID), xlogger.Any("ids", req.ExternalUserIDs))
+		xlogger.Error(reqCtx, "更新访客失败", xlogger.Err(err), xlogger.Any("cardId", cardID), xlogger.Any("ids", req.UserIDs))
 		c.Error(ctx, err)
 		return
 	}
 
-	c.Success(ctx, kfbackend.BatchOpExtUserResponse{})
+	c.Success(ctx, kfbackend.BatchOpUserResponse{})
 }
 
-func (c *ChatController) ExtUserUpdate(ctx *gin.Context) {
-	var req kfbackend.UpdateExtUserRequest
+func (c *ChatController) UserUpdate(ctx *gin.Context) {
+	var req kfbackend.UpdateUserRequest
 	if !c.BindAndValidate(ctx, &req) {
 		return
 	}
 
 	if req.ID <= 0 {
 		// do nothing
-		c.Success(ctx, kfbackend.UpdateExtUserResponse{})
+		c.Success(ctx, kfbackend.UpdateUserResponse{})
 		return
 	}
 
 	reqCtx := ctx.Request.Context()
 	cardID := middleware.GetKFCardID(ctx)
 
-	var repo repository.KFExternalUserRepository
+	var repo repository.KFUserRepository
 
-	u := dao.KFExternalUser{
-		Remark:      req.Remark,
-		PhoneNumber: req.PhoneNumber,
-		NickName:    req.NickName,
+	u := dao.KfUser{
+		RemarkName: req.RemarkName,
+		Mobile:     req.Mobile,
+		Comments:   req.Comments,
 	}
 
 	err := repo.BatchUpdate(reqCtx, []uint{req.ID}, u)
@@ -204,13 +204,13 @@ func (c *ChatController) ExtUserUpdate(ctx *gin.Context) {
 		return
 	}
 
-	c.Success(ctx, kfbackend.BatchOpExtUserResponse{})
+	c.Success(ctx, kfbackend.BatchOpUserResponse{})
 }
 
-func extUser2ChatVO(u *dao.KFExternalUser, lastMsgMap map[uint64]*dao.KFMessage) kfbackend.Chat {
+func extUser2ChatVO(u *dao.KfUser, lastMsgMap map[uint64]*dao.KFMessage) kfbackend.Chat {
 	chat := kfbackend.Chat{
 		Type: kfbackend.ChatTypeSingle,
-		ExternalUser: kfbackend.ExternalUser{
+		User: kfbackend.User{
 			Avatar:   u.Avatar,
 			NickName: u.NickName,
 			IsOnline: false, // TODO 从在离线状态的redis中实时获取

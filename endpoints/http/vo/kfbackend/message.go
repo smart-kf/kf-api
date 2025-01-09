@@ -60,11 +60,11 @@ const (
 )
 
 type Chat struct {
-	Type         ChatType     `json:"type" doc:"会话类型 0:单聊(默认) 1:群聊(暂不做)"`
-	ExternalUser ExternalUser `json:"externalUser" doc:"外部访客信息"`
-	LastChatAt   int64        `json:"lastChatAt" doc:"最近聊天时间 毫秒"`
-	LastMessage  Message      `json:"lastMessage" doc:"最近一次聊天的消息内容"`
-	UnreadMsgCnt int64        `json:"unreadMsgCnt" doc:"未读消息数"`
+	Type         ChatType `json:"type" doc:"会话类型 0:单聊(默认) 1:群聊(暂不做)"`
+	User         User     `json:"user" doc:"访客信息"`
+	LastChatAt   int64    `json:"lastChatAt" doc:"最近聊天时间 毫秒"`
+	LastMessage  Message  `json:"lastMessage" doc:"最近一次聊天的消息内容"`
+	UnreadMsgCnt int64    `json:"unreadMsgCnt" doc:"未读消息数"`
 }
 
 type MsgListRequest struct {
@@ -83,32 +83,32 @@ type ReadMsgRequest struct {
 type ReadMsgResponse struct {
 }
 
-type BatchOpExtUserRequest struct {
-	ExternalUserIDs []uint    `json:"externalUserIDs" doc:"粉丝ids"`
-	Op              ExtUserOp `json:"op" doc:"操作 1:置顶 2:取消置顶 3:拉黑 4:取消拉黑"`
+type BatchOpUserRequest struct {
+	UserIDs []uint `json:"userIDs" doc:"粉丝ids"`
+	Op      UserOp `json:"op" doc:"操作 1:置顶 2:取消置顶 3:拉黑 4:取消拉黑"`
 }
 
-type ExtUserOp int8
+type UserOp int8
 
 const (
-	_ ExtUserOp = iota
-	ExtUserOpTop
-	ExtUserOpTopUndo
-	ExtUserOpBlock
-	ExtUserOpBlockUndo
+	_ UserOp = iota
+	UserOpTop
+	UserOpTopUndo
+	UserOpBlock
+	UserOpBlockUndo
 )
 
-type BatchOpExtUserResponse struct {
+type BatchOpUserResponse struct {
 }
 
-type UpdateExtUserRequest struct {
-	ID          uint   `json:"id" doc:"粉丝id"`
-	Remark      string `json:"remark" doc:"备注"`
-	PhoneNumber string `json:"phoneNumber" doc:"手机号"`
-	NickName    string `json:"nickName" doc:"昵称"`
+type UpdateUserRequest struct {
+	ID         uint   `json:"id" doc:"粉丝id"`
+	RemarkName string `json:"remarkName" doc:"备注名称"`
+	Mobile     string `json:"mobile" doc:"手机号"`
+	Comments   string `json:"comments" doc:"备注信息"`
 }
 
-type UpdateExtUserResponse struct {
+type UpdateUserResponse struct {
 }
 
 type Message struct {
@@ -162,7 +162,7 @@ type File struct {
 	Size int64  `json:"size,omitempty" doc:"文件的大小 单位字节"`
 }
 
-type ExternalUser struct {
+type User struct {
 	Avatar   string `json:"avatar" doc:"头像"`
 	NickName string `json:"nickName,omitempty" doc:"昵称"`
 	IsOnline bool   `json:"isOnline,omitempty" doc:"是否在线"`

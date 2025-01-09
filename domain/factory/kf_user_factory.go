@@ -10,28 +10,23 @@ import (
 	"github.com/smart-fm/kf-api/pkg/utils"
 )
 
-func FactoryNewKfUser(cardId string, ip string) dao.KfUsers {
+func FactoryNewKfUser(cardId string, ip string) dao.KfUser {
 	token := uuid.New().String()
 	nickName := strings.ToUpper(utils.RandomWord(1)) + utils.RandomNumber(10)
-	user := dao.KfUsers{
-		CardID:        cardId,
-		UUID:          token,
-		Avatar:        "/static/avatar/guest.png", // 先写死.
-		Nickname:      nickName,                   // 生成随机名称.
-		RemarkName:    "",
-		Mobile:        "",
-		Comments:      "",
-		IP:            "127.0.0.1", // 先写死
-		Area:          "四川成都电信",    // 先写死
-		OfflineTime:   0,
-		Device:        "",
-		Browser:       "",
-		ScanQRCodeCnt: 0,
-		IsTop:         0,
-		IsBlack:       0,
-		IsSimulator:   0,
-		IsProxy:       0,
-		Source:        "",
+	user := dao.KfUser{
+		CardID:     cardId,
+		UUID:       token,
+		Avatar:     "/static/avatar/guest.png", // 先写死.
+		NickName:   nickName,                   // 生成随机名称.
+		RemarkName: "",
+		Mobile:     "",
+		Comments:   "",
+		IP:         "127.0.0.1", // 先写死
+		Area:       "四川成都电信",    // 先写死
+		OfflineAt:  0,
+		Device:     "",
+		IsProxy:    0,
+		Source:     "",
 	}
 }
 
