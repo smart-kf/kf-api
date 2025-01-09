@@ -55,3 +55,13 @@ func (r *KFExternalUserRepository) List(ctx context.Context, options *ListExtUse
 
 	return common.Scroll[*dao.KFExternalUser](tx, options.ScrollRequest)
 }
+
+func (r *KFExternalUserRepository) BatchUpdate(ctx context.Context, ids []uint, u dao.KFExternalUser) error {
+	tx := mysql.GetDBFromContext(ctx)
+	res := tx.Model(&dao.KFExternalUser{}).Where("id in ?", ids).Updates(u)
+	if err := res.Error; err != nil {
+		xlogger.Error(ctx, "BatchUpdate-failed", xlogger.Err(err))
+		return err
+	}
+	return nil
+}
