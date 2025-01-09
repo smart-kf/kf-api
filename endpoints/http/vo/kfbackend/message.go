@@ -163,7 +163,24 @@ type File struct {
 }
 
 type User struct {
-	Avatar   string `json:"avatar" doc:"头像"`
-	NickName string `json:"nickName,omitempty" doc:"昵称"`
-	IsOnline bool   `json:"isOnline,omitempty" doc:"是否在线"`
+	UUID        string `json:"uuid,omitempty" doc:"访客/粉丝/用户的id"`
+	Avatar      string `json:"avatar,omitempty" doc:"头像 相对地址"`
+	NickName    string `json:"nickName,omitempty" doc:"昵称"`
+	IsOnline    bool   `json:"isOnline,omitempty" doc:"是否在线"`
+	RemarkName  string `json:"remarkName,omitempty" doc:"备注名称"`
+	Mobile      string `json:"mobile,omitempty" doc:"手机号"`
+	Comments    string `json:"comments,omitempty" doc:"备注信息"`
+	IP          string `json:"ip,omitempty" doc:"注册ip"`
+	Area        string `json:"area,omitempty" doc:"ip对应的地区"`
+	Browser     string `json:"browser,omitempty" doc:"浏览器 Chrome/Safari/firfox/..."`
+	Device      string `json:"device,omitempty" doc:"设备类型： iphone/android/..."`
+	IsProxy     int    `json:"isProxy,omitempty" doc:"是否使用了代理ip访问: 1=是，2=不是."`
+	IsEmulator  int    `json:"isEmulator,omitempty" doc:"是否是模拟器 1=是，2=不是"`
+	Source      string `json:"source,omitempty" doc:"来源"`
+	OfflineAt   int64  `json:"offlineAt,omitempty" doc:"离线时间 秒"`
+	NetworkType string `json:"networkType,omitempty" doc:"网络类型 wifi/4G/5G"`
+	ScanCount   int64  `json:"scanCount,omitempty" doc:"扫码次数"`
+	TopAt       int64  `json:"topAt,omitempty" doc:"置顶时间 >0则是置顶 秒"`
+	BlockAt     int64  `json:"blockAt,omitempty" doc:"拉黑时间 >0则是拉黑 秒"`
+	LastChatAt  int64  `json:"lastChatAt,omitempty" doc:"最近聊天时间 毫秒"`
 }

@@ -3,6 +3,7 @@ package kfbackend
 import (
 	xlogger "github.com/clearcodecn/log"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/copier"
 	"github.com/samber/lo"
 	"github.com/smart-fm/kf-api/domain/repository"
 	"github.com/smart-fm/kf-api/endpoints/common"
@@ -27,7 +28,7 @@ func (c *ChatController) List(ctx *gin.Context) {
 
 	var repo repository.KFUserRepository
 
-	extUsers, err := repo.List(reqCtx, &repository.ListExtUserOption{
+	users, err := repo.List(reqCtx, &repository.ListUserOption{
 		CardID:   cardID,
 		SearchBy: req.SearchBy,
 		ListType: req.ListType,
@@ -39,12 +40,12 @@ func (c *ChatController) List(ctx *gin.Context) {
 		},
 	})
 	if err != nil {
-		xlogger.Error(reqCtx, "查询客服设置失败", xlogger.Err(err), xlogger.Any("cardId", cardID))
+		xlogger.Error(reqCtx, "查询粉丝失败", xlogger.Err(err), xlogger.Any("cardId", cardID))
 		c.Error(ctx, err)
 		return
 	}
 
-	msgIDs := lo.Map(extUsers, func(item *dao.KfUser, index int) uint64 {
+	msgIDs := lo.Map(users, func(item *dao.KfUser, index int) uint64 {
 		return item.LastMsgID
 	})
 
@@ -58,8 +59,8 @@ func (c *ChatController) List(ctx *gin.Context) {
 		return item.ID, item
 	})
 
-	chats := lo.Map(extUsers, func(item *dao.KfUser, index int) kfbackend.Chat {
-		return extUser2ChatVO(item, lastMsgMap)
+	chats := lo.Map(users, func(item *dao.KfUser, index int) kfbackend.Chat {
+		return user2ChatVO(item, lastMsgMap)
 	})
 
 	c.Success(ctx, kfbackend.ChatListResponse{
@@ -83,7 +84,7 @@ func (c *ChatController) Msgs(ctx *gin.Context) {
 
 	var repo repository.KFMessageRepository
 
-	extUsers, err := repo.List(reqCtx, &repository.ListMsgOption{
+	msgsDTO, err := repo.List(reqCtx, &repository.ListMsgOption{
 		CardID:  cardID,
 		FromTos: req.FromTos,
 		ScrollRequest: &common.ScrollRequest{
@@ -94,17 +95,17 @@ func (c *ChatController) Msgs(ctx *gin.Context) {
 		},
 	})
 	if err != nil {
-		xlogger.Error(reqCtx, "查询客服设置失败", xlogger.Err(err), xlogger.Any("cardId", cardID))
+		xlogger.Error(reqCtx, "查询消息失败", xlogger.Err(err), xlogger.Any("cardId", cardID))
 		c.Error(ctx, err)
 		return
 	}
 
-	msgs := lo.Map(extUsers, func(item *dao.KFMessage, index int) kfbackend.Message {
+	msgsVO := lo.Map(msgsDTO, func(item *dao.KFMessage, index int) kfbackend.Message {
 		return msg2VO(item)
 	})
 
 	c.Success(ctx, kfbackend.MsgListResponse{
-		Messages: msgs,
+		Messages: msgsVO,
 	})
 }
 
@@ -207,14 +208,10 @@ func (c *ChatController) UserUpdate(ctx *gin.Context) {
 	c.Success(ctx, kfbackend.BatchOpUserResponse{})
 }
 
-func extUser2ChatVO(u *dao.KfUser, lastMsgMap map[uint64]*dao.KFMessage) kfbackend.Chat {
+func user2ChatVO(u *dao.KfUser, lastMsgMap map[uint64]*dao.KFMessage) kfbackend.Chat {
 	chat := kfbackend.Chat{
-		Type: kfbackend.ChatTypeSingle,
-		User: kfbackend.User{
-			Avatar:   u.Avatar,
-			NickName: u.NickName,
-			IsOnline: false, // TODO 从在离线状态的redis中实时获取
-		},
+		Type:         kfbackend.ChatTypeSingle,
+		User:         user2VO(u),
 		LastChatAt:   u.LastChatAt,
 		UnreadMsgCnt: u.UnreadMsgCnt,
 	}
@@ -225,6 +222,15 @@ func extUser2ChatVO(u *dao.KfUser, lastMsgMap map[uint64]*dao.KFMessage) kfbacke
 	}
 
 	return chat
+}
+
+func user2VO(u *dao.KfUser) kfbackend.User {
+	vo := kfbackend.User{}
+	copier.Copy(&vo, u)
+
+	vo.IsOnline = false // TODO 从在离线状态的redis中实时获取
+
+	return vo
 }
 
 func msg2VO(m *dao.KFMessage) kfbackend.Message {
