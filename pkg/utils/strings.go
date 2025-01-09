@@ -36,6 +36,18 @@ func Random(n int) string {
 	return key
 }
 
+func RandomWord(n int) string {
+	// 定义卡密的字符集
+	charset := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	// 生成10位随机字符
+	key := ""
+	for i := 0; i < n; i++ {
+		key += string(charset[rand.Intn(len(charset))])
+	}
+	// 返回生成的卡密
+	return key
+}
+
 func RandomOrderNo() string {
 	s := time.Now().Format(`060102150405`)
 	s += fmt.Sprintf("%d", rand.Intn(10000)+100)
@@ -51,4 +63,14 @@ func RandomPath() string {
 	return fmt.Sprintf(
 		"%s/%s/%s.html", part1, part2, part3,
 	)
+}
+
+// RandomNumber 10wei2suiji shuzi
+func RandomNumber(n int) string {
+	charset := "0123456789"
+	key := ""
+	for i := 0; i < n; i++ {
+		key += string(charset[rand.Intn(len(charset))])
+	}
+	return key
 }

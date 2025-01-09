@@ -15,7 +15,6 @@ import (
 	"github.com/smart-fm/kf-api/endpoints/http/controller/kfbackend"
 	"github.com/smart-fm/kf-api/endpoints/http/controller/kffrontend"
 	notify2 "github.com/smart-fm/kf-api/endpoints/http/controller/notify"
-	"github.com/smart-fm/kf-api/endpoints/http/controller/qrcode"
 	"github.com/smart-fm/kf-api/pkg/version"
 
 	"github.com/smart-fm/kf-api/config"
@@ -123,16 +122,10 @@ func registerRouter(g *gin.Engine) {
 
 	// 客服前台
 	kffe := api.Group("/kf-fe")
+	kffe.Use(middleware.KFAuthMiddleware())
 	{
-		kffe.GET("/qrcode/*action")
-	}
-
-	// 二维码入口.
-	{
-		var qrCodeControlelr qrcode.QRCodeController
-		{
-			g.Any("/s/*action", qrCodeControlelr.Scan)
-		}
+		var qr kffrontend.QRCodeController
+		kffe.POST("/qrcode/scan", qr.Scan)
 	}
 
 	// 计费前台.
