@@ -22,14 +22,14 @@ func (r *KFUserRepository) SaveOne(ctx context.Context, chat *dao.KfUser) error 
 	return nil
 }
 
-type ListExtUserOption struct {
+type ListUserOption struct {
 	CardID        string
 	SearchBy      string
 	ListType      kfbackend.ChatListType
 	ScrollRequest *common.ScrollRequest
 }
 
-func (r *KFUserRepository) List(ctx context.Context, options *ListExtUserOption) ([]*dao.KfUser, error) {
+func (r *KFUserRepository) List(ctx context.Context, options *ListUserOption) ([]*dao.KfUser, error) {
 	tx := mysql.GetDBFromContext(ctx).Debug()
 
 	if len(options.CardID) == 0 {
@@ -59,7 +59,7 @@ func (r *KFUserRepository) List(ctx context.Context, options *ListExtUserOption)
 
 func (r *KFUserRepository) BatchUpdate(ctx context.Context, ids []uint, u dao.KfUser) error {
 	tx := mysql.GetDBFromContext(ctx)
-	res := tx.Model(&dao.KfUser{}).Where("id in ?", ids).Updates(u)
+	res := tx.Model(&dao.KfUser{}).Where("uuid in ?", ids).Updates(u)
 	if err := res.Error; err != nil {
 		xlogger.Error(ctx, "BatchUpdate-failed", xlogger.Err(err))
 		return err
