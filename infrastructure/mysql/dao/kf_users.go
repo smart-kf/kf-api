@@ -4,9 +4,9 @@ import "gorm.io/gorm"
 
 type KfUser struct {
 	gorm.Model
-	CardID       string `json:"card_id" gorm:"column:card_id;index"`             // 卡密id
-	UUID         string `json:"uuid" gorm:"column:uuid;unique;type:varchar(32)"` // 用户的uuid，不用主键做业务.
-	Avatar       string `json:"avatar" gorm:"column:avatar;type:varchar(255)"`   // 头像地址，存储的是相对路径
+	CardID       string `json:"card_id" gorm:"column:card_id;index"`              // 卡密id
+	UUID         string `json:"uuid" gorm:"column:uuid;unique;type:varchar(255)"` // 用户的uuid，不用主键做业务.
+	Avatar       string `json:"avatar" gorm:"column:avatar;type:varchar(255)"`    // 头像地址，存储的是相对路径
 	NickName     string `json:"nickName" gorm:"column:nick_name;type:varchar(255)" doc:"昵称"`
 	RemarkName   string `json:"remarkName" gorm:"column:remark_name"`      // 备注名称.
 	Mobile       string `json:"mobile" gorm:"column:mobile"`               // 手机号
@@ -31,4 +31,11 @@ type KfUser struct {
 
 func (KfUser) TableName() string {
 	return "kf_users"
+}
+
+// UserExtra 用户持久化存储属性
+type UserExtra struct {
+	LastChatTime    int64  `json:"last_chat_time"`    // 最近聊天时间
+	LastOfflineTime int64  `json:"last_offline_time"` // 最近离线时间.
+	LastMessageId   string `json:"last_message_id"`   // 最近消息id.
 }

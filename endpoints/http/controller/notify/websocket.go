@@ -6,6 +6,8 @@ import (
 	xlogger "github.com/clearcodecn/log"
 	"github.com/gin-gonic/gin"
 
+	"github.com/smart-fm/kf-api/domain/caches"
+	"github.com/smart-fm/kf-api/endpoints/common/constant"
 	"github.com/smart-fm/kf-api/endpoints/http/middleware"
 )
 
@@ -47,9 +49,9 @@ func (c *NotifyController) WebsocketAuth(ctx *gin.Context) {
 		err error
 	)
 	switch req.GetPlatform() {
-	case "kf-backend": // 后台
-		err = middleware.VerifyKFBackendToken(reqCtx, req.GetToken())
-	case "kf": // 前台
+	case constant.PlatformKfBe: // 后台
+		_, err = caches.KfAuthCacheInstance.GetBackendToken(reqCtx, req.GetToken())
+	case constant.PlatformKfFe: // 前台
 		err = middleware.VerifyKFToken(reqCtx, req.GetToken())
 	default:
 		err = errors.New("invalid platform")

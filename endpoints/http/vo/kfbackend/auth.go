@@ -2,11 +2,6 @@ package kfbackend
 
 import (
 	"context"
-
-	"github.com/make-money-fast/captcha"
-
-	"github.com/smart-fm/kf-api/infrastructure/caches"
-	"github.com/smart-fm/kf-api/pkg/xerrors"
 )
 
 type LoginRequest struct {
@@ -17,15 +12,15 @@ type LoginRequest struct {
 }
 
 func (r *LoginRequest) Validate(ctx context.Context) error {
-	if caches.BillSettingCacheInstance.IsVerifyCodeEnable() {
-		if r.CaptchaID == "" && r.CaptchaCode == "" {
-			return xerrors.NewParamsErrors("请输入验证码")
-		}
-
-		if !captcha.VerifyString(ctx, r.CaptchaID, r.CaptchaCode) {
-			return xerrors.NewParamsErrors("验证码错误")
-		}
-	}
+	// if caches.BillSettingCacheInstance.IsVerifyCodeEnable() {
+	// 	if r.CaptchaID == "" && r.CaptchaCode == "" {
+	// 		return xerrors.NewParamsErrors("请输入验证码")
+	// 	}
+	//
+	// 	if !captcha.VerifyString(ctx, r.CaptchaID, r.CaptchaCode) {
+	// 		return xerrors.NewParamsErrors("验证码错误")
+	// 	}
+	// }
 	return nil
 }
 

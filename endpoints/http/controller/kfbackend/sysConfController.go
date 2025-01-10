@@ -3,8 +3,9 @@ package kfbackend
 import (
 	xlogger "github.com/clearcodecn/log"
 	"github.com/gin-gonic/gin"
+
 	"github.com/smart-fm/kf-api/domain/repository"
-	"github.com/smart-fm/kf-api/endpoints/http/middleware"
+	"github.com/smart-fm/kf-api/endpoints/common"
 	"github.com/smart-fm/kf-api/infrastructure/mysql/dao"
 )
 
@@ -28,7 +29,7 @@ type GetSysConfResponse struct {
 
 func (c *SysConfController) Get(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
-	cardID := middleware.GetKFCardID(ctx)
+	cardID := common.GetKFCardID(ctx)
 
 	var kfsetting repository.KFSettingRepository
 	setting, ok, err := kfsetting.GetByCardID(reqCtx, cardID)
@@ -77,7 +78,7 @@ type PostSysConfResponse struct{}
 
 func (c *SysConfController) Post(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
-	cardID := middleware.GetKFCardID(ctx)
+	cardID := common.GetKFCardID(ctx)
 
 	var req PostSysConfRequest
 	if !c.BindAndValidate(ctx, &req) {

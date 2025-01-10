@@ -1,7 +1,10 @@
 package factory
 
 import (
+	"errors"
+	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/google/uuid"
@@ -10,24 +13,38 @@ import (
 	"github.com/smart-fm/kf-api/pkg/utils"
 )
 
-func FactoryNewKfUser(cardId string, ip string) dao.KfUser {
-	token := uuid.New().String()
+func FactoryNewKfUser(cardMainId int64, cardId string, ip string) *dao.KfUser {
+	uid := strings.ReplaceAll(uuid.New().String(), "-", "")
+	token := fmt.Sprintf("%d|%s", cardMainId, uid)
 	nickName := strings.ToUpper(utils.RandomWord(1)) + utils.RandomNumber(10)
 	user := dao.KfUser{
 		CardID:     cardId,
 		UUID:       token,
 		Avatar:     "/static/avatar/guest.png", // 先写死.
 		NickName:   nickName,                   // 生成随机名称.
-		RemarkName: "",
-		Mobile:     "",
-		Comments:   "",
+		RemarkName: "备注名称123",
+		Mobile:     "13300991111",
+		Comments:   "这里是写死的长备注",
 		IP:         "127.0.0.1", // 先写死
 		Area:       "四川成都电信",    // 先写死
 		OfflineAt:  0,
-		Device:     "",
+		Device:     "Iphone",
 		IsProxy:    0,
 		Source:     "",
 	}
+	return &user
+}
+
+func FactoryParseUserToken(token string) (cardMainId int64, err error) {
+	arr := strings.Split(token, "|")
+	if len(arr) != 2 {
+		return 0, errors.New("wrong token parts1")
+	}
+	cardMainId, err = strconv.ParseInt(arr[0], 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	return
 }
 
 func parseUserAgent(ua string) (string, string, string, bool, bool) {

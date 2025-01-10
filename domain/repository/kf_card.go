@@ -3,8 +3,6 @@ package repository
 import (
 	"context"
 	"errors"
-	"fmt"
-	"time"
 
 	xlogger "github.com/clearcodecn/log"
 	"gorm.io/gorm"
@@ -55,7 +53,6 @@ func (r *KFCardRepository) UpdateOne(ctx context.Context, card *dao.KFCard) erro
 		xlogger.Error(ctx, "UpdateOne-failed", xlogger.Err(res.Error))
 		return res.Error
 	}
-	deleteCacheByKey(ctx, fmt.Sprintf(kfCardRedisKeyPrefix, card.CardID))
 	return nil
 }
 
@@ -101,10 +98,6 @@ func (r *KFCardRepository) List(ctx context.Context, options *ListCardOption) ([
 }
 
 func (r *KFCardRepository) FindByCardID(ctx context.Context, cardID string) (*dao.KFCard, bool, error) {
-	cacheKey := fmt.Sprintf("%s.%s", kfCardRedisKeyPrefix, cardID)
-	if card := getCacheByKey[dao.KFCard](ctx, cacheKey); card != nil {
-		return card, true, nil
-	}
 	tx := mysql.GetDBFromContext(ctx)
 	var card dao.KFCard
 	res := tx.Where("card_id = ?", cardID).First(&card)
@@ -114,7 +107,19 @@ func (r *KFCardRepository) FindByCardID(ctx context.Context, cardID string) (*da
 		}
 		return nil, false, err
 	}
-	setCacheByKey(ctx, cacheKey, &card, 10*time.Minute)
+	return &card, true, nil
+}
+
+func (r *KFCardRepository) FindByMainId(ctx context.Context, id int64) (*dao.KFCard, bool, error) {
+	tx := mysql.GetDBFromContext(ctx)
+	var card dao.KFCard
+	res := tx.Where("id = ?", id).First(&card)
+	if err := res.Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, false, nil
+		}
+		return nil, false, err
+	}
 	return &card, true, nil
 }
 

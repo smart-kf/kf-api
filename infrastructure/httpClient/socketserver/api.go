@@ -38,9 +38,10 @@ func NewSocketServerClient() *socketServerClient {
 }
 
 type PushMessageRequest struct {
-	SessionId string `json:"sessionId"`
-	Event     string `json:"event"`
-	Data      string `json:"data"`
+	SessionId  string   `json:"sessionId"`
+	SessionIds []string `json:"sessionIds"`
+	Event      string   `json:"event"`
+	Data       string   `json:"data"`
 }
 
 func (r *PushMessageRequest) SetData(v interface{}) {

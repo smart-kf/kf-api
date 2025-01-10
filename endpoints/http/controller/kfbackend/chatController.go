@@ -1,16 +1,17 @@
 package kfbackend
 
 import (
+	"time"
+
 	xlogger "github.com/clearcodecn/log"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
 	"github.com/samber/lo"
+
 	"github.com/smart-fm/kf-api/domain/repository"
 	"github.com/smart-fm/kf-api/endpoints/common"
-	"github.com/smart-fm/kf-api/endpoints/http/middleware"
 	"github.com/smart-fm/kf-api/endpoints/http/vo/kfbackend"
 	"github.com/smart-fm/kf-api/infrastructure/mysql/dao"
-	"time"
 )
 
 type ChatController struct {
@@ -24,48 +25,64 @@ func (c *ChatController) List(ctx *gin.Context) {
 	}
 
 	reqCtx := ctx.Request.Context()
-	cardID := middleware.GetKFCardID(ctx)
+	cardID := common.GetKFCardID(ctx)
 
 	var repo repository.KFUserRepository
 
-	users, err := repo.List(reqCtx, &repository.ListUserOption{
-		CardID:   cardID,
-		SearchBy: req.SearchBy,
-		ListType: req.ListType,
-		ScrollRequest: &common.ScrollRequest{
-			Key:      "last_chat_at",
-			Asc:      false,
-			ScrollID: req.ScrollID,
-			PageSize: req.PageSize,
+	users, err := repo.List(
+		reqCtx, &repository.ListUserOption{
+			CardID:   cardID,
+			SearchBy: req.SearchBy,
+			ListType: req.ListType,
+			ScrollRequest: &common.ScrollRequest{
+				Key:      "last_chat_at",
+				Asc:      false,
+				ScrollID: req.ScrollID,
+				PageSize: req.PageSize,
+			},
 		},
-	})
+	)
 	if err != nil {
 		xlogger.Error(reqCtx, "查询粉丝失败", xlogger.Err(err), xlogger.Any("cardId", cardID))
 		c.Error(ctx, err)
 		return
 	}
 
-	msgIDs := lo.Map(users, func(item *dao.KfUser, index int) uint64 {
-		return item.LastMsgID
-	})
+	msgIDs := lo.Map(
+		users, func(item *dao.KfUser, index int) uint64 {
+			return item.LastMsgID
+		},
+	)
 
 	var msgRepo repository.KFMessageRepository
 	msgs, err := msgRepo.ByIDs(reqCtx, cardID, msgIDs...)
 	if err != nil {
-		xlogger.Error(reqCtx, "查询最近消息失败", xlogger.Err(err), xlogger.Any("cardId", cardID), xlogger.Any("msgIDs", msgIDs))
+		xlogger.Error(
+			reqCtx,
+			"查询最近消息失败",
+			xlogger.Err(err),
+			xlogger.Any("cardId", cardID),
+			xlogger.Any("msgIDs", msgIDs),
+		)
 	}
 
-	lastMsgMap := lo.SliceToMap(msgs, func(item *dao.KFMessage) (uint64, *dao.KFMessage) {
-		return item.ID, item
-	})
+	lastMsgMap := lo.SliceToMap(
+		msgs, func(item *dao.KFMessage) (uint64, *dao.KFMessage) {
+			return item.ID, item
+		},
+	)
 
-	chats := lo.Map(users, func(item *dao.KfUser, index int) kfbackend.Chat {
-		return user2ChatVO(item, lastMsgMap)
-	})
+	chats := lo.Map(
+		users, func(item *dao.KfUser, index int) kfbackend.Chat {
+			return user2ChatVO(item, lastMsgMap)
+		},
+	)
 
-	c.Success(ctx, kfbackend.ChatListResponse{
-		Chats: chats,
-	})
+	c.Success(
+		ctx, kfbackend.ChatListResponse{
+			Chats: chats,
+		},
+	)
 }
 
 func (c *ChatController) Msgs(ctx *gin.Context) {
@@ -80,33 +97,39 @@ func (c *ChatController) Msgs(ctx *gin.Context) {
 	}
 
 	reqCtx := ctx.Request.Context()
-	cardID := middleware.GetKFCardID(ctx)
+	cardID := common.GetKFCardID(ctx)
 
 	var repo repository.KFMessageRepository
 
-	msgsDTO, err := repo.List(reqCtx, &repository.ListMsgOption{
-		CardID:  cardID,
-		FromTos: req.FromTos,
-		ScrollRequest: &common.ScrollRequest{
-			Key:      "id",
-			Asc:      req.Asc,
-			ScrollID: req.ScrollID,
-			PageSize: req.PageSize,
+	msgsDTO, err := repo.List(
+		reqCtx, &repository.ListMsgOption{
+			CardID:  cardID,
+			FromTos: req.FromTos,
+			ScrollRequest: &common.ScrollRequest{
+				Key:      "id",
+				Asc:      req.Asc,
+				ScrollID: req.ScrollID,
+				PageSize: req.PageSize,
+			},
 		},
-	})
+	)
 	if err != nil {
 		xlogger.Error(reqCtx, "查询消息失败", xlogger.Err(err), xlogger.Any("cardId", cardID))
 		c.Error(ctx, err)
 		return
 	}
 
-	msgsVO := lo.Map(msgsDTO, func(item *dao.KFMessage, index int) kfbackend.Message {
-		return msg2VO(item)
-	})
+	msgsVO := lo.Map(
+		msgsDTO, func(item *dao.KFMessage, index int) kfbackend.Message {
+			return msg2VO(item)
+		},
+	)
 
-	c.Success(ctx, kfbackend.MsgListResponse{
-		Messages: msgsVO,
-	})
+	c.Success(
+		ctx, kfbackend.MsgListResponse{
+			Messages: msgsVO,
+		},
+	)
 }
 
 func (c *ChatController) MsgsRead(ctx *gin.Context) {
@@ -122,13 +145,19 @@ func (c *ChatController) MsgsRead(ctx *gin.Context) {
 	}
 
 	reqCtx := ctx.Request.Context()
-	cardID := middleware.GetKFCardID(ctx)
+	cardID := common.GetKFCardID(ctx)
 
 	var repo repository.KFMessageRepository
 
 	err := repo.BatchUpdateReadAt(reqCtx, req.MsgIDs, time.Now().Unix())
 	if err != nil {
-		xlogger.Error(reqCtx, "更新已读时间失败", xlogger.Err(err), xlogger.Any("cardId", cardID), xlogger.Any("ids", req.MsgIDs))
+		xlogger.Error(
+			reqCtx,
+			"更新已读时间失败",
+			xlogger.Err(err),
+			xlogger.Any("cardId", cardID),
+			xlogger.Any("ids", req.MsgIDs),
+		)
 		c.Error(ctx, err)
 		return
 	}
@@ -149,7 +178,7 @@ func (c *ChatController) UserOp(ctx *gin.Context) {
 	}
 
 	reqCtx := ctx.Request.Context()
-	cardID := middleware.GetKFCardID(ctx)
+	cardID := common.GetKFCardID(ctx)
 
 	var repo repository.KFUserRepository
 
@@ -167,7 +196,13 @@ func (c *ChatController) UserOp(ctx *gin.Context) {
 
 	err := repo.BatchUpdate(reqCtx, req.UserIDs, u)
 	if err != nil {
-		xlogger.Error(reqCtx, "更新访客失败", xlogger.Err(err), xlogger.Any("cardId", cardID), xlogger.Any("ids", req.UserIDs))
+		xlogger.Error(
+			reqCtx,
+			"更新访客失败",
+			xlogger.Err(err),
+			xlogger.Any("cardId", cardID),
+			xlogger.Any("ids", req.UserIDs),
+		)
 		c.Error(ctx, err)
 		return
 	}
@@ -188,7 +223,7 @@ func (c *ChatController) UserUpdate(ctx *gin.Context) {
 	}
 
 	reqCtx := ctx.Request.Context()
-	cardID := middleware.GetKFCardID(ctx)
+	cardID := common.GetKFCardID(ctx)
 
 	var repo repository.KFUserRepository
 
@@ -200,7 +235,13 @@ func (c *ChatController) UserUpdate(ctx *gin.Context) {
 
 	err := repo.BatchUpdate(reqCtx, []uint{req.ID}, u)
 	if err != nil {
-		xlogger.Error(reqCtx, "更新访客失败", xlogger.Err(err), xlogger.Any("cardId", cardID), xlogger.Any("ids", req.ID))
+		xlogger.Error(
+			reqCtx,
+			"更新访客失败",
+			xlogger.Err(err),
+			xlogger.Any("cardId", cardID),
+			xlogger.Any("ids", req.ID),
+		)
 		c.Error(ctx, err)
 		return
 	}

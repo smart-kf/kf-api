@@ -3,7 +3,10 @@ package repository
 import (
 	"context"
 	"errors"
+
 	xlogger "github.com/clearcodecn/log"
+	"gorm.io/gorm"
+
 	"github.com/smart-fm/kf-api/endpoints/common"
 	"github.com/smart-fm/kf-api/endpoints/http/vo/kfbackend"
 	"github.com/smart-fm/kf-api/infrastructure/mysql"
@@ -20,6 +23,19 @@ func (r *KFUserRepository) SaveOne(ctx context.Context, chat *dao.KfUser) error 
 		return err
 	}
 	return nil
+}
+
+func (r *KFUserRepository) FindByToken(ctx context.Context, token string) (chat *dao.KfUser, ok bool, err error) {
+	tx := mysql.GetDBFromContext(ctx)
+	res := tx.Model(&dao.KfUser{}).Where("uuid = ?", token).First(&chat)
+	if err = res.Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, false, nil
+		}
+		xlogger.Error(ctx, "FindByToken-failed", xlogger.Err(err))
+		return
+	}
+	return
 }
 
 type ListUserOption struct {
@@ -40,11 +56,13 @@ func (r *KFUserRepository) List(ctx context.Context, options *ListUserOption) ([
 
 	// 用户id/昵称/手机号/备注
 	if options.SearchBy != "" {
-		tx.Where(tx.Where("nick_name LIKE ?", "%"+options.SearchBy+"%").
-			Or("id LIKE ?", "%"+options.SearchBy+"%").
-			Or("mobile LIKE ?", "%"+options.SearchBy+"%").
-			Or("remark_name LIKE ?", "%"+options.SearchBy+"%").
-			Or("comments LIKE ?", "%"+options.SearchBy+"%"))
+		tx.Where(
+			tx.Where("nick_name LIKE ?", "%"+options.SearchBy+"%").
+				Or("id LIKE ?", "%"+options.SearchBy+"%").
+				Or("mobile LIKE ?", "%"+options.SearchBy+"%").
+				Or("remark_name LIKE ?", "%"+options.SearchBy+"%").
+				Or("comments LIKE ?", "%"+options.SearchBy+"%"),
+		)
 	}
 
 	switch options.ListType {

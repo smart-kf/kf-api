@@ -1,12 +1,32 @@
-package repository
+package caches
 
 import (
 	"context"
 	"encoding/json"
 	"time"
 
+	redis2 "github.com/redis/go-redis/v9"
+
 	"github.com/smart-fm/kf-api/infrastructure/redis"
 )
+
+func UnMarshalRedisResult[T any](cmd *redis2.StringCmd, t *T, missFunc func() (*T, error)) error {
+	data, err := cmd.Bytes()
+	if err != nil {
+		if err == redis2.Nil {
+			if missFunc != nil {
+				newT, err := missFunc()
+				if err != nil {
+					return err
+				}
+				*t = *newT
+			}
+			return nil
+		}
+		return err
+	}
+	return json.Unmarshal(data, t)
+}
 
 func getCacheByKey[T any](ctx context.Context, key string) *T {
 	res, err := redis.GetRedisClient().Get(ctx, key).Result()

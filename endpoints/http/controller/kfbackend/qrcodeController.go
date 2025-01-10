@@ -2,6 +2,8 @@ package kfbackend
 
 import (
 	"fmt"
+
+	"github.com/smart-fm/kf-api/endpoints/common"
 	"github.com/smart-fm/kf-api/endpoints/http/vo/kfbackend"
 	"github.com/smart-fm/kf-api/infrastructure/mysql/dao"
 
@@ -9,7 +11,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/smart-fm/kf-api/domain/repository"
-	"github.com/smart-fm/kf-api/endpoints/http/middleware"
 	"github.com/smart-fm/kf-api/pkg/utils"
 )
 
@@ -25,7 +26,7 @@ func (c *QRCodeController) List(ctx *gin.Context) {
 
 	reqCtx := ctx.Request.Context()
 
-	cardID := middleware.GetKFCardID(ctx)
+	cardID := common.GetKFCardID(ctx)
 
 	var kfsetting repository.KFSettingRepository
 	setting, ok, err := kfsetting.GetByCardID(reqCtx, cardID)
@@ -73,7 +74,7 @@ func (c *QRCodeController) List(ctx *gin.Context) {
 // Switch 更换二维码图片
 func (c *QRCodeController) Switch(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
-	cardID := middleware.GetKFCardID(ctx)
+	cardID := common.GetKFCardID(ctx)
 
 	var kfsetting repository.KFSettingRepository
 	setting, ok, err := kfsetting.GetByCardID(reqCtx, cardID)
@@ -122,7 +123,7 @@ func (c *QRCodeController) Switch(ctx *gin.Context) {
 // OnOff 二维码功能开关
 func (c *QRCodeController) OnOff(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
-	cardID := middleware.GetKFCardID(ctx)
+	cardID := common.GetKFCardID(ctx)
 
 	var req kfbackend.QRCodeOnOffRequest
 	if !c.BindAndValidate(ctx, &req) {

@@ -95,7 +95,7 @@ func registerRouter(g *gin.Engine) {
 	api.POST("/kf-be/login", authController.Login)
 
 	// 客服后台
-	kf := api.Group("/kf-be", middleware.KFAuthMiddleware())
+	kf := api.Group("/kf-be", middleware.KFBeAuthMiddleware())
 	{
 
 		var qrcodeController kfbackend.QRCodeController
@@ -126,7 +126,7 @@ func registerRouter(g *gin.Engine) {
 
 	// 客服前台
 	kffe := api.Group("/kf-fe")
-	kffe.Use(middleware.KFAuthMiddleware())
+	kffe.Use(middleware.KFFeAuthMiddleware())
 	{
 		var qr kffrontend.QRCodeController
 		kffe.POST("/qrcode/scan", qr.Scan)

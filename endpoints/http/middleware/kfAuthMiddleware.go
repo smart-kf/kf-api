@@ -2,71 +2,86 @@ package middleware
 
 import (
 	"context"
-	"fmt"
-	"time"
+	"strings"
 
-	xlogger "github.com/clearcodecn/log"
 	"github.com/gin-gonic/gin"
 
-	"github.com/smart-fm/kf-api/infrastructure/redis"
+	"github.com/smart-fm/kf-api/domain/caches"
+	"github.com/smart-fm/kf-api/domain/factory"
+	"github.com/smart-fm/kf-api/endpoints/common"
 	"github.com/smart-fm/kf-api/pkg/xerrors"
 )
 
-var kfCardIDKey = "kf-card-key"
-var kfTokenKey = "kf-token-key"
-
-func KFAuthMiddleware() gin.HandlerFunc {
+func KFBeAuthMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		var bc BaseController
 		token := ctx.GetHeader("Authorization")
 		// 空的也可以请求，由控制器生成 token 返回前端.
 		if token == "" {
-			ctx.Next()
+			bc.Error(ctx, xerrors.AuthError)
 			return
 		}
-		redisClient := redis.GetRedisClient()
-		cardID, err := redisClient.Get(ctx.Request.Context(), fmt.Sprintf("kfbe.%s", token)).Result()
-		var bc BaseController
+		cardId, err := caches.KfAuthCacheInstance.GetBackendToken(ctx.Request.Context(), token)
 		if err != nil {
 			bc.Error(ctx, xerrors.AuthError)
 			return
 		}
-		reqCtx := context.WithValue(ctx.Request.Context(), kfCardIDKey, cardID)
-		reqCtx = context.WithValue(reqCtx, kfTokenKey, token)
-		ctx.Request = ctx.Request.WithContext(reqCtx)
+		newCtx := common.WithKfCardID(ctx.Request.Context(), cardId)
+		newCtx = common.WithKFToken(newCtx, token)
+		ctx.Request = ctx.Request.WithContext(newCtx)
 		// TODO:: 验证 card 的有效期, 这里给token续期.
-		redisClient.Set(ctx.Request.Context(), fmt.Sprintf("kfbe.%s", token), cardID, 7*24*time.Hour)
 		ctx.Next()
 	}
 }
 
-func GetKFCardID(ctx *gin.Context) string {
-	acc, ok := ctx.Request.Context().Value(kfCardIDKey).(string)
-	if ok {
-		return acc
+// KFFeAuthMiddleware 如果redis中token过期，需要去数据库查询，然后设置到redis中.
+func KFFeAuthMiddleware() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		var bc BaseController
+		token := ctx.GetHeader("Authorization")
+		// 空的也可以请求，由控制器生成 token 返回前端.
+		if token == "" {
+			bc.Error(ctx, xerrors.AuthError)
+			return
+		}
+		// 可能造成数据库击穿.
+		cardId, err := caches.KfAuthCacheInstance.GetFrontToken(ctx.Request.Context(), token)
+		if err != nil {
+			if strings.Contains(err.Error(), "token not found") {
+				cardMainId, err := factory.FactoryParseUserToken(token)
+				if err != nil {
+					bc.Error(ctx, xerrors.AuthError)
+					return
+				}
+				cardId, err = caches.KfCardCacheInstance.GetCardIDByMainID(ctx.Request.Context(), cardMainId)
+				if err != nil {
+					bc.Error(ctx, xerrors.AuthError)
+					return
+				}
+				_, err = caches.KfUserCacheInstance.GetDBUser(ctx, cardId, token)
+				if err != nil {
+					bc.Error(ctx, xerrors.AuthError)
+					return
+				}
+				caches.KfAuthCacheInstance.SetFrontToken(ctx.Request.Context(), token, cardId)
+			} else {
+				bc.Error(ctx, xerrors.AuthError)
+				return
+			}
+		}
+		newCtx := common.WithKfCardID(ctx.Request.Context(), cardId)
+		newCtx = common.WithKFToken(newCtx, token)
+		ctx.Request = ctx.Request.WithContext(newCtx)
+		// TODO:: 验证 card 的有效期, 这里给token续期.
+		ctx.Next()
 	}
-	xlogger.Warn(ctx.Request.Context(), "GetKFCardID-failed, 未从context中获取到cardID,请检查路由设置")
-	return ""
 }
 
-func GetKFToken(ctx *gin.Context) string {
-	acc, ok := ctx.Request.Context().Value(kfTokenKey).(string)
-	if ok {
-		return acc
-	}
-	xlogger.Warn(ctx.Request.Context(), "GetKFCardID-failed, 未从context中获取到kfToken,请检查路由设置")
-	return ""
-}
-
-func VerifyKFBackendToken(ctx context.Context, token string) error {
-	redisClient := redis.GetRedisClient()
-	_, err := redisClient.Get(ctx, fmt.Sprintf("kfbe.%s", token)).Result()
+// VerifyKFToken 前台用户的token
+func VerifyKFToken(ctx context.Context, token string) error {
+	_, err := caches.KfAuthCacheInstance.GetFrontToken(ctx, token)
 	if err != nil {
 		return err
 	}
-	return nil
-}
-
-// TODO:: VerifyKFToken 前台用户的token
-func VerifyKFToken(ctx context.Context, s string) error {
 	return nil
 }
