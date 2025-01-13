@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"time"
 
 	xlogger "github.com/clearcodecn/log"
 	"gorm.io/gorm"
@@ -15,9 +16,9 @@ import (
 
 type KFUserRepository struct{}
 
-func (r *KFUserRepository) SaveOne(ctx context.Context, chat *dao.KfUser) error {
+func (r *KFUserRepository) SaveOne(ctx context.Context, kfUser *dao.KfUser) error {
 	tx := mysql.GetDBFromContext(ctx)
-	res := tx.Model(&dao.KfUser{}).Save(chat)
+	res := tx.Model(&dao.KfUser{}).Save(kfUser)
 	if err := res.Error; err != nil {
 		xlogger.Error(ctx, "SaveOne-failed", xlogger.Err(err))
 		return err
@@ -25,9 +26,9 @@ func (r *KFUserRepository) SaveOne(ctx context.Context, chat *dao.KfUser) error 
 	return nil
 }
 
-func (r *KFUserRepository) FindByToken(ctx context.Context, token string) (chat *dao.KfUser, ok bool, err error) {
+func (r *KFUserRepository) FindByToken(ctx context.Context, token string) (kfUser *dao.KfUser, ok bool, err error) {
 	tx := mysql.GetDBFromContext(ctx)
-	res := tx.Model(&dao.KfUser{}).Where("uuid = ?", token).First(&chat)
+	res := tx.Model(&dao.KfUser{}).Where("uuid = ?", token).First(&kfUser)
 	if err = res.Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, false, nil
@@ -39,9 +40,11 @@ func (r *KFUserRepository) FindByToken(ctx context.Context, token string) (chat 
 }
 
 type ListUserOption struct {
-	CardID        string
-	SearchBy      string
-	ListType      kfbackend.ChatListType
+	CardID      string
+	SearchBy    string
+	UnreadUUIDs []string
+	ListType    kfbackend.ChatListType
+
 	ScrollRequest *common.ScrollRequest
 }
 
@@ -67,7 +70,7 @@ func (r *KFUserRepository) List(ctx context.Context, options *ListUserOption) ([
 
 	switch options.ListType {
 	case kfbackend.ChatListTypeUnread:
-		tx = tx.Where("unread_msg_cnt > 0") // 未读消息
+		tx = tx.Where("uuid in ?", options.UnreadUUIDs) // 有未读消息的访客
 	case kfbackend.ChatListTypeBlock:
 		tx = tx.Where("block_at > 0") // 用拉黑时间来判断
 	}
@@ -75,11 +78,21 @@ func (r *KFUserRepository) List(ctx context.Context, options *ListUserOption) ([
 	return common.Scroll[*dao.KfUser](tx, options.ScrollRequest)
 }
 
-func (r *KFUserRepository) BatchUpdate(ctx context.Context, ids []uint, u dao.KfUser) error {
+func (r *KFUserRepository) BatchUpdate(ctx context.Context, ids []string, u dao.KfUser) error {
 	tx := mysql.GetDBFromContext(ctx)
 	res := tx.Model(&dao.KfUser{}).Where("uuid in ?", ids).Updates(u)
 	if err := res.Error; err != nil {
 		xlogger.Error(ctx, "BatchUpdate-failed", xlogger.Err(err))
+		return err
+	}
+	return nil
+}
+
+func (r *KFUserRepository) Offline(ctx context.Context, id string) error {
+	tx := mysql.GetDBFromContext(ctx)
+	res := tx.Model(&dao.KfUser{}).Where("uuid = ?", id).Update("offline_at", time.Now().Unix())
+	if err := res.Error; err != nil {
+		xlogger.Error(ctx, "Offline-failed", xlogger.Err(err))
 		return err
 	}
 	return nil
