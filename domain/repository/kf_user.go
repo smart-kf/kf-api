@@ -40,9 +40,11 @@ func (r *KFUserRepository) FindByToken(ctx context.Context, token string) (kfUse
 }
 
 type ListUserOption struct {
-	CardID        string
-	SearchBy      string
-	ListType      kfbackend.ChatListType
+	CardID      string
+	SearchBy    string
+	UnreadUUIDs []string
+	ListType    kfbackend.ChatListType
+
 	ScrollRequest *common.ScrollRequest
 }
 
@@ -68,7 +70,7 @@ func (r *KFUserRepository) List(ctx context.Context, options *ListUserOption) ([
 
 	switch options.ListType {
 	case kfbackend.ChatListTypeUnread:
-		tx = tx.Where("unread_msg_cnt > 0") // 未读消息
+		tx = tx.Where("uuid in ?", options.UnreadUUIDs) // 有未读消息的访客
 	case kfbackend.ChatListTypeBlock:
 		tx = tx.Where("block_at > 0") // 用拉黑时间来判断
 	}

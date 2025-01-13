@@ -3,6 +3,7 @@ package kfbackend
 import (
 	"context"
 	"github.com/smart-fm/kf-api/domain/caches"
+	"golang.org/x/sync/errgroup"
 	"time"
 
 	xlogger "github.com/clearcodecn/log"
@@ -31,11 +32,33 @@ func (c *ChatController) List(ctx *gin.Context) {
 
 	var repo repository.KFUserRepository
 
+	// in 从redis中获取到的未读访客ids
+	var unreadUUIDs []string
+	if req.ListType == kfbackend.ChatListTypeUnread {
+		uid2Cnt, err := caches.UserUnReadCacheInstance.GetUnReadUsers(ctx, cardID)
+		if err != nil {
+			xlogger.Error(reqCtx, "查询粉丝未读消息失败", xlogger.Err(err), xlogger.Any("cardId", cardID))
+			c.Error(ctx, err)
+			return
+		}
+
+		uids := lo.MapToSlice(uid2Cnt, func(k string, v int64) string {
+			return k
+		})
+		if len(uids) == 0 {
+			c.Success(
+				ctx, kfbackend.ChatListResponse{},
+			)
+			return
+		}
+	}
+
 	users, err := repo.List(
 		reqCtx, &repository.ListUserOption{
-			CardID:   cardID,
-			SearchBy: req.SearchBy,
-			ListType: req.ListType,
+			CardID:      cardID,
+			SearchBy:    req.SearchBy,
+			UnreadUUIDs: unreadUUIDs,
+			ListType:    req.ListType,
 			ScrollRequest: &common.ScrollRequest{
 				Key:      "last_chat_at",
 				Asc:      false,
@@ -151,7 +174,49 @@ func (c *ChatController) MsgsRead(ctx *gin.Context) {
 
 	var repo repository.KFMessageRepository
 
-	err := repo.BatchUpdateReadAt(reqCtx, req.MsgIDs, time.Now().Unix())
+	msgs, err := repo.ByIDs(reqCtx, cardID, req.MsgIDs...)
+	if err != nil {
+		xlogger.Error(
+			reqCtx,
+			"ByIDs",
+			xlogger.Err(err),
+			xlogger.Any("cardId", cardID),
+			xlogger.Any("ids", req.MsgIDs),
+		)
+		c.Error(ctx, err)
+		return
+	}
+
+	userIDs := lo.FilterMap(msgs, func(item *dao.KFMessage, index int) (string, bool) {
+		if item.FromType == dao.ChatObjTypeUser && len(item.From) > 0 {
+			return item.From, true
+		}
+		return "", false
+	})
+
+	userIDs = lo.Uniq(userIDs)
+
+	eg := errgroup.Group{}
+	eg.SetLimit(len(userIDs) / 3)
+	for _, userID := range userIDs {
+		eg.Go(func() error {
+			return caches.UserUnReadCacheInstance.IncrUserUnRead(reqCtx, cardID, userID, -1)
+		})
+	}
+
+	if err := eg.Wait(); err != nil {
+		xlogger.Error(
+			reqCtx,
+			"删除已读失败",
+			xlogger.Err(err),
+			xlogger.Any("cardId", cardID),
+			xlogger.Any("ids", req.MsgIDs),
+		)
+		c.Error(ctx, err)
+		return
+	}
+
+	err = repo.BatchUpdateReadAt(reqCtx, req.MsgIDs, time.Now().Unix())
 	if err != nil {
 		xlogger.Error(
 			reqCtx,
@@ -160,7 +225,6 @@ func (c *ChatController) MsgsRead(ctx *gin.Context) {
 			xlogger.Any("cardId", cardID),
 			xlogger.Any("ids", req.MsgIDs),
 		)
-		c.Error(ctx, err)
 		return
 	}
 
@@ -218,7 +282,7 @@ func (c *ChatController) UserUpdate(ctx *gin.Context) {
 		return
 	}
 
-	if req.ID <= 0 {
+	if len(req.ID) == 0 {
 		// do nothing
 		c.Success(ctx, kfbackend.UpdateUserResponse{})
 		return
@@ -252,11 +316,15 @@ func (c *ChatController) UserUpdate(ctx *gin.Context) {
 }
 
 func user2ChatVO(ctx context.Context, u *dao.KfUser, lastMsgMap map[uint64]*dao.KFMessage) kfbackend.Chat {
+	unreadCnt, err := caches.UserUnReadCacheInstance.GetUserUnRead(ctx, u.CardID, u.UUID)
+	if err != nil {
+		xlogger.Error(ctx, "GetUserUnRead err", xlogger.Err(err))
+	}
 	chat := kfbackend.Chat{
 		Type:         kfbackend.ChatTypeSingle,
 		User:         user2VO(ctx, u),
 		LastChatAt:   u.LastChatAt,
-		UnreadMsgCnt: u.UnreadMsgCnt,
+		UnreadMsgCnt: unreadCnt,
 	}
 
 	msg, ok := lastMsgMap[u.LastMsgID]
