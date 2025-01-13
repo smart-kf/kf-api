@@ -1,6 +1,8 @@
 package kfbackend
 
 import (
+	"context"
+	"github.com/smart-fm/kf-api/domain/caches"
 	"time"
 
 	xlogger "github.com/clearcodecn/log"
@@ -74,7 +76,7 @@ func (c *ChatController) List(ctx *gin.Context) {
 
 	chats := lo.Map(
 		users, func(item *dao.KfUser, index int) kfbackend.Chat {
-			return user2ChatVO(item, lastMsgMap)
+			return user2ChatVO(reqCtx, item, lastMsgMap)
 		},
 	)
 
@@ -249,10 +251,10 @@ func (c *ChatController) UserUpdate(ctx *gin.Context) {
 	c.Success(ctx, kfbackend.BatchOpUserResponse{})
 }
 
-func user2ChatVO(u *dao.KfUser, lastMsgMap map[uint64]*dao.KFMessage) kfbackend.Chat {
+func user2ChatVO(ctx context.Context, u *dao.KfUser, lastMsgMap map[uint64]*dao.KFMessage) kfbackend.Chat {
 	chat := kfbackend.Chat{
 		Type:         kfbackend.ChatTypeSingle,
-		User:         user2VO(u),
+		User:         user2VO(ctx, u),
 		LastChatAt:   u.LastChatAt,
 		UnreadMsgCnt: u.UnreadMsgCnt,
 	}
@@ -265,11 +267,15 @@ func user2ChatVO(u *dao.KfUser, lastMsgMap map[uint64]*dao.KFMessage) kfbackend.
 	return chat
 }
 
-func user2VO(u *dao.KfUser) kfbackend.User {
+func user2VO(ctx context.Context, u *dao.KfUser) kfbackend.User {
 	vo := kfbackend.User{}
 	copier.Copy(&vo, u)
 
-	vo.IsOnline = false // TODO 从在离线状态的redis中实时获取
+	var err error
+	vo.IsOnline, err = caches.UserOnLineCacheInstance.IsUserOnline(ctx, u.CardID, u.UUID)
+	if err != nil {
+		xlogger.Error(ctx, "IsUserOnline err", xlogger.Err(err))
+	}
 
 	return vo
 }
