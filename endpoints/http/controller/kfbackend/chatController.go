@@ -235,7 +235,7 @@ func (c *ChatController) UserUpdate(ctx *gin.Context) {
 		Comments:   req.Comments,
 	}
 
-	err := repo.BatchUpdate(reqCtx, []uint{req.ID}, u)
+	err := repo.BatchUpdate(reqCtx, []string{req.ID}, u)
 	if err != nil {
 		xlogger.Error(
 			reqCtx,

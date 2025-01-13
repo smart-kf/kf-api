@@ -84,8 +84,8 @@ type ReadMsgResponse struct {
 }
 
 type BatchOpUserRequest struct {
-	UserIDs []uint `json:"userIDs" doc:"粉丝ids"`
-	Op      UserOp `json:"op" doc:"操作 1:置顶 2:取消置顶 3:拉黑 4:取消拉黑"`
+	UserIDs []string `json:"userIDs" doc:"粉丝ids"`
+	Op      UserOp   `json:"op" doc:"操作 1:置顶 2:取消置顶 3:拉黑 4:取消拉黑"`
 }
 
 type UserOp int8
@@ -102,7 +102,7 @@ type BatchOpUserResponse struct {
 }
 
 type UpdateUserRequest struct {
-	ID         uint   `json:"id" doc:"粉丝id"`
+	ID         string `json:"id" doc:"粉丝id"`
 	RemarkName string `json:"remarkName" doc:"备注名称"`
 	Mobile     string `json:"mobile" doc:"手机号"`
 	Comments   string `json:"comments" doc:"备注信息"`
