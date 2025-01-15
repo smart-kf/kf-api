@@ -29,8 +29,8 @@ func (c *kfAuthCache) SetBackendToken(ctx context.Context, token string, cardId 
 
 func (c *kfAuthCache) GetBackendToken(ctx context.Context, token string) (string, error) {
 	redisClient := redis.GetRedisClient()
-	res := redisClient.Get(ctx, c.getKey(token)).String()
-	if res == "" {
+	res, err := redisClient.Get(ctx, c.getKey(token)).Result()
+	if err != nil {
 		return "", fmt.Errorf("token not found")
 	}
 	return res, nil

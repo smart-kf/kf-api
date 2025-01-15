@@ -27,6 +27,7 @@ nsq:
     - 127.0.0.1:4150
   messageTopic: im_message
   messageTopicGroup: im_message_group
+  orderExpireTopic: order_expire_notify
 
 httpClient:
   socketServerAddress: http://127.0.0.1:9000

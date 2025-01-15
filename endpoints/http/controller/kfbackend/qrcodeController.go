@@ -1,7 +1,9 @@
 package kfbackend
 
 import (
+	"errors"
 	"fmt"
+	"time"
 
 	"github.com/smart-fm/kf-api/endpoints/common"
 	"github.com/smart-fm/kf-api/endpoints/http/vo/kfbackend"
@@ -38,35 +40,53 @@ func (c *QRCodeController) List(ctx *gin.Context) {
 
 	enable := true
 	enableNewUser := true
-	ver := 0
 
 	if ok {
 		enable = setting.QRCodeEnabled
 		enableNewUser = setting.QRCodeEnabledNewUser
-		ver = setting.QRCodeVersion
 	}
 
-	baseDomain := "base.domain"                          // TODO 配置
-	chatH5 := fmt.Sprintf("https://%s/todo", baseDomain) // TODO 配置 前端客服聊天C端入口地址
-	if ver > 0 {
-		chatH5 = fmt.Sprintf("%s?ver=%d", chatH5, ver)
+	var qrCodeDomainRepo repository.QRCodeDomainRepository
+	// 获取二维码列表.
+	qrCode, exist, err := qrCodeDomainRepo.FindByCardID(reqCtx, cardID)
+	if err != nil {
+		xlogger.Error(reqCtx, "查询客服设置失败", xlogger.Err(err), xlogger.Any("cardId", cardID))
+		c.Error(ctx, err)
+		return
+	}
+	if !exist {
+		c.Error(ctx, errors.New("查找二维码失败"))
+		return
 	}
 
-	static, err := utils.DrawQRCodeNX(cardID, chatH5)
+	// 获取域名列表
+	qrCodeDomain, err := qrCodeDomainRepo.FindDomain(reqCtx, int(qrCode.ID))
 	if err != nil {
 		c.Error(ctx, err)
 		return
 	}
-
+	firstDomain := ""
+	if len(qrCodeDomain) > 0 {
+		firstDomain = qrCodeDomain[0].Domain
+	}
+	var domains []kfbackend.QRCodeDomain
+	for _, item := range qrCodeDomain {
+		domains = append(
+			domains, kfbackend.QRCodeDomain{
+				Domain:    item.Domain,
+				CreateAt:  item.CreatedAt.Unix(),
+				IsPrivate: item.IsPrivate,
+			},
+		)
+	}
 	c.Success(
 		ctx, kfbackend.QRCodeResponse{
-			URL:           fmt.Sprintf("https://%s/%s", baseDomain, static),
+			QRCodeURL:     fmt.Sprintf("%s%s", firstDomain, qrCode.Path),
 			HealthAt:      0,
 			Enable:        enable,
 			EnableNewUser: enableNewUser,
-
-			// TODO 计费域名
-			Domains: []kfbackend.QRCodeDomain{},
+			Version:       qrCode.Version,
+			Domains:       domains,
 		},
 	)
 }
@@ -75,47 +95,40 @@ func (c *QRCodeController) List(ctx *gin.Context) {
 func (c *QRCodeController) Switch(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
 	cardID := common.GetKFCardID(ctx)
-
-	var kfsetting repository.KFSettingRepository
-	setting, ok, err := kfsetting.GetByCardID(reqCtx, cardID)
+	var qrCodeDomainRepo repository.QRCodeDomainRepository
+	// 获取二维码列表.
+	qrCode, exist, err := qrCodeDomainRepo.FindByCardID(reqCtx, cardID)
 	if err != nil {
-		xlogger.Error(reqCtx, "查询客服设置失败", xlogger.Err(err), xlogger.Any("cardId", cardID))
+		xlogger.Error(reqCtx, "Switch-err", xlogger.Err(err), xlogger.Any("cardId", cardID))
 		c.Error(ctx, err)
 		return
 	}
-
-	if !ok {
-		setting = &dao.KFSettings{}
-		setting.CardID = cardID
+	if !exist {
+		c.Error(ctx, errors.New("查找二维码失败"))
+		return
 	}
-
-	// 更新版本号
-	setting.QRCodeVersion++
-
-	err = kfsetting.SaveOne(reqCtx, setting)
+	qrCode.ID = 0
+	qrCode.CreatedAt = time.Now()
+	qrCode.Version++
+	qrCode.Path = utils.RandomPath()
+	err = qrCodeDomainRepo.CreateOne(reqCtx, qrCode)
 	if err != nil {
-		xlogger.Error(reqCtx, "保存客服设置失败", xlogger.Err(err), xlogger.Any("cardId", cardID))
+		xlogger.Error(reqCtx, "Switch-error2", xlogger.Err(err), xlogger.Any("cardId", cardID))
 		c.Error(ctx, err)
 		return
 	}
-
-	baseDomain := "base.domain" // TODO 配置
-	chatH5 := fmt.Sprintf(
-		"https://%s/todo?ver=%d",
-		baseDomain,
-		setting.QRCodeVersion, // 使用新的版本号生成新的二维码
-	) // TODO 配置 前端客服聊天C端入口地址
-
-	resource, err := utils.DrawQRCodeNX(cardID, chatH5)
+	qrCodeDomain, err := qrCodeDomainRepo.FindDomain(reqCtx, int(qrCode.ID))
 	if err != nil {
 		c.Error(ctx, err)
 		return
 	}
-
+	firstDomain := ""
+	if len(qrCodeDomain) > 0 {
+		firstDomain = qrCodeDomain[0].Domain
+	}
 	c.Success(
 		ctx, kfbackend.QRCodeSwitchResponse{
-			URL:      fmt.Sprintf("https://%s/%s", baseDomain, resource),
-			HealthAt: 0,
+			QRCodeURL: fmt.Sprintf("%s%s", firstDomain, qrCode.Path),
 		},
 	)
 }

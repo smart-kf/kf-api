@@ -204,6 +204,7 @@ func (c *BaseController) Notify(ctx *gin.Context) {
 		CardID:           card.CardID,
 		Status:           constant.QRCodeNormal,
 		ChangeQRCodeTime: time.Now().Unix(),
+		Version:          1,
 	}
 
 	if err := tx.Create(&qrCode).Error; err != nil {
@@ -227,9 +228,10 @@ func (c *BaseController) Notify(ctx *gin.Context) {
 
 	// 分配公共域名
 	qrCodeDomain := dao.KFQRCodeDomain{
-		QRCodeId: int64(qrCode.ID),
-		Domain:   domain.TopName,
-		DomainId: int64(domain.ID),
+		QRCodeId:  int64(qrCode.ID),
+		Domain:    domain.TopName,
+		DomainId:  int64(domain.ID),
+		IsPrivate: false,
 	}
 
 	if err := tx.Create(&qrCodeDomain).Error; err != nil {

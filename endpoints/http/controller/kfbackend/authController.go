@@ -89,6 +89,13 @@ func (c *AuthController) Login(ctx *gin.Context) {
 	kflog.AddKFLog(card.CardID, "login", "登录成功")
 
 	token := uuid.New().String()
+
+	err = caches.KfAuthCacheInstance.SetBackendToken(reqCtx, token, card.CardID)
+	if err != nil {
+		xlogger.Error(reqCtx, "SetBackendToken-failed", xlogger.Err(err))
+		c.Error(ctx, xerrors.NewCustomError("登录失败，请重试"))
+		return
+	}
 	// 将session 存储到 redis.
 	redisClient := redis.GetRedisClient()
 	redisClient.Set(reqCtx, fmt.Sprintf("kfbe.%s", token), card.CardID, 7*24*time.Hour) // 7 天token

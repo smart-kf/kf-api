@@ -1,0 +1,20 @@
+### 客服登录  TM-zkYJdPMehc
+POST {{ host }}/api/kf-be/login
+Content-Type: application/json
+Authorization: {{ kf_token }}
+
+{
+  "cardID": "TM-zkYJdPMehc"
+}
+
+> {%
+    // 将响应中的 orderNo 存储到变量 {{orderNo}} 中
+    var token = response.body.data.token;
+    client.global.set("kf_token",token);
+%}
+
+### 获取二维码:
+GET {{ host }}/api/kf-be/qrcode
+Content-Type: application/json
+Authorization: {{ kf_token }}
+

@@ -23,3 +23,35 @@ func (r *QRCodeDomainRepository) FindByPath(ctx context.Context, path string) (*
 	}
 	return &data, true, nil
 }
+
+// FindByCardID TODO:: cache
+func (r *QRCodeDomainRepository) FindByCardID(ctx context.Context, cardID string) (*dao.KFQRCode, bool, error) {
+	tx := mysql.GetDBFromContext(ctx)
+	var data dao.KFQRCode
+	if err := tx.Where("card_id = ?", cardID).Order("version desc").First(&data).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, false, nil
+		}
+		return nil, false, err
+	}
+	return &data, true, nil
+}
+
+// FindDomain
+func (r *QRCodeDomainRepository) FindDomain(ctx context.Context, qrCodeId int) ([]*dao.KFQRCodeDomain, error) {
+	tx := mysql.GetDBFromContext(ctx)
+	var data []*dao.KFQRCodeDomain
+	if err := tx.Where("qrcode_id = ?", qrCodeId).Find(&data).Error; err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+// FindDomain
+func (r *QRCodeDomainRepository) CreateOne(ctx context.Context, qrCode *dao.KFQRCode) error {
+	tx := mysql.GetDBFromContext(ctx)
+	if err := tx.Create(qrCode).Error; err != nil {
+		return err
+	}
+	return nil
+}

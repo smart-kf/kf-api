@@ -7,25 +7,25 @@ import (
 
 type QRCodeRequest struct{}
 type QRCodeResponse struct {
-	URL           string         `json:"qrcodeUrl,omitempty" doc:"主站二维码图片地址"`
+	// URL           string         `json:"qrcodeUrl,omitempty" doc:"主站二维码图片地址"`
+	QRCodeURL     string         `json:"qrCodeUrl" doc:"二维码的内容，前端拿到字符串渲染二维码"`
 	HealthAt      int64          `json:"healthAt,omitempty" doc:"主站通过健康检查的时间 毫秒"`
 	Enable        bool           `json:"enable,omitempty" doc:"启用停用状态"`
 	EnableNewUser bool           `json:"enableNewUser,omitempty" doc:"启用停用新粉状态"`
+	Version       int            `json:"version" doc:"版本号"`
 	Domains       []QRCodeDomain `json:"domains,omitempty" doc:"域名列表"`
 }
 
 type QRCodeDomain struct {
-	Domain   string `json:"domain,omitempty" doc:"站点域名"`
-	HealthAt int64  `json:"healthAt,omitempty" doc:"通过健康检查的时间 毫秒"`
-	CreateAt int64  `json:"createAt,omitempty" doc:"添加创建时间 毫秒"`
-	Remark   string `json:"remark,omitempty" doc:"备注"`
-	URL      string `json:"url,omitempty" doc:"二维码图片地址"`
+	Domain    string `json:"domain,omitempty" doc:"站点域名"`
+	HealthAt  int64  `json:"healthAt,omitempty" doc:"通过健康检查的时间 毫秒"`
+	CreateAt  int64  `json:"createAt,omitempty" doc:"添加创建时间 毫秒"`
+	IsPrivate bool   `json:"isPrivate" doc:"是否是私有域名"`
 }
 
 type QRCodeSwitchRequest struct{}
 type QRCodeSwitchResponse struct {
-	URL      string `json:"qrcodeUrl,omitempty" doc:"主站二维码图片地址"`
-	HealthAt int64  `json:"healthAt,omitempty" doc:"主站通过健康检查的时间 毫秒"`
+	QRCodeURL string `json:"qrCodeUrl" doc:"二维码的内容，前端拿到字符串渲染二维码"`
 }
 
 type QRCodeOnOffRequest struct {
