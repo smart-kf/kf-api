@@ -36,10 +36,10 @@ func (m MessageType) ToMaterialType() MaterialType {
 type ChatObjType int8
 
 const (
-	ChatObjTypeSys          ChatObjType = iota // 系统
-	ChatObjTypeExternalUser                    // 访客 即用户/粉丝
-	ChatObjTypeUser                            // 员工 即客服
-	ChatObjTypeGroup                           // 群组
+	ChatObjTypeSys   ChatObjType = iota // 系统
+	ChatObjTypeUser                     // 访客 即用户/粉丝
+	ChatObjTypeCard                     // 卡密 即客服
+	ChatObjTypeGroup                    // 群组
 )
 
 func (KFMessage) TableName() string {
