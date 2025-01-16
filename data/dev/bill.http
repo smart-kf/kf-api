@@ -3,8 +3,8 @@ POST {{ host }}/api/bill/login
 Content-Type: application/json
 
 {
-  "username": "admin",
-  "password": "admin"
+  "username": "kfadmin",
+  "password": "kfadmin123"
 }
 
 > {%
@@ -64,9 +64,9 @@ Content-Type: application/json
 Authorization: {{ token }}
 
 {
-  "topName": "localhost:8083",
+  "topName": "https://private.smartkf.top",
   "status": 1,
-  "isPublic": true
+  "isPublic": false
 }
 
 ### 3. 域名列表

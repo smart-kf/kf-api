@@ -1,10 +1,9 @@
 ###1. 提交订单
 POST {{ host }}/api/bill-fe/order/create
 Content-Type: application/json
-Authorization: {{ token }}
 
 {
-  "packageId": "daily"
+  "packageId": "monthly"
 }
 
 > {%
