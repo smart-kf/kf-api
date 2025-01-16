@@ -10,9 +10,11 @@ redis:
   address: redis:6379
   password: "238XSfh98xa"
 
+
 web:
   addr: 0.0.0.0
   port: 8081
+  staticDir: ./static
 
 log:
   level: debug    # debug / info / warn / error
@@ -28,6 +30,7 @@ nsq:
     - nsq:4150
   messageTopic: im_message
   messageTopicGroup: im_message_group
+  orderExpireTopic: order_expire_notify
 
 httpClient:
   socketServerAddress: http://socket-server:9000
