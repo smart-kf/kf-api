@@ -2,6 +2,7 @@ package caches
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -49,7 +50,7 @@ func (d *kfUserCache) GetDBUser(ctx context.Context, cardId string, userID strin
 		return nil, err
 	}
 	if !ok {
-		return nil, err
+		return nil, errors.New("user not found")
 	}
 	d.SetDBUser(ctx, cardId, user)
 	return user, nil

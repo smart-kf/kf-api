@@ -102,8 +102,8 @@ func (c *imSessionCache) GetKffeSessionIds(ctx context.Context, cardId string, u
 
 /* 下面是一些组合方法，对前后台的方法进行聚合utils */
 
-// GetCardIDByToken 通过前台token获取cardId
-func (c *imSessionCache) GetCardIDByToken(ctx context.Context, token string) (string, error) {
+// GetCardIDByKFFEToken 通过前台token获取cardId
+func (c *imSessionCache) GetCardIDByKFFEToken(ctx context.Context, token string) (string, error) {
 	// 1. 通过token 拿到 kf_card.id
 	cardMainId, err := factory.FactoryParseUserToken(token)
 	if err != nil {
@@ -117,9 +117,9 @@ func (c *imSessionCache) GetCardIDByToken(ctx context.Context, token string) (st
 	return cardId, nil
 }
 
-// FindBffeSessionIdByUserId 通过userId、cardId拿到前台用户的sessionId
+// GetKFFESessionIdByUserId 通过userId、cardId拿到前台用户的sessionId
 // ps:: 可能为空哦.
-func (c *imSessionCache) FindBffeSessionIdByUserId(ctx context.Context, cardId string, userId string) (string, error) {
+func (c *imSessionCache) GetKFFESessionIdByUserId(ctx context.Context, cardId string, userId string) (string, error) {
 	result, err := c.GetKffeSessionIds(ctx, cardId, []string{userId})
 	if err != nil {
 		return "", err

@@ -41,7 +41,7 @@ func KFFeAuthMiddleware() gin.HandlerFunc {
 		token := ctx.GetHeader("Authorization")
 		// 空的也可以请求，由控制器生成 token 返回前端.
 		if token == "" {
-			bc.Error(ctx, xerrors.AuthError)
+			ctx.Next()
 			return
 		}
 		// 可能造成数据库击穿.

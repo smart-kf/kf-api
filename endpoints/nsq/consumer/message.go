@@ -63,7 +63,7 @@ func (m *MessageConsumer) handleOnline(msg *dto.Message) {
 	{
 		// 2. 如果是前台用户上线，给后台推送一个上线事件，并且修改redis状态.完了之后，触发event的上线钩子.
 		if msg.Platform == constant.PlatformKfFe {
-			cardId, err := caches.ImSessionCacheInstance.GetCardIDByToken(ctx, msg.Token)
+			cardId, err := caches.ImSessionCacheInstance.GetCardIDByKFFEToken(ctx, msg.Token)
 			if err != nil {
 				xlogger.Error(ctx, "处理消息失败-GetCardIDByToken", xlogger.Err(err), xlogger.Any("msg", msg))
 				return
@@ -112,12 +112,13 @@ func (m *MessageConsumer) handleOnline(msg *dto.Message) {
 			return
 		}
 		if msg.Platform == constant.PlatformKfBe {
-			// 将后台session存储至redis
-			caches.ImSessionCacheInstance.SetKfbeOnlineSession(ctx, msg.Token, msg.SessionId)
 			cardId, err := caches.KfAuthCacheInstance.GetBackendToken(ctx, msg.Token)
 			if err != nil {
+				xlogger.Error(ctx, "处理消息失败-GetBackendToken", xlogger.Err(err), xlogger.Any("msg", msg))
 				return
 			}
+			// 将后台session存储至redis
+			caches.ImSessionCacheInstance.SetKfbeOnlineSession(ctx, cardId, msg.SessionId)
 			event2.TriggerEvent(context.Background(), constant.EventOnline, msg.Platform, msg.Token, cardId)
 		}
 	}
@@ -131,7 +132,7 @@ func (m *MessageConsumer) handleOffline(msg *dto.Message) {
 	{
 		// 2. 如果是前台用户上线，给后台推送一个上线事件，并且修改redis状态.完了之后，触发event的上线钩子.
 		if msg.Platform == constant.PlatformKfFe {
-			cardId, err := caches.ImSessionCacheInstance.GetCardIDByToken(ctx, msg.Token)
+			cardId, err := caches.ImSessionCacheInstance.GetCardIDByKFFEToken(ctx, msg.Token)
 			if err != nil {
 				xlogger.Error(ctx, "处理消息失败-GetCardIDByToken", xlogger.Err(err), xlogger.Any("msg", msg))
 				return
@@ -193,76 +194,99 @@ func (m *MessageConsumer) handleOffline(msg *dto.Message) {
 
 // handleEventMessage:: todo.
 func (m *MessageConsumer) handleEventMessage(msg *dto.Message) {
-	// ctx := context.Background()
-	// client := socketserver.NewSocketServerClient()
-	// // 1. 回复已收到ACK
-	// var req = socketserver.PushMessageRequest{
-	// 	SessionId: msg.SessionId,
-	// 	Event:     constant.EventMessageAck,
-	// }
-	// req.SetData(
-	// 	&dto.Message{
-	// 		MessageBase: dto.MessageBase{
-	// 			Event:     constant.EventMessageAck,
-	// 			Platform:  msg.Platform,
-	// 			SessionId: msg.SessionId,
-	// 			Token:     "",
-	// 		},
-	// 		MsgType:     "",
-	// 		MsgId:       "",
-	// 		GuestName:   "",
-	// 		GuestAvatar: "",
-	// 		GuestId:     "",
-	// 		Content:     "",
-	// 		KfId:        "",
-	// 		IsKf:        0,
-	// 	},
-	// )
-	// client.PushMessage(context.Background(), &req)
-	//
-	// var newMessage Message
-	// // 2. 推送给接收方.
-	// if msg.Platform == constant.PlatformKfFe {
-	// 	// 查询接收方的id.
-	// 	var repo repository.KfUserRedisRepository
-	// 	user, ok, err := repo.GetDBUser(ctx, msg.Token)
-	// 	if err != nil {
-	// 		return
-	// 	}
-	// 	if !ok {
-	// 		return
-	// 	}
-	// 	// 推给后台.
-	// 	newMessage = Message{
-	// 		Event:       constant.EventMessage,
-	// 		Platform:    constant.PlatformKFBackend,
-	// 		SessionId:   "",
-	// 		Token:       "",
-	// 		MsgType:     msg.MsgType,
-	// 		MsgId:       msg.MsgId,
-	// 		GuestName:   user.NickName,
-	// 		GuestAvatar: user.Avatar,
-	// 		GuestId:     user.UUID,
-	// 		Content:     msg.Content,
-	// 		KfId:        "",
-	// 		IsKf:        2,
-	// 	}
-	// } else {
-	// 	// 推给前台
-	// 	// 推给后台.
-	// 	newMessage = Message{
-	// 		Event:       constant.EventMessage,
-	// 		Platform:    constant.PlatformKFBackend,
-	// 		SessionId:   "",
-	// 		Token:       "",
-	// 		MsgType:     msg.MsgType,
-	// 		MsgId:       msg.MsgId,
-	// 		GuestName:   user.NickName,
-	// 		GuestAvatar: user.Avatar,
-	// 		GuestId:     user.UUID,
-	// 		Content:     msg.Content,
-	// 		KfId:        "",
-	// 		IsKf:        2,
-	// 	}
-	// }
+	ctx := context.Background()
+	_ = ctx
+	client := socketserver.NewSocketServerClient()
+	// 1. 回复已收到ACK
+	var req = socketserver.PushMessageRequest{
+		SessionId: msg.SessionId,
+		Event:     constant.EventMessageAck,
+	}
+	req.SetData(
+		&dto.Message{
+			MessageBase: dto.MessageBase{
+				Event:     constant.EventMessageAck,
+				Platform:  msg.Platform,
+				SessionId: msg.SessionId,
+			},
+		},
+	)
+	client.PushMessage(context.Background(), &req)
+
+	req = socketserver.PushMessageRequest{}
+	var newMessage dto.Message
+	data, _ := json.Marshal(msg)
+	fmt.Println(string(data))
+	// 2. 推送给接收方.
+	if msg.Platform == constant.PlatformKfBe {
+		// 查询接收方的id.
+		// 前台找后台的id.
+		cardId, err := caches.ImSessionCacheInstance.GetCardIDByKFFEToken(ctx, msg.GuestId)
+		if err != nil {
+			return
+		}
+		// 找前台的sessionid
+		sid, err := caches.ImSessionCacheInstance.GetKFFESessionIdByUserId(ctx, cardId, msg.GuestId)
+		if err != nil {
+			return
+		}
+		if sid == "" {
+			// TODO:: 离线消息操作
+			return
+		}
+		// 推给前台
+		newMessage = dto.Message{
+			MessageBase: dto.MessageBase{
+				Event:     constant.EventMessage,
+				Platform:  constant.PlatformKfFe,
+				SessionId: sid,
+				Token:     msg.GuestId,
+			},
+			MsgType:     msg.MsgType,
+			MsgId:       msg.MsgId,
+			GuestName:   msg.GuestName,
+			GuestAvatar: msg.GuestAvatar,
+			GuestId:     msg.GuestId,
+			Content:     msg.Content,
+			KfId:        msg.KfId,
+			IsKf:        msg.IsKf,
+		}
+		req.SessionId = sid
+		req.Event = constant.EventMessage
+		req.SetData(newMessage)
+		client.PushMessage(context.Background(), &req)
+	} else {
+		// 发给后台
+		cardId, err := caches.ImSessionCacheInstance.GetCardIDByKFFEToken(ctx, msg.Token)
+		if err != nil {
+			return
+		}
+		// 找前台的sessionid
+		sids, err := caches.ImSessionCacheInstance.GetKfbeSessionIds(ctx, cardId)
+		if err != nil {
+			return
+		}
+		if len(sids) == 0 {
+			// TODO:: 离线消息操作
+			return
+		}
+		newMessage = dto.Message{
+			MessageBase: dto.MessageBase{
+				Event:    constant.EventMessage,
+				Platform: constant.PlatformKfFe,
+			},
+			MsgType:     msg.MsgType,
+			MsgId:       msg.MsgId,
+			GuestName:   msg.GuestName,
+			GuestAvatar: msg.GuestAvatar,
+			GuestId:     msg.GuestId,
+			Content:     msg.Content,
+			KfId:        msg.KfId,
+			IsKf:        msg.IsKf,
+		}
+		req.SessionIds = sids
+		req.Event = constant.EventMessage
+		req.SetData(newMessage)
+		client.PushMessage(context.Background(), &req)
+	}
 }

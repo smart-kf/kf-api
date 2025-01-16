@@ -10,6 +10,7 @@ import (
 	"github.com/smart-fm/kf-api/endpoints/common"
 	"github.com/smart-fm/kf-api/endpoints/http/vo/kffrontend"
 	"github.com/smart-fm/kf-api/infrastructure/mysql/dao"
+	"github.com/smart-fm/kf-api/pkg/xerrors"
 )
 
 type QRCodeController struct {
@@ -32,7 +33,7 @@ func (c *QRCodeController) Scan(ctx *gin.Context) {
 	}
 
 	if !exist {
-		ctx.String(200, "404 Not Found")
+		c.Error(ctx, xerrors.NewCustomError("二维码已失效"))
 		return
 	}
 

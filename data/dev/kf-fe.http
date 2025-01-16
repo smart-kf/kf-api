@@ -1,0 +1,9 @@
+# localhost:8081/s/1H3OyO/AcuIqo/AROJ3T.html
+POST {{ host }}/api/kf-fe/qrcode/scan
+Content-Type: application/json
+
+{
+  "code": "/s/1H3OyO/AcuIqo/AROJ3T.html"
+}
+
+### 4|bb0218246c6e40b3865c22bb1b3d6879
