@@ -26,7 +26,6 @@ func (c *QRCodeController) List(ctx *gin.Context) {
 	}
 
 	reqCtx := ctx.Request.Context()
-
 	cardID := common.GetKFCardID(ctx)
 
 	var kfsetting repository.KFSettingRepository
