@@ -31,6 +31,7 @@ type QRCodeSwitchResponse struct {
 type QRCodeOnOffRequest struct {
 	OnOff        *bool `json:"onoff" doc:"开关：所有二维码的所有用户都不能进入"`
 	OnOffNewUser *bool `json:"onoffNewUser" doc:"开关：老用户可进，新用户不能进"`
+	CancelQRCode *bool `json:"cancelQRCode" doc:"失效当前的二维码，生成新的二维码"`
 }
 type QRCodeOnOffResponse struct{}
 

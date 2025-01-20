@@ -2,7 +2,6 @@ package caches
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -23,12 +22,9 @@ func (c *kfSettingCache) GetOne(ctx context.Context, cardID string) (*dao.KFSett
 		return res, nil
 	}
 	var repo repository.KFSettingRepository
-	setting, ok, err := repo.GetByCardID(ctx, cardID)
+	setting, err := repo.MustGetByCardID(ctx, cardID)
 	if err != nil {
 		return nil, err
-	}
-	if !ok {
-		return nil, errors.New("not found")
 	}
 	setCacheByKey[dao.KFSettings](ctx, fmt.Sprintf(kfSettingCacheKey, cardID), *setting, 10*time.Minute)
 	return setting, nil

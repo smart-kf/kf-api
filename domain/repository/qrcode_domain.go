@@ -38,16 +38,16 @@ func (r *QRCodeDomainRepository) FindByCardID(ctx context.Context, cardID string
 }
 
 // FindDomain
-func (r *QRCodeDomainRepository) FindDomain(ctx context.Context, qrCodeId int) ([]*dao.KFQRCodeDomain, error) {
+func (r *QRCodeDomainRepository) FindDomain(ctx context.Context, cardId string) ([]*dao.KFQRCodeDomain, error) {
 	tx := mysql.GetDBFromContext(ctx)
 	var data []*dao.KFQRCodeDomain
-	if err := tx.Where("qrcode_id = ?", qrCodeId).Find(&data).Error; err != nil {
+	if err := tx.Where("card_id = ?", cardId).Find(&data).Error; err != nil {
 		return nil, err
 	}
 	return data, nil
 }
 
-// FindDomain
+// CreateOne
 func (r *QRCodeDomainRepository) CreateOne(ctx context.Context, qrCode *dao.KFQRCode) error {
 	tx := mysql.GetDBFromContext(ctx)
 	if err := tx.Create(qrCode).Error; err != nil {

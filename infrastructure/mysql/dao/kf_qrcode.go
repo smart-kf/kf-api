@@ -14,7 +14,7 @@ type KFQRCode struct {
 
 type KFQRCodeDomain struct {
 	gorm.Model
-	QRCodeId  int64  `json:"qrcodeId" gorm:"column:qrcode_id"`              // 二维码id
+	CardID    string `json:"cardId" gorm:"card_id"`
 	Domain    string `json:"domain" gorm:"column:domain;type:varchar(255)"` // 前台域名
 	DomainId  int64  `json:"domainId" gorm:"column:domain_id"`              // bill_domain 的id
 	IsPrivate bool   `json:"is_private" gorm:"column:is_private"`           // 是否是私有

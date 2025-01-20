@@ -7,7 +7,6 @@ import (
 	"github.com/smart-fm/kf-api/domain/caches"
 	"github.com/smart-fm/kf-api/domain/repository"
 	"github.com/smart-fm/kf-api/endpoints/common"
-	"github.com/smart-fm/kf-api/infrastructure/mysql/dao"
 )
 
 type SysConfController struct {
@@ -33,16 +32,11 @@ func (c *SysConfController) Get(ctx *gin.Context) {
 	cardID := common.GetKFCardID(ctx)
 
 	var kfsetting repository.KFSettingRepository
-	setting, ok, err := kfsetting.GetByCardID(reqCtx, cardID)
+	setting, err := kfsetting.MustGetByCardID(reqCtx, cardID)
 	if err != nil {
 		xlogger.Error(reqCtx, "查询客服设置失败", xlogger.Err(err), xlogger.Any("cardId", cardID))
 		c.Error(ctx, err)
 		return
-	}
-
-	if !ok {
-		setting = &dao.KFSettings{}
-		setting.CardID = cardID
 	}
 
 	sysConf := GetSysConfResponse{
@@ -88,15 +82,11 @@ func (c *SysConfController) Post(ctx *gin.Context) {
 
 	var kfsetting repository.KFSettingRepository
 
-	setting, ok, err := kfsetting.GetByCardID(ctx, cardID)
+	setting, err := kfsetting.MustGetByCardID(ctx, cardID)
 	if err != nil {
 		xlogger.Error(reqCtx, "查询客服设置失败", xlogger.Err(err), xlogger.Any("cardId", cardID))
 		c.Error(ctx, err)
 		return
-	}
-
-	if !ok {
-		setting = &dao.KFSettings{}
 	}
 
 	setting.Nickname = req.Nickname

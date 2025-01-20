@@ -2,10 +2,8 @@ package repository
 
 import (
 	"context"
-	"errors"
 
 	xlogger "github.com/clearcodecn/log"
-	"gorm.io/gorm"
 
 	mysql2 "github.com/smart-fm/kf-api/infrastructure/mysql"
 	"github.com/smart-fm/kf-api/infrastructure/mysql/dao"
@@ -13,17 +11,14 @@ import (
 
 type KFSettingRepository struct{}
 
-func (r *KFSettingRepository) GetByCardID(ctx context.Context, cardID string) (*dao.KFSettings, bool, error) {
+func (r *KFSettingRepository) MustGetByCardID(ctx context.Context, cardID string) (*dao.KFSettings, error) {
 	tx := mysql2.GetDBFromContext(ctx)
 	var setting dao.KFSettings
 	res := tx.Where("card_id = ?", cardID).First(&setting)
 	if err := res.Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, false, nil
-		}
-		return nil, false, err
+		return dao.NewDefaultKFSettings(cardID), nil
 	}
-	return &setting, true, nil
+	return &setting, nil
 }
 
 // SaveOne save一条数据

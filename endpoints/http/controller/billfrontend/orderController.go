@@ -213,7 +213,7 @@ func (c *BaseController) Notify(ctx *gin.Context) {
 
 	// 分配公共域名
 	qrCodeDomain := dao.KFQRCodeDomain{
-		QRCodeId:  int64(qrCode.ID),
+		CardID:    card.CardID,
 		Domain:    domain.TopName,
 		DomainId:  int64(domain.ID),
 		IsPrivate: false,
