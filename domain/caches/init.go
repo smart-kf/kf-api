@@ -18,6 +18,7 @@ var (
 	KfUserCacheInstance      *kfUserCache
 	KfAuthCacheInstance      *kfAuthCache
 	IdAtomicCacheInstance    *idAtomicCache
+	KfSettingCache           *kfSettingCache
 )
 
 func InitCacheInstances() {
@@ -33,6 +34,7 @@ func InitCacheInstances() {
 			KfUserCacheInstance = &kfUserCache{}
 			KfAuthCacheInstance = &kfAuthCache{}
 			IdAtomicCacheInstance = &idAtomicCache{}
+			KfSettingCache = &kfSettingCache{}
 		},
 	)
 }

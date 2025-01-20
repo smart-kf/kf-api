@@ -4,6 +4,7 @@ import (
 	xlogger "github.com/clearcodecn/log"
 	"github.com/gin-gonic/gin"
 
+	"github.com/smart-fm/kf-api/domain/caches"
 	"github.com/smart-fm/kf-api/domain/repository"
 	"github.com/smart-fm/kf-api/endpoints/common"
 	"github.com/smart-fm/kf-api/infrastructure/mysql/dao"
@@ -108,6 +109,7 @@ func (c *SysConfController) Post(ctx *gin.Context) {
 	setting.SimulatorFilter = req.SimulatorFilter
 	setting.Notice = req.Notice
 	setting.NewMessageVoice = req.NewMessageVoice
+	setting.CardID = cardID
 
 	err = kfsetting.SaveOne(reqCtx, setting)
 	if err != nil {
@@ -116,5 +118,6 @@ func (c *SysConfController) Post(ctx *gin.Context) {
 		return
 	}
 
+	caches.KfSettingCache.DeleteOne(ctx, cardID)
 	c.Success(ctx, PostSysConfResponse{})
 }

@@ -35,7 +35,6 @@ func SwaggerDoc(group *swaggos.Group) {
 	{
 		chat.Post("/list").Body(kfbackend.ChatListRequest{}).JSON(kfbackend.ChatListResponse{}).Description("会话列表")
 		chat.Post("/msgs").Body(kfbackend.MsgListRequest{}).JSON(kfbackend.MsgListResponse{}).Description("消息列表 按消息id倒序滚页查询")
-		chat.Post("/msgs/read").Body(kfbackend.ReadMsgRequest{}).JSON(kfbackend.ReadMsgResponse{}).Description("上报已读消息")
 		chat.Post("/users/op").Body(kfbackend.BatchOpUserRequest{}).JSON(kfbackend.ReadMsgResponse{}).Description("对粉丝的批量操作 拉黑/置顶")
 		chat.Post("/user/update").Body(kfbackend.UpdateUserRequest{}).JSON(kfbackend.UpdateUserResponse{}).Description("更新粉丝信息")
 	}
