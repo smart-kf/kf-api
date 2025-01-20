@@ -58,15 +58,13 @@ func (c *QRCodeController) List(ctx *gin.Context) {
 		c.Error(ctx, err)
 		return
 	}
-	firstDomain := ""
-	if len(qrCodeDomain) > 0 {
-		firstDomain = qrCodeDomain[0].Domain
-	}
+
 	var domains []kfbackend.QRCodeDomain
 	for idx, item := range qrCodeDomain {
 		domains = append(
 			domains, kfbackend.QRCodeDomain{
 				Id:        idx + 1,
+				QRCodeURL: qrCode.Path,
 				Domain:    item.Domain,
 				CreateAt:  item.CreatedAt.Unix(),
 				IsPrivate: item.IsPrivate,
@@ -76,11 +74,8 @@ func (c *QRCodeController) List(ctx *gin.Context) {
 	}
 	c.Success(
 		ctx, kfbackend.QRCodeResponse{
-			QRCodeURL:     fmt.Sprintf("%s%s", firstDomain, qrCode.Path),
-			HealthAt:      0,
 			Enable:        enable,
 			EnableNewUser: enableNewUser,
-			Version:       qrCode.Version,
 			Domains:       domains,
 		},
 	)
