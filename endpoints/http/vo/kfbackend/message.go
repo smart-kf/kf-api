@@ -17,6 +17,7 @@ type QRCodeResponse struct {
 }
 
 type QRCodeDomain struct {
+	Id        int    `json:"id" doc:"id"`
 	Domain    string `json:"domain,omitempty" doc:"站点域名"`
 	HealthAt  int64  `json:"healthAt,omitempty" doc:"通过健康检查的时间 毫秒"`
 	CreateAt  int64  `json:"createAt,omitempty" doc:"添加创建时间 毫秒"`

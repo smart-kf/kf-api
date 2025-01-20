@@ -63,9 +63,10 @@ func (c *QRCodeController) List(ctx *gin.Context) {
 		firstDomain = qrCodeDomain[0].Domain
 	}
 	var domains []kfbackend.QRCodeDomain
-	for _, item := range qrCodeDomain {
+	for idx, item := range qrCodeDomain {
 		domains = append(
 			domains, kfbackend.QRCodeDomain{
+				Id:        idx + 1,
 				Domain:    item.Domain,
 				CreateAt:  item.CreatedAt.Unix(),
 				IsPrivate: item.IsPrivate,
