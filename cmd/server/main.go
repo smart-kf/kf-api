@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	http2 "net/http"
 	"time"
 
 	xlogger "github.com/clearcodecn/log"
@@ -17,12 +18,15 @@ import (
 	"github.com/smart-fm/kf-api/infrastructure/mysql"
 	"github.com/smart-fm/kf-api/infrastructure/nsq"
 	"github.com/smart-fm/kf-api/infrastructure/redis"
+	"github.com/smart-fm/kf-api/pkg/datagen/kffe"
 )
 
 var configName string
+var generateFakeMessage bool
 
 func init() {
 	flag.StringVar(&configName, "c", "config.yaml", "配置文件")
+	flag.BoolVar(&generateFakeMessage, "gen", false, "生成假消息数据")
 }
 
 func main() {
@@ -33,6 +37,11 @@ func main() {
 	redis.InitRedis()
 	nsq.InitNSQ()
 	producer.InitProducer()
+
+	if generateFakeMessage {
+		doGenerateFakeMessage()
+		return
+	}
 
 	caches.InitCacheInstances()
 	var (
@@ -89,4 +98,30 @@ func initLogger(conf *config.Config) {
 	}
 
 	xlogger.SetGlobal(logger)
+}
+
+func doGenerateFakeMessage() {
+	cli := http2.Client{
+		Timeout: 1 * time.Second,
+	}
+	_, err := cli.Get("https://www.google.com")
+	if err != nil {
+		// 自动探测.
+		kffe.Gen(
+			kffe.GenRequest{
+				Host:   "http://localhost:8081",
+				QRCode: "/s/EkCLyM/BJfmus/ak8BXI.html",
+				CardId: `TM-J9pWlL8GfI`,
+			},
+		)
+	} else {
+		// 自动探测.
+		kffe.Gen(
+			kffe.GenRequest{
+				Host:   "http://localhost:8081",
+				QRCode: "/s/2VoVue/rfQj7G/oLqFXg.html",
+				CardId: "TM-Tsmab1509q",
+			},
+		)
+	}
 }

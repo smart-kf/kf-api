@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/smart-fm/kf-api/config"
 	"github.com/smart-fm/kf-api/domain/caches"
 	"github.com/smart-fm/kf-api/domain/repository"
 	"github.com/smart-fm/kf-api/endpoints/common/constant"
@@ -103,8 +104,9 @@ func (c *AuthController) Login(ctx *gin.Context) {
 	// 查找公告.
 	c.Success(
 		ctx, kfbackend.LoginResponse{
-			Token:  token,
-			Notice: caches.BillSettingCacheInstance.GetNotice(),
+			Token:     token,
+			Notice:    caches.BillSettingCacheInstance.GetNotice(),
+			CdnDomain: config.GetConfig().Web.CdnHost,
 		},
 	)
 }

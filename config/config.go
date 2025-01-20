@@ -26,6 +26,7 @@ type Web struct {
 	Addr      string `json:"addr" default:"127.0.0.1"`
 	Port      int    `json:"port" default:"8081"`
 	StaticDir string `json:"staticDir" default:"static"`
+	CdnHost   string `json:"cdnHost" default:"cdnHost"` // 用户上传的文件cdn域名
 }
 
 func (w Web) String() string {

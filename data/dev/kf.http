@@ -1,11 +1,13 @@
 ### 客服登录  TM-Tsmab1509q
 ### 测试环境客服token: f64366a9-19dc-43fb-b1ed-c33bb11180b6
+### dev: TM-J9pWlL8GfI
+### dev: 5755b35f-fecc-4ff1-8b43-5c4a6cb6c5c5
 POST {{ host }}/api/kf-be/login
 Content-Type: application/json
 Authorization: {{ kf_token }}
 
 {
-  "cardID": "TM-Tsmab1509q"
+  "cardID": "{{ cardId }}"
 }
 
 > {%
@@ -20,3 +22,21 @@ GET {{ host }}/api/kf-be/qrcode
 Content-Type: application/json
 Authorization: {{ kf_token }}
 
+
+### 获取聊天信息列表
+### 测试环境
+POST {{ host }}/api/kf-be/chat/list
+Content-Type: application/json
+Authorization: {{ kf_token }}
+
+{}
+
+### 获取消息列表
+### 测试环境
+POST {{ host }}/api/kf-be/chat/msgs
+Content-Type: application/json
+Authorization: {{ kf_token }}
+
+{
+  "guestId": "51|b298877dfe8342baab38f2056e610a3c"
+}

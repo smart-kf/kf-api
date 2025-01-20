@@ -4,7 +4,7 @@ POST {{ host }}/api/kf-fe/qrcode/scan
 Content-Type: application/json
 
 {
-  "code": "/s/2VoVue/rfQj7G/oLqFXg.html"
+  "code": "/s/EkCLyM/BJfmus/ak8BXI.html"
 }
 
 ### 4|bb0218246c6e40b3865c22bb1b3d6879

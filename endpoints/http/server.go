@@ -111,7 +111,6 @@ func registerRouter(g *gin.Engine) {
 		{
 			chatGroup.POST("/list", chatController.List)
 			chatGroup.POST("/msgs", chatController.Msgs)
-			chatGroup.POST("/msgs/read", chatController.MsgsRead)
 			chatGroup.POST("/users/op", chatController.UserOp)
 			chatGroup.POST("/user/update", chatController.UserUpdate)
 		}

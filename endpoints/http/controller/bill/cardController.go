@@ -2,6 +2,7 @@ package bill
 
 import (
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 
 	"github.com/smart-fm/kf-api/domain/caches"
 	"github.com/smart-fm/kf-api/domain/repository"
@@ -24,19 +25,32 @@ func (c *CardController) BatchAddCard(ctx *gin.Context) {
 	if !c.BindAndValidate(ctx, &req) {
 		return
 	}
+	reqCtx := ctx.Request.Context()
+
 	var cards []*dao.KFCard
 	oneDayCardPrice := caches.BillSettingCacheInstance.OneDayCardPrice()
 	price := int64(oneDayCardPrice * req.Days)
+
+	mainIds, err := caches.IdAtomicCacheInstance.GetBizIds(reqCtx, req.Num)
+	if err != nil {
+		c.Error(ctx, err)
+		return
+	}
+
 	for i := 0; i < req.Num; i++ {
-		cards = append(
-			cards, &dao.KFCard{
-				CardID:      utils.RandomCard(10),
-				SaleStatus:  constant.SaleStatusOnSale,
-				LoginStatus: constant.LoginStatusUnLogin,
-				CardType:    req.CardType,
-				Day:         req.Days,
-				Price:       price,
+		card := &dao.KFCard{
+			Model: gorm.Model{
+				ID: uint(mainIds[i]),
 			},
+			CardID:      utils.RandomCard(10),
+			SaleStatus:  constant.SaleStatusOnSale,
+			LoginStatus: constant.LoginStatusUnLogin,
+			CardType:    req.CardType,
+			Day:         req.Days,
+			Price:       price,
+		}
+		cards = append(
+			cards, card,
 		)
 	}
 

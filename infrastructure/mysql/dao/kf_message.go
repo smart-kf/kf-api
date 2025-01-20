@@ -2,45 +2,20 @@ package dao
 
 import (
 	"gorm.io/gorm"
+
+	"github.com/smart-fm/kf-api/endpoints/common"
 )
 
 // KFMessage 消息
 type KFMessage struct {
 	gorm.Model
-	ID       uint64      `gorm:"primaryKey;type;bigint unsigned;autoIncrement"`    // 消息自增id
-	Type     MessageType `gorm:"column:type;type:tinyint(4)" json:"type"`          // 消息类型
-	From     string      `gorm:"column:from;type:varchar(255)" json:"from"`        // 发送方id 存成字符串方便统一查询
-	FromType ChatObjType `gorm:"column:from_type;type:tinyint(4)" json:"fromType"` // 发送方类型
-	To       string      `gorm:"column:to;type:varchar(255)" json:"to"`            // 接收方id 存成字符串方便统一查询
-	ToType   ChatObjType `gorm:"column:to_type;type:tinyint(4)" json:"toType"`     // 接收方类型
-	ReadAt   int64       `gorm:"column:read_at" json:"read_at"`                    // 接收方已读消息的时间
-	Content  string      `gorm:"column:content;type:longtext;" json:"content"`     // 内容.
+	MsgId   string             `gorm:"column:"`
+	MsgType common.MessageType `gorm:"column:msg_type;type:varchar(128)" json:"type"` // 消息类型
+	GuestId string             `gorm:"column:guest_id" json:"guestId"`                // 客服id
+	CardId  string             `gorm:"column:card_id" json:"cardId"`                  // 卡密id
+	Content string             `gorm:"column:content;type:longtext;" json:"content"`  // 内容.
+	IsKf    int                `gorm:"column:is_kf;type:tinyint(4)"`                  // 是否是客服
 }
-
-type MessageType int8
-
-const (
-	MessageTypeText  MessageType = iota // 文本
-	MessageTypeVoice                    // 语音
-	MessageTypeImage                    // 图片
-	MessageTypeVideo                    // 视频
-	MessageTypeUrl                      // 网址
-	MessageTypeFile                     // 其他文件
-)
-
-func (m MessageType) ToMaterialType() MaterialType {
-	return MaterialType(m)
-}
-
-// ChatObjType 聊天对象的类型
-type ChatObjType int8
-
-const (
-	ChatObjTypeSys   ChatObjType = iota // 系统
-	ChatObjTypeUser                     // 访客 即用户/粉丝
-	ChatObjTypeCard                     // 卡密 即客服
-	ChatObjTypeGroup                    // 群组
-)
 
 func (KFMessage) TableName() string {
 	return "kf_message"

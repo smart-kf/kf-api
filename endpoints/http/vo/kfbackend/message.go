@@ -49,7 +49,7 @@ const (
 )
 
 type ChatListResponse struct {
-	Chats []Chat `json:"chats,omitempty" doc:"会话列表"`
+	Chats []*Chat `json:"chats,omitempty" doc:"会话列表"`
 }
 
 type ChatType int8
@@ -60,20 +60,19 @@ const (
 )
 
 type Chat struct {
-	Type         ChatType `json:"type" doc:"会话类型 0:单聊(默认) 1:群聊(暂不做)"`
 	User         User     `json:"user" doc:"访客信息"`
 	LastChatAt   int64    `json:"lastChatAt" doc:"最近聊天时间 毫秒"`
-	LastMessage  Message  `json:"lastMessage" doc:"最近一次聊天的消息内容"`
+	LastMessage  *Message `json:"lastMessage" doc:"最近一次聊天的消息内容"`
 	UnreadMsgCnt int64    `json:"unreadMsgCnt" doc:"未读消息数"`
 }
 
 type MsgListRequest struct {
-	FromTos              []string `json:"fromTos" doc:"发送方id和接收方id数组 即一个会话中客服和粉丝的ids"`
+	GuestId              string `json:"guestId" binding:"required" doc:" 即一个会话中粉丝的id"`
 	common.ScrollRequest `json:",inline"`
 }
 
 type MsgListResponse struct {
-	Messages []Message `json:"messages" doc:"消息列表"`
+	Messages []*Message `json:"messages" doc:"消息列表"`
 }
 
 type ReadMsgRequest struct {
@@ -112,14 +111,13 @@ type UpdateUserResponse struct {
 }
 
 type Message struct {
-	ID       uint64          `json:"id" doc:"消息自增id 可用作排序"`
-	Content  string          `json:"content" doc:"消息的内容"`
-	From     string          `json:"from" doc:"发送方id"`
-	FromType dao.ChatObjType `json:"fromType" doc:"发送方类型 0:系统 1:访客 2:客服"`
-	To       string          `json:"to" doc:"接收方id"`
-	ToType   dao.ChatObjType `json:"toType" doc:"接收方类型 0:系统 1:访客 2:客服"`
-	ReadAt   int64           `json:"readAt" doc:"接收方是否已读 如果已读则存有已读时间 单位秒"`
-	CreateAt int64           `json:"create_at" doc:"消息创建时间 单位秒 可用作合并时间窗口"`
+	MsgId    string             `doc:"消息id" json:"msgId"`
+	MsgType  common.MessageType `json:"type" doc:"消息类型:text||image||video"`              // 消息类型
+	GuestId  string             `gorm:"column:guest_id" json:"guestId" doc:"客户id"`       // 客服id
+	CardId   string             `gorm:"column:card_id" json:"cardId" doc:"卡密id: 只有后台有值"` // 卡密id
+	Content  string             `json:"content" doc:"消息的内容"`                             // 内容.
+	IsKf     int                `gorm:"column:is_kf;type:tinyint(4)"`                    // 是否是客服
+	CreateAt int64              `json:"createAt" doc:"消息创建时间 单位秒 可用作合并时间窗口"`
 }
 
 type Material struct {
@@ -163,24 +161,27 @@ type File struct {
 }
 
 type User struct {
-	UUID        string `json:"uuid,omitempty" doc:"访客/粉丝/用户的id"`
-	Avatar      string `json:"avatar,omitempty" doc:"头像 相对地址"`
-	NickName    string `json:"nickName,omitempty" doc:"昵称"`
-	IsOnline    bool   `json:"isOnline,omitempty" doc:"是否在线"`
-	RemarkName  string `json:"remarkName,omitempty" doc:"备注名称"`
-	Mobile      string `json:"mobile,omitempty" doc:"手机号"`
-	Comments    string `json:"comments,omitempty" doc:"备注信息"`
-	IP          string `json:"ip,omitempty" doc:"注册ip"`
-	Area        string `json:"area,omitempty" doc:"ip对应的地区"`
-	Browser     string `json:"browser,omitempty" doc:"浏览器 Chrome/Safari/firfox/..."`
-	Device      string `json:"device,omitempty" doc:"设备类型： iphone/android/..."`
-	IsProxy     int    `json:"isProxy,omitempty" doc:"是否使用了代理ip访问: 1=是，2=不是."`
-	IsEmulator  int    `json:"isEmulator,omitempty" doc:"是否是模拟器 1=是，2=不是"`
-	Source      string `json:"source,omitempty" doc:"来源"`
-	OfflineAt   int64  `json:"offlineAt,omitempty" doc:"离线时间 秒"`
-	NetworkType string `json:"networkType,omitempty" doc:"网络类型 wifi/4G/5G"`
-	ScanCount   int64  `json:"scanCount,omitempty" doc:"扫码次数"`
-	TopAt       int64  `json:"topAt,omitempty" doc:"置顶时间 >0则是置顶 秒"`
-	BlockAt     int64  `json:"blockAt,omitempty" doc:"拉黑时间 >0则是拉黑 秒"`
-	LastChatAt  int64  `json:"lastChatAt,omitempty" doc:"最近聊天时间 毫秒"`
+	CardID      string `json:"card_id" gorm:"column:card_id;index" doc:"卡密id"`                    // 卡密id
+	UUID        string `json:"uuid" gorm:"column:uuid;unique;type:varchar(255)" doc:"用户的uuid"`    // 用户的uuid，不用主键做业务.
+	Avatar      string `json:"avatar" gorm:"column:avatar;type:varchar(255)" doc:"头像地址，存储的是相对路径"` // 头像地址，存储的是相对路径
+	NickName    string `json:"nickName" gorm:"column:nick_name;type:varchar(255)" doc:"昵称"`
+	RemarkName  string `json:"remarkName" gorm:"column:remark_name" doc:"备注名称"`         // 备注名称.
+	Mobile      string `json:"mobile" gorm:"column:mobile" doc:"手机号"`                   // 手机号
+	Comments    string `json:"comments" gorm:"column:comments" doc:"备注信息"`              // 备注信息
+	IP          string `json:"ip" gorm:"column:ip;type:varchar(255)" doc:"注册ip"`        // 注册ip
+	Area        string `json:"area" gorm:"column:area;type:varchar(255)" doc:"ip对应的地区"` // ip对应的地区
+	UserAgent   string `json:"userAgent" gorm:"column:user_agent;type:varchar(1000)" doc:"浏览器user-agent"`
+	Browser     string `json:"browser"  doc:"浏览器 Chrome/Safari/firfox/..."`                  // 浏览器 Chrome/Safari/firfox/...
+	Device      string `json:"device" doc:"设备类型： iphone、android、"`                           // 设备类型： iphone、android、
+	IsProxy     int    `json:"isProxy" gorm:"column:is_proxy" doc:"是否使用了代理ip访问: 1=是，2=不是."`  // 是否使用了代理ip访问: 1=是，2=不是.
+	IsEmulator  int    `json:"isEmulator" gorm:"column:is_emulator" doc:"是否是模拟器 1=是，2=不是"`   // 是否是模拟器 1=是，2=不是
+	Source      string `json:"source" gorm:"column:source" doc:"来源"`                         // 来源
+	OfflineAt   int64  `json:"offlineAt" gorm:"column:offline_at" doc:"离线时间 秒"`              // ws断开链接时记录
+	NetworkType string `json:"networkType" gorm:"column:network_type" doc:"网络类型:wifi/4G/5G"` // wifi/4G/5G
+	ScanCount   int64  `json:"scanCount" gorm:"column:scan_count" doc:"扫码次数"`
+	TopAt       int64  `json:"topAt" gorm:"column:top_at" doc:"置顶时间 >0则是置顶 秒"`
+	BlockAt     int64  `json:"blockAt" gorm:"column:block_at" doc:"拉黑时间 >0则是拉黑 秒"`
+	LastChatAt  int64  `json:"lastChatAt" gorm:"column:last_chat_at" doc:"最近聊天时间 毫秒"`
+	LastMsgID   uint64 `json:"lastMsgID" doc:"最近一次由该用户发送的消息id"`
+	IsOnline    bool   `json:"isOnline" doc:"是否在线"`
 }

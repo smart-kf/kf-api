@@ -231,7 +231,6 @@ func (m *MessageConsumer) handleEventMessage(msg *dto.Message) {
 			return
 		}
 		if sid == "" {
-			// TODO:: 离线消息操作
 			return
 		}
 		// 推给前台

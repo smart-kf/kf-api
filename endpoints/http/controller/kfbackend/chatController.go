@@ -2,9 +2,9 @@ package kfbackend
 
 import (
 	"context"
-	"github.com/smart-fm/kf-api/domain/caches"
-	"golang.org/x/sync/errgroup"
 	"time"
+
+	"github.com/smart-fm/kf-api/domain/caches"
 
 	xlogger "github.com/clearcodecn/log"
 	"github.com/gin-gonic/gin"
@@ -42,9 +42,11 @@ func (c *ChatController) List(ctx *gin.Context) {
 			return
 		}
 
-		uids := lo.MapToSlice(uid2Cnt, func(k string, v int64) string {
-			return k
-		})
+		uids := lo.MapToSlice(
+			uid2Cnt, func(k string, v int64) string {
+				return k
+			},
+		)
 		if len(uids) == 0 {
 			c.Success(
 				ctx, kfbackend.ChatListResponse{},
@@ -60,8 +62,16 @@ func (c *ChatController) List(ctx *gin.Context) {
 			UnreadUUIDs: unreadUUIDs,
 			ListType:    req.ListType,
 			ScrollRequest: &common.ScrollRequest{
-				Key:      "last_chat_at",
-				Asc:      false,
+				Sorters: []common.Sorter{
+					{
+						Key: "top_at", // 1. 置顶时间
+						Asc: false,
+					},
+					{
+						Key: "last_chat_at", // 2. 最近聊天时间
+						Asc: false,
+					},
+				},
 				ScrollID: req.ScrollID,
 				PageSize: req.PageSize,
 			},
@@ -93,15 +103,30 @@ func (c *ChatController) List(ctx *gin.Context) {
 
 	lastMsgMap := lo.SliceToMap(
 		msgs, func(item *dao.KFMessage) (uint64, *dao.KFMessage) {
-			return item.ID, item
+			return uint64(item.ID), item
 		},
 	)
 
+	uids := make([]string, 0, len(users))
+
 	chats := lo.Map(
-		users, func(item *dao.KfUser, index int) kfbackend.Chat {
+		users, func(item *dao.KfUser, index int) *kfbackend.Chat {
+			uids = append(uids, item.UUID)
 			return user2ChatVO(reqCtx, item, lastMsgMap)
 		},
 	)
+
+	// 在线状态.
+	if len(uids) > 0 {
+		onlineMap, err := caches.UserOnLineCacheInstance.IsUsersOnline(reqCtx, cardID, uids)
+		if err == nil {
+			lo.ForEach(
+				chats, func(item *kfbackend.Chat, index int) {
+					item.User.IsOnline = onlineMap[item.User.UUID]
+				},
+			)
+		}
+	}
 
 	c.Success(
 		ctx, kfbackend.ChatListResponse{
@@ -116,11 +141,6 @@ func (c *ChatController) Msgs(ctx *gin.Context) {
 		return
 	}
 
-	if len(req.FromTos) == 0 {
-		c.Success(ctx, kfbackend.MsgListResponse{})
-		return
-	}
-
 	reqCtx := ctx.Request.Context()
 	cardID := common.GetKFCardID(ctx)
 
@@ -129,10 +149,14 @@ func (c *ChatController) Msgs(ctx *gin.Context) {
 	msgsDTO, err := repo.List(
 		reqCtx, &repository.ListMsgOption{
 			CardID:  cardID,
-			FromTos: req.FromTos,
+			GuestId: req.GuestId,
 			ScrollRequest: &common.ScrollRequest{
-				Key:      "id",
-				Asc:      req.Asc,
+				Sorters: []common.Sorter{
+					{
+						Key: "id",
+						Asc: false,
+					},
+				},
 				ScrollID: req.ScrollID,
 				PageSize: req.PageSize,
 			},
@@ -145,7 +169,7 @@ func (c *ChatController) Msgs(ctx *gin.Context) {
 	}
 
 	msgsVO := lo.Map(
-		msgsDTO, func(item *dao.KFMessage, index int) kfbackend.Message {
+		msgsDTO, func(item *dao.KFMessage, index int) *kfbackend.Message {
 			return msg2VO(item)
 		},
 	)
@@ -157,79 +181,84 @@ func (c *ChatController) Msgs(ctx *gin.Context) {
 	)
 }
 
-func (c *ChatController) MsgsRead(ctx *gin.Context) {
-	var req kfbackend.ReadMsgRequest
-	if !c.BindAndValidate(ctx, &req) {
-		return
-	}
-
-	if len(req.MsgIDs) == 0 {
-		// do nothing
-		c.Success(ctx, kfbackend.ReadMsgResponse{})
-		return
-	}
-
-	reqCtx := ctx.Request.Context()
-	cardID := common.GetKFCardID(ctx)
-
-	var repo repository.KFMessageRepository
-
-	msgs, err := repo.ByIDs(reqCtx, cardID, req.MsgIDs...)
-	if err != nil {
-		xlogger.Error(
-			reqCtx,
-			"ByIDs",
-			xlogger.Err(err),
-			xlogger.Any("cardId", cardID),
-			xlogger.Any("ids", req.MsgIDs),
-		)
-		c.Error(ctx, err)
-		return
-	}
-
-	userIDs := lo.FilterMap(msgs, func(item *dao.KFMessage, index int) (string, bool) {
-		if item.FromType == dao.ChatObjTypeUser && len(item.From) > 0 {
-			return item.From, true
-		}
-		return "", false
-	})
-
-	userIDs = lo.Uniq(userIDs)
-
-	eg := errgroup.Group{}
-	eg.SetLimit(len(userIDs) / 3)
-	for _, userID := range userIDs {
-		eg.Go(func() error {
-			return caches.UserUnReadCacheInstance.IncrUserUnRead(reqCtx, cardID, userID, -1)
-		})
-	}
-
-	if err := eg.Wait(); err != nil {
-		xlogger.Error(
-			reqCtx,
-			"删除已读失败",
-			xlogger.Err(err),
-			xlogger.Any("cardId", cardID),
-			xlogger.Any("ids", req.MsgIDs),
-		)
-		c.Error(ctx, err)
-		return
-	}
-
-	err = repo.BatchUpdateReadAt(reqCtx, req.MsgIDs, time.Now().Unix())
-	if err != nil {
-		xlogger.Error(
-			reqCtx,
-			"更新已读时间失败",
-			xlogger.Err(err),
-			xlogger.Any("cardId", cardID),
-			xlogger.Any("ids", req.MsgIDs),
-		)
-		return
-	}
-
-	c.Success(ctx, kfbackend.ReadMsgResponse{})
-}
+//  websocket 来做.
+// func (c *ChatController) MsgsRead(ctx *gin.Context) {
+// 	var req kfbackend.ReadMsgRequest
+// 	if !c.BindAndValidate(ctx, &req) {
+// 		return
+// 	}
+//
+// 	if len(req.MsgIDs) == 0 {
+// 		// do nothing
+// 		c.Success(ctx, kfbackend.ReadMsgResponse{})
+// 		return
+// 	}
+//
+// 	reqCtx := ctx.Request.Context()
+// 	cardID := common.GetKFCardID(ctx)
+//
+// 	var repo repository.KFMessageRepository
+//
+// 	msgs, err := repo.ByIDs(reqCtx, cardID, req.MsgIDs...)
+// 	if err != nil {
+// 		xlogger.Error(
+// 			reqCtx,
+// 			"ByIDs",
+// 			xlogger.Err(err),
+// 			xlogger.Any("cardId", cardID),
+// 			xlogger.Any("ids", req.MsgIDs),
+// 		)
+// 		c.Error(ctx, err)
+// 		return
+// 	}
+//
+// 	userIDs := lo.FilterMap(
+// 		msgs, func(item *dao.KFMessage, index int) (string, bool) {
+// 			if item.FromType == dao.ChatObjTypeUser && len(item.From) > 0 {
+// 				return item.From, true
+// 			}
+// 			return "", false
+// 		},
+// 	)
+//
+// 	userIDs = lo.Uniq(userIDs)
+//
+// 	eg := errgroup.Group{}
+// 	eg.SetLimit(len(userIDs) / 3)
+// 	for _, userID := range userIDs {
+// 		eg.Go(
+// 			func() error {
+// 				return caches.UserUnReadCacheInstance.IncrUserUnRead(reqCtx, cardID, userID, -1)
+// 			},
+// 		)
+// 	}
+//
+// 	if err := eg.Wait(); err != nil {
+// 		xlogger.Error(
+// 			reqCtx,
+// 			"删除已读失败",
+// 			xlogger.Err(err),
+// 			xlogger.Any("cardId", cardID),
+// 			xlogger.Any("ids", req.MsgIDs),
+// 		)
+// 		c.Error(ctx, err)
+// 		return
+// 	}
+//
+// 	err = repo.BatchUpdateReadAt(reqCtx, req.MsgIDs, time.Now().Unix())
+// 	if err != nil {
+// 		xlogger.Error(
+// 			reqCtx,
+// 			"更新已读时间失败",
+// 			xlogger.Err(err),
+// 			xlogger.Any("cardId", cardID),
+// 			xlogger.Any("ids", req.MsgIDs),
+// 		)
+// 		return
+// 	}
+//
+// 	c.Success(ctx, kfbackend.ReadMsgResponse{})
+// }
 
 func (c *ChatController) UserOp(ctx *gin.Context) {
 	var req kfbackend.BatchOpUserRequest
@@ -315,13 +344,12 @@ func (c *ChatController) UserUpdate(ctx *gin.Context) {
 	c.Success(ctx, kfbackend.BatchOpUserResponse{})
 }
 
-func user2ChatVO(ctx context.Context, u *dao.KfUser, lastMsgMap map[uint64]*dao.KFMessage) kfbackend.Chat {
+func user2ChatVO(ctx context.Context, u *dao.KfUser, lastMsgMap map[uint64]*dao.KFMessage) *kfbackend.Chat {
 	unreadCnt, err := caches.UserUnReadCacheInstance.GetUserUnRead(ctx, u.CardID, u.UUID)
 	if err != nil {
 		xlogger.Error(ctx, "GetUserUnRead err", xlogger.Err(err))
 	}
 	chat := kfbackend.Chat{
-		Type:         kfbackend.ChatTypeSingle,
 		User:         user2VO(ctx, u),
 		LastChatAt:   u.LastChatAt,
 		UnreadMsgCnt: unreadCnt,
@@ -332,33 +360,26 @@ func user2ChatVO(ctx context.Context, u *dao.KfUser, lastMsgMap map[uint64]*dao.
 		chat.LastMessage = msg2VO(msg)
 	}
 
-	return chat
+	return &chat
 }
 
 func user2VO(ctx context.Context, u *dao.KfUser) kfbackend.User {
 	vo := kfbackend.User{}
 	copier.Copy(&vo, u)
 
-	var err error
-	vo.IsOnline, err = caches.UserOnLineCacheInstance.IsUserOnline(ctx, u.CardID, u.UUID)
-	if err != nil {
-		xlogger.Error(ctx, "IsUserOnline err", xlogger.Err(err))
-	}
-
+	vo.CardID = ""
 	return vo
 }
 
-func msg2VO(m *dao.KFMessage) kfbackend.Message {
-	vo := kfbackend.Message{
-		ID:       m.ID,
+func msg2VO(m *dao.KFMessage) *kfbackend.Message {
+	vo := &kfbackend.Message{
+		MsgId:    m.MsgId,
+		MsgType:  m.MsgType,
+		GuestId:  m.GuestId,
+		CardId:   m.CardId,
 		Content:  m.Content,
-		From:     m.From,
-		FromType: m.FromType,
-		To:       m.To,
-		ToType:   m.ToType,
-		ReadAt:   m.ReadAt,
+		IsKf:     m.IsKf,
 		CreateAt: m.CreatedAt.Unix(),
 	}
-
 	return vo
 }

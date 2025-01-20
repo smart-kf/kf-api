@@ -1,12 +1,15 @@
 package billfrontend
 
 import (
+	"fmt"
 	"time"
 
 	xlogger "github.com/clearcodecn/log"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 
 	"github.com/smart-fm/kf-api/config"
+	"github.com/smart-fm/kf-api/domain/caches"
 	"github.com/smart-fm/kf-api/domain/repository"
 	"github.com/smart-fm/kf-api/endpoints/common/constant"
 	"github.com/smart-fm/kf-api/endpoints/http/vo/billfront"
@@ -14,7 +17,6 @@ import (
 	"github.com/smart-fm/kf-api/endpoints/nsq/producer"
 	"github.com/smart-fm/kf-api/infrastructure/mysql"
 	"github.com/smart-fm/kf-api/infrastructure/mysql/dao"
-	"github.com/smart-fm/kf-api/infrastructure/redis"
 	"github.com/smart-fm/kf-api/pkg/utils"
 	"github.com/smart-fm/kf-api/pkg/xerrors"
 )
@@ -41,29 +43,25 @@ func (c *BaseController) CreateOrder(ctx *gin.Context) {
 		return
 	}
 
-	no := utils.RandomOrderNo()
 	tx, reqCtx := mysql.Begin(reqCtx)
 	defer tx.Rollback()
 
 	var orderRepository repository.BillOrderRepository
-	for {
-		// 检测订单号是否存在.
-		_, ok, err := orderRepository.GetOrderByOrderNo(reqCtx, no)
-		if err != nil {
-			xlogger.Error(reqCtx, "GetOrderByOrderNo-失败:"+no, xlogger.Err(err))
-			c.Error(ctx, err)
-			return
-		}
-		if !ok {
-			break
-		}
+	orderNo, err := caches.IdAtomicCacheInstance.GetBizId(reqCtx)
+	if err != nil {
+		c.Error(ctx, xerrors.NewCustomError("系统错误"))
+		return
 	}
+	no := fmt.Sprintf("N%d", orderNo)
 
 	var orderExpireDelay = config.GetConfig().BillConfig.OrderExpireTime
 	var orderExpireTime = time.Now().UnixMicro() + orderExpireDelay*1000 // 使用毫秒.
 
 	// 1. 创建订单.
 	var order = dao.Orders{
+		Model: gorm.Model{
+			ID: uint(orderNo),
+		},
 		CardID:         "",
 		PackageId:      cardPackage.Id,
 		PackageDay:     cardPackage.Day,
@@ -81,19 +79,6 @@ func (c *BaseController) CreateOrder(ctx *gin.Context) {
 	if err := orderRepository.CreateOne(reqCtx, &order); err != nil {
 		c.Error(ctx, err)
 		xlogger.Error(reqCtx, "orderCreateOne-失败:"+no, xlogger.Err(err))
-		return
-	}
-
-	// 2. 设置取消队列.
-	redisClient := redis.GetRedisClient()
-	if err := utils.ZAdd(
-		reqCtx,
-		redisClient,
-		constant.OrderExpireZSetKey,
-		utils.ZSetMember{Member: no, Score: order.ExpireTime},
-	); err != nil {
-		c.Error(ctx, err)
-		xlogger.Error(reqCtx, "createOrder-ZAdd-失败:"+no, xlogger.Err(err))
 		return
 	}
 

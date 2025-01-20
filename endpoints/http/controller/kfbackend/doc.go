@@ -19,8 +19,8 @@ func SwaggerDoc(group *swaggos.Group) {
 	qrcode := bg.Group("/qrcode").Tag("二维码管理").
 		Header("authorization", "授权session", true)
 	{
-		qrcode.Post("/").
-			Body(kfbackend.QRCodeRequest{}).JSON(kfbackend.QRCodeResponse{}).
+		qrcode.Get("/").
+			QueryObject(kfbackend.QRCodeRequest{}).JSON(kfbackend.QRCodeResponse{}).
 			Description("获取二维码和域名列表的接口")
 
 		qrcode.Post("/switch").

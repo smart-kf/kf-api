@@ -3,8 +3,8 @@ POST {{ host }}/api/bill/login
 Content-Type: application/json
 
 {
-  "username": "kfadmin",
-  "password": "kfadmin123"
+  "username": "admin",
+  "password": "admin"
 }
 
 > {%
@@ -54,7 +54,8 @@ Authorization: {{ token }}
 
 {
   "page": 1,
-  "pageSize": 20
+  "pageSize": 20,
+  "day": 30
 }
 
 

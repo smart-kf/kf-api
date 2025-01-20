@@ -25,6 +25,7 @@ func (r *LoginRequest) Validate(ctx context.Context) error {
 }
 
 type LoginResponse struct {
-	Token  string `json:"token" doc:"用户的token"`
-	Notice string `json:"notice,omitempty" doc:"公告通知"`
+	Token     string `json:"token" doc:"用户的token"`
+	Notice    string `json:"notice,omitempty" doc:"公告通知"`
+	CdnDomain string `json:"cdnDomain" doc:"静态资源域名"`
 }

@@ -57,7 +57,7 @@ func (c *QRCodeController) Scan(ctx *gin.Context) {
 	if kfToken == "" {
 		// 生成用户信息.
 		// token := uuid.New().String()
-		user = factory.FactoryNewKfUser(int64(card.ID), common.GetKFCardID(reqCtx), ctx.ClientIP())
+		user = factory.FactoryNewKfUser(int64(card.ID), cardID, ctx.ClientIP())
 		if err := userRepo.SaveOne(reqCtx, user); err != nil {
 			xlogger.Error(reqCtx, "FindByPath failed", xlogger.Err(err))
 			c.Error(ctx, err)

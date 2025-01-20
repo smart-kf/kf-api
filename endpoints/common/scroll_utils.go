@@ -16,6 +16,12 @@ type ScrollRequest struct {
 	Asc      bool        `json:"asc,omitempty" doc:"是否是升序"`
 	ScrollID interface{} `json:"scrollID,omitempty" doc:"滚页的id"`
 	PageSize *uint       `json:"pageSize,omitempty" doc:"分页大小,默认20"`
+	Sorters  []Sorter    `json:"sorters" doc:"排序列表"`
+}
+
+type Sorter struct {
+	Key string
+	Asc bool
 }
 
 func (r *ScrollRequest) GetPageSize() int64 {
@@ -30,15 +36,22 @@ func Scroll[T schema.Tabler](db *gorm.DB, request *ScrollRequest) ([]T, error) {
 
 	var orderCols []clause.OrderByColumn
 
-	if len(request.Key) == 0 || request.Key == "id" { // 未指定key 则按id滚页
-		orderCols = append(orderCols, clause.OrderByColumn{Column: clause.Column{Name: "id"}, Desc: !request.Asc})
-	} else { // 指定key滚页时 和id组合排序
-		orderCols = append(orderCols, clause.OrderByColumn{Column: clause.Column{Name: request.Key}, Desc: !request.Asc})
-		orderCols = append(orderCols, clause.OrderByColumn{Column: clause.Column{Name: "id"}, Desc: false})
+	if len(request.Sorters) == 0 {
+		orderCols = append(
+			orderCols, clause.OrderByColumn{
+				Column: clause.Column{Name: "id"},
+				Desc:   !request.Asc,
+			},
+		)
+	} else {
+		for _, sort := range request.Sorters {
+			orderCols = append(
+				orderCols,
+				clause.OrderByColumn{Column: clause.Column{Name: sort.Key}, Desc: !sort.Asc},
+			)
+		}
 	}
-
 	order := clause.OrderBy{Columns: orderCols}
-
 	if reflect2.IsNil(request.ScrollID) {
 		result := db.
 			Order(order).

@@ -25,10 +25,6 @@ const (
 	MaterialTypeFile                      // 其他文件
 )
 
-func (m MaterialType) ToMessageType() MessageType {
-	return MessageType(m)
-}
-
 func (KFMaterial) TableName() string {
 	return "kf_material"
 }
