@@ -70,6 +70,7 @@ func (c *QRCodeController) List(ctx *gin.Context) {
 				Domain:    item.Domain,
 				CreateAt:  item.CreatedAt.Unix(),
 				IsPrivate: item.IsPrivate,
+				Status:    1, // TODO:: 处理域名状态
 			},
 		)
 	}

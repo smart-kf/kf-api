@@ -22,6 +22,7 @@ type QRCodeDomain struct {
 	HealthAt  int64  `json:"healthAt,omitempty" doc:"通过健康检查的时间 毫秒"`
 	CreateAt  int64  `json:"createAt,omitempty" doc:"添加创建时间 毫秒"`
 	IsPrivate bool   `json:"isPrivate" doc:"是否是私有域名"`
+	Status    int    `json:"status" doc:"域名状态: 1=正常，2=微信封禁, 3=系统封禁"`
 }
 
 type QRCodeSwitchRequest struct{}
