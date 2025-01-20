@@ -38,5 +38,5 @@ Content-Type: application/json
 Authorization: {{ kf_token }}
 
 {
-  "guestId": "51|b298877dfe8342baab38f2056e610a3c"
+  "guestId": "58|c75b42045c3e456d925de3c5c6d9645a"
 }

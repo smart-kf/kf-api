@@ -32,8 +32,7 @@ func SwaggerDoc(group *swaggos.Group) {
 			Description("二维码功能开关")
 	}
 
-	chat := bg.Group("/chat").Tag("聊天管理").
-		Header("authorization", "授权session", true)
+	chat := bg.Group("/chat").Tag("聊天管理")
 	{
 		chat.Post("/list").Body(kfbackend.ChatListRequest{}).JSON(kfbackend.ChatListResponse{}).Description("会话列表")
 		chat.Post("/msgs").Body(kfbackend.MsgListRequest{}).JSON(kfbackend.MsgListResponse{}).Description("消息列表 按消息id倒序滚页查询")
