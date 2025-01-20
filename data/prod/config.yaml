@@ -16,6 +16,7 @@ web:
   port: 8081
   staticDir: ./static
   cdnHost: 'https://cdn.smartkf.top'
+  uploadDir: /www/cdn
 
 log:
   level: debug    # debug / info / warn / error

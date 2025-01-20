@@ -16,6 +16,14 @@ func SwaggerDoc(group *swaggos.Group) {
 		bg.Post("/login").Body(kfbackend.LoginRequest{}).JSON(kfbackend.LoginResponse{}).Description("登陆接口").Tag("公开接口")
 	}
 
+	bg.Post("/upload").Tag("公共接口").
+		FormFile(
+			"file",
+			swaggos.Attribute{Required: true, Description: "文件, 不超过32M"},
+		).
+		Form("fileType", swaggos.Attribute{Required: true, Description: "文件类型: image || video"}).
+		JSON(kfbackend.UploadResponse{}).Description("文件上传")
+
 	qrcode := bg.Group("/qrcode").Tag("二维码管理")
 	{
 		qrcode.Get("/").

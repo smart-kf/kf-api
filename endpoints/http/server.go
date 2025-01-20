@@ -97,6 +97,8 @@ func registerRouter(g *gin.Engine) {
 	// 客服后台
 	kf := api.Group("/kf-be", middleware.KFBeAuthMiddleware())
 	{
+		var publicController kfbackend.PublicController
+		kf.POST("/upload", publicController.Upload)
 
 		var qrcodeController kfbackend.QRCodeController
 		qrCodeGroup := kf.Group("/qrcode")
