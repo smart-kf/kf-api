@@ -16,8 +16,7 @@ func SwaggerDoc(group *swaggos.Group) {
 		bg.Post("/login").Body(kfbackend.LoginRequest{}).JSON(kfbackend.LoginResponse{}).Description("登陆接口").Tag("公开接口")
 	}
 
-	qrcode := bg.Group("/qrcode").Tag("二维码管理").
-		Header("authorization", "授权session", true)
+	qrcode := bg.Group("/qrcode").Tag("二维码管理")
 	{
 		qrcode.Get("/").
 			QueryObject(kfbackend.QRCodeRequest{}).JSON(kfbackend.QRCodeResponse{}).
@@ -41,22 +40,19 @@ func SwaggerDoc(group *swaggos.Group) {
 		chat.Post("/user/update").Body(kfbackend.UpdateUserRequest{}).JSON(kfbackend.UpdateUserResponse{}).Description("更新粉丝信息")
 	}
 
-	msgLib := bg.Group("/msgLib").Tag("话术管理").
-		Header("authorization", "授权session", true)
+	msgLib := bg.Group("/msgLib").Tag("话术管理")
 	{
 		// TODO
 		msgLib.Post("/").Body(kfbackend.LoginRequest{}).JSON(kfbackend.LoginResponse{})
 	}
 
-	sysLog := bg.Group("/sysLog").Tag("操作日志").
-		Header("authorization", "授权session", true)
+	sysLog := bg.Group("/sysLog").Tag("操作日志")
 	{
 		// TODO
 		sysLog.Post("/").Body(kfbackend.LoginRequest{}).JSON(kfbackend.LoginResponse{})
 	}
 
-	sysConf := bg.Group("/sysConf").Tag("系统配置").
-		Header("authorization", "授权session", true)
+	sysConf := bg.Group("/sysConf").Tag("系统配置")
 	{
 		sysConf.Get("/").JSON(GetSysConfResponse{})
 		sysConf.Post("/").Body(PostSysConfRequest{}).JSON(PostSysConfResponse{})
