@@ -2,11 +2,10 @@ package http
 
 import (
 	"fmt"
-	"time"
+	"net/http"
 
 	xlogger "github.com/clearcodecn/log"
 	"github.com/clearcodecn/swaggos"
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/make-money-fast/captcha"
 
@@ -28,15 +27,19 @@ func Run() error {
 	g := gin.New()
 	g.Use(gin.Recovery())
 	g.Use(
-		cors.New(
-			cors.Config{
-				AllowAllOrigins:  true,
-				AllowMethods:     []string{"*"},
-				AllowHeaders:     []string{"*"},
-				AllowCredentials: true,
-				MaxAge:           360 * time.Second,
-			},
-		),
+		func(ctx *gin.Context) {
+			origin := ctx.Request.Header.Get("Origin")
+			ctx.Header("Access-Control-Allow-Origin", origin)
+			ctx.Header("Access-Control-Allow-Methods", "GET,POST,OPTIONS,DELETE,PUT,PATCH,HEAD")
+			ctx.Header("Access-Control-Allow-Headers", "*")
+			ctx.Header("Access-Control-Max-Age", "600")
+			ctx.Header("Access-Control-Allow-Credentials", "true")
+			if ctx.Request.Method == http.MethodOptions {
+				ctx.AbortWithStatus(204)
+				return
+			}
+			ctx.Next()
+		},
 	)
 
 	var logConfig xlogger.GinLogConfigure
