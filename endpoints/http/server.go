@@ -2,7 +2,6 @@ package http
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	xlogger "github.com/clearcodecn/log"
@@ -29,12 +28,7 @@ func Run() error {
 	g.Use(gin.Recovery())
 	g.Use(
 		func(ctx *gin.Context) {
-			headers := ctx.Request.Header.Get("Access-Control-Request-Headers")
-			method := ctx.Request.Header.Get("Access-Control-Request-Method")
 			origin := ctx.Request.Header.Get("Origin")
-
-			log.Println("headers,", headers)
-			log.Println("method,", method)
 			ctx.Header("Access-Control-Allow-Origin", origin)
 			ctx.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 			ctx.Header("Access-Control-Allow-Headers", "Content-Type,X-Requested-With,Authorization")
