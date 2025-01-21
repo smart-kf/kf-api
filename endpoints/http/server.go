@@ -49,7 +49,7 @@ func Run() error {
 			cors.Config{
 				AllowOrigins:     []string{"*"},
 				AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
-				AllowHeaders:     []string{"*"},
+				AllowHeaders:     []string{"authorization,x-requested-with,content-type"},
 				AllowCredentials: false,
 				MaxAge:           24 * time.Hour,
 			},
