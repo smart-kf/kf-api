@@ -2,6 +2,7 @@ package http
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	xlogger "github.com/clearcodecn/log"
@@ -31,9 +32,12 @@ func Run() error {
 			headers := ctx.Request.Header.Get("Access-Control-Allow-Headers")
 			method := ctx.Request.Header.Get("Access-Control-Allow-Method")
 			origin := ctx.Request.Header.Get("Origin")
+
+			log.Println("headers,", headers)
+			log.Println("method,", method)
 			ctx.Header("Access-Control-Allow-Origin", origin)
-			ctx.Header("Access-Control-Allow-Method", method)
-			ctx.Header("Access-Control-Allow-Headers", headers)
+			ctx.Header("Access-Control-Allow-Method", "POST")
+			ctx.Header("Access-Control-Allow-Headers", "content-type,x-requested-with")
 			if ctx.Request.Method == http.MethodOptions {
 				ctx.AbortWithStatus(204)
 				return
