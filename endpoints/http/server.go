@@ -26,7 +26,15 @@ func Run() error {
 	conf := config.GetConfig()
 	g := gin.New()
 	g.Use(gin.Recovery())
-	g.Use(cors.Default())
+	g.Use(
+		cors.New(
+			cors.Config{
+				AllowAllOrigins: true,
+				AllowMethods:    []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
+				AllowHeaders:    []string{"*"},
+			},
+		),
+	)
 
 	var logConfig xlogger.GinLogConfigure
 	logConfig.LogIP(utils.ClientIP)
