@@ -29,8 +29,8 @@ func Run() error {
 	g.Use(gin.Recovery())
 	g.Use(
 		func(ctx *gin.Context) {
-			headers := ctx.Request.Header.Get("Access-Control-Allow-Headers")
-			method := ctx.Request.Header.Get("Access-Control-Allow-Method")
+			headers := ctx.Request.Header.Get("Access-Control-Request-Headers")
+			method := ctx.Request.Header.Get("Access-Control-Request-Method")
 			origin := ctx.Request.Header.Get("Origin")
 
 			log.Println("headers,", headers)
