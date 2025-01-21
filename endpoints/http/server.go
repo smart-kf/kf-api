@@ -29,9 +29,10 @@ func Run() error {
 	g.Use(
 		cors.New(
 			cors.Config{
-				AllowAllOrigins: true,
-				AllowMethods:    []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
-				AllowHeaders:    []string{"*"},
+				AllowAllOrigins:  true,
+				AllowMethods:     []string{"*"},
+				AllowHeaders:     []string{"*"},
+				AllowCredentials: true,
 			},
 		),
 	)
