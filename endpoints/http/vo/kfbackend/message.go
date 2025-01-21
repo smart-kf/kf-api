@@ -110,13 +110,13 @@ type UpdateUserResponse struct {
 }
 
 type Message struct {
-	MsgId    string             `doc:"消息id" json:"msgId"`
-	MsgType  common.MessageType `json:"type" doc:"消息类型:text||image||video"`              // 消息类型
-	GuestId  string             `gorm:"column:guest_id" json:"guestId" doc:"客户id"`       // 客服id
-	CardId   string             `gorm:"column:card_id" json:"cardId" doc:"卡密id: 只有后台有值"` // 卡密id
-	Content  string             `json:"content" doc:"消息的内容"`                             // 内容.
-	IsKf     int                `gorm:"column:is_kf;type:tinyint(4)"`                    // 是否是客服
-	CreateAt int64              `json:"createAt" doc:"消息创建时间 单位秒 可用作合并时间窗口"`
+	MsgId   string             `doc:"消息id" json:"msgId"`
+	MsgType common.MessageType `json:"msgType" doc:"消息类型:text||image||video"`           // 消息类型
+	GuestId string             `gorm:"column:guest_id" json:"guestId" doc:"客户id"`       // 客服id
+	CardId  string             `gorm:"column:card_id" json:"cardId" doc:"卡密id: 只有后台有值"` // 卡密id
+	Content string             `json:"content" doc:"消息的内容"`                             // 内容.
+	IsKf    int                `gorm:"column:is_kf;type:tinyint(4)" json:"isKf"`        // 是否是客服
+	MsgTime int64              `json:"msgTime" doc:"消息创建时间 单位秒 可用作合并时间窗口"`
 }
 
 type Material struct {

@@ -37,7 +37,7 @@ func Run() error {
 			log.Println("method,", method)
 			ctx.Header("Access-Control-Allow-Origin", origin)
 			ctx.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-			ctx.Header("Access-Control-Allow-Headers", "Content-Type,X-Requested-With")
+			ctx.Header("Access-Control-Allow-Headers", "Content-Type,X-Requested-With,Authorization")
 			ctx.Header("Access-Control-Allow-Credentials", "true")
 			if ctx.Request.Method == http.MethodOptions {
 				ctx.AbortWithStatus(204)

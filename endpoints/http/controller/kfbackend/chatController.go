@@ -373,13 +373,13 @@ func user2VO(ctx context.Context, u *dao.KfUser) kfbackend.User {
 
 func msg2VO(m *dao.KFMessage) *kfbackend.Message {
 	vo := &kfbackend.Message{
-		MsgId:    m.MsgId,
-		MsgType:  m.MsgType,
-		GuestId:  m.GuestId,
-		CardId:   m.CardId,
-		Content:  m.Content,
-		IsKf:     m.IsKf,
-		CreateAt: m.CreatedAt.Unix(),
+		MsgId:   m.MsgId,
+		MsgType: m.MsgType,
+		GuestId: m.GuestId,
+		CardId:  m.CardId,
+		Content: m.Content,
+		IsKf:    m.IsKf,
+		MsgTime: m.CreatedAt.Unix(),
 	}
 	return vo
 }
