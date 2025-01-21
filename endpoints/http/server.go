@@ -2,6 +2,7 @@ package http
 
 import (
 	"fmt"
+	"time"
 
 	xlogger "github.com/clearcodecn/log"
 	"github.com/clearcodecn/swaggos"
@@ -33,6 +34,7 @@ func Run() error {
 				AllowMethods:     []string{"*"},
 				AllowHeaders:     []string{"*"},
 				AllowCredentials: true,
+				MaxAge:           360 * time.Second,
 			},
 		),
 	)
