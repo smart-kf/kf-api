@@ -29,9 +29,12 @@ func Run() error {
 	g.Use(
 		func(ctx *gin.Context) {
 			origin := ctx.Request.Header.Get("Origin")
+			allowHeader := ctx.Request.Header.Get("Access-Control-Request-Headers")
+			methods := ctx.Request.Header.Get("Access-Control-Request-Method")
+
 			ctx.Header("Access-Control-Allow-Origin", origin)
-			ctx.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-			ctx.Header("Access-Control-Allow-Headers", "Content-Type,X-Requested-With,Authorization")
+			ctx.Header("Access-Control-Allow-Methods", methods)
+			ctx.Header("Access-Control-Allow-Headers", allowHeader)
 			ctx.Header("Access-Control-Allow-Credentials", "true")
 			if ctx.Request.Method == http.MethodOptions {
 				ctx.AbortWithStatus(204)
