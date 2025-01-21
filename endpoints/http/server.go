@@ -28,12 +28,12 @@ func Run() error {
 	g.Use(gin.Recovery())
 	g.Use(
 		func(ctx *gin.Context) {
+			headers := ctx.Request.Header.Get("Access-Control-Allow-Headers")
+			method := ctx.Request.Header.Get("Access-Control-Allow-Method")
 			origin := ctx.Request.Header.Get("Origin")
 			ctx.Header("Access-Control-Allow-Origin", origin)
-			ctx.Header("Access-Control-Allow-Methods", "GET,POST,OPTIONS,DELETE,PUT,PATCH,HEAD")
-			ctx.Header("Access-Control-Allow-Headers", "*")
-			ctx.Header("Access-Control-Max-Age", "600")
-			ctx.Header("Access-Control-Allow-Credentials", "true")
+			ctx.Header("Access-Control-Allow-Method", method)
+			ctx.Header("Access-Control-Allow-Headers", headers)
 			if ctx.Request.Method == http.MethodOptions {
 				ctx.AbortWithStatus(204)
 				return
