@@ -2,10 +2,11 @@ package http
 
 import (
 	"fmt"
-	"net/http"
+	"time"
 
 	xlogger "github.com/clearcodecn/log"
 	"github.com/clearcodecn/swaggos"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/make-money-fast/captcha"
 
@@ -26,22 +27,33 @@ func Run() error {
 	conf := config.GetConfig()
 	g := gin.New()
 	g.Use(gin.Recovery())
+	// g.Use(
+	// 	func(ctx *gin.Context) {
+	// 		origin := ctx.Request.Header.Get("Origin")
+	// 		allowHeader := ctx.Request.Header.Get("Access-Control-Request-Headers")
+	// 		methods := ctx.Request.Header.Get("Access-Control-Request-Method")
+	//
+	// 		ctx.Header("Access-Control-Allow-Origin", origin)
+	// 		ctx.Header("Access-Control-Allow-Methods", methods)
+	// 		ctx.Header("Access-Control-Allow-Headers", allowHeader)
+	// 		ctx.Header("Access-Control-Allow-Credentials", "true")
+	// 		if ctx.Request.Method == http.MethodOptions {
+	// 			ctx.AbortWithStatus(204)
+	// 			return
+	// 		}
+	// 		ctx.Next()
+	// 	},
+	// )
 	g.Use(
-		func(ctx *gin.Context) {
-			origin := ctx.Request.Header.Get("Origin")
-			allowHeader := ctx.Request.Header.Get("Access-Control-Request-Headers")
-			methods := ctx.Request.Header.Get("Access-Control-Request-Method")
-
-			ctx.Header("Access-Control-Allow-Origin", origin)
-			ctx.Header("Access-Control-Allow-Methods", methods)
-			ctx.Header("Access-Control-Allow-Headers", allowHeader)
-			ctx.Header("Access-Control-Allow-Credentials", "true")
-			if ctx.Request.Method == http.MethodOptions {
-				ctx.AbortWithStatus(204)
-				return
-			}
-			ctx.Next()
-		},
+		cors.New(
+			cors.Config{
+				AllowOrigins:     []string{"*"},
+				AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
+				AllowHeaders:     []string{"*"},
+				AllowCredentials: false,
+				MaxAge:           24 * time.Hour,
+			},
+		),
 	)
 
 	var logConfig xlogger.GinLogConfigure
