@@ -48,7 +48,7 @@ func SwaggerDoc(group *swaggos.Group) {
 
 	user := bg.Group("/user").Tag("客服后台客户信息")
 	{
-		user.Get("/").FormObject(kfbackend.GetKfUserInfoRequest{}).JSON(kfbackend.User{}).Description("获取客户信息")
+		user.Get("").FormObject(kfbackend.GetKfUserInfoRequest{}).JSON(kfbackend.User{}).Description("获取客户信息")
 		user.Post("/update").Body(kfbackend.UpdateUserInfoRequest{}).JSON(common.EmptyResponse{}).Description(
 			"更新用户信息",
 		)

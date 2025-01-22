@@ -77,6 +77,9 @@ func Run() error {
 
 	g.Static("/static", conf.Web.StaticDir)
 
+	g.RedirectTrailingSlash = true
+	g.RedirectFixedPath = true
+
 	registerRouter(g)
 	swaggerAPI(g)
 
@@ -131,7 +134,7 @@ func registerRouter(g *gin.Engine) {
 		var qrcodeController kfbackend.QRCodeController
 		qrCodeGroup := kf.Group("/qrcode")
 		{
-			qrCodeGroup.GET("/", qrcodeController.List)
+			qrCodeGroup.GET("", qrcodeController.List)
 			qrCodeGroup.POST("/switch", qrcodeController.Switch)
 			qrCodeGroup.POST("/on-off", qrcodeController.OnOff)
 		}
@@ -146,14 +149,14 @@ func registerRouter(g *gin.Engine) {
 		var sysConfController kfbackend.SysConfController
 		settingGroup := kf.Group("/sysConf")
 		{
-			settingGroup.GET("/", sysConfController.Get)
-			settingGroup.POST("/", sysConfController.Post)
+			settingGroup.GET("", sysConfController.Get)
+			settingGroup.POST("", sysConfController.Post)
 		}
 
 		var kfUserInfo kfbackend.GuestController
 		userInfoGroup := kf.Group("/user")
 		{
-			userInfoGroup.GET("/", kfUserInfo.GetKfUserInfo)
+			userInfoGroup.GET("", kfUserInfo.GetKfUserInfo)
 			userInfoGroup.POST("/update", kfUserInfo.UpdateUserInfo)
 		}
 	}
