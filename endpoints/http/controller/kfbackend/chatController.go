@@ -2,7 +2,6 @@ package kfbackend
 
 import (
 	"context"
-	"time"
 
 	"github.com/smart-fm/kf-api/domain/caches"
 
@@ -259,90 +258,6 @@ func (c *ChatController) Msgs(ctx *gin.Context) {
 //
 // 	c.Success(ctx, kfbackend.ReadMsgResponse{})
 // }
-
-func (c *ChatController) UserOp(ctx *gin.Context) {
-	var req kfbackend.BatchOpUserRequest
-	if !c.BindAndValidate(ctx, &req) {
-		return
-	}
-
-	if len(req.UserIDs) == 0 {
-		// do nothing
-		c.Success(ctx, kfbackend.BatchOpUserResponse{})
-		return
-	}
-
-	reqCtx := ctx.Request.Context()
-	cardID := common.GetKFCardID(ctx)
-
-	var repo repository.KFUserRepository
-
-	u := dao.KfUser{}
-	switch req.Op {
-	case kfbackend.UserOpTop:
-		u.TopAt = time.Now().Unix()
-	case kfbackend.UserOpTopUndo:
-		u.TopAt = 0
-	case kfbackend.UserOpBlock:
-		u.BlockAt = time.Now().Unix()
-	case kfbackend.UserOpBlockUndo:
-		u.BlockAt = 0
-	}
-
-	err := repo.BatchUpdate(reqCtx, req.UserIDs, u)
-	if err != nil {
-		xlogger.Error(
-			reqCtx,
-			"更新访客失败",
-			xlogger.Err(err),
-			xlogger.Any("cardId", cardID),
-			xlogger.Any("ids", req.UserIDs),
-		)
-		c.Error(ctx, err)
-		return
-	}
-
-	c.Success(ctx, kfbackend.BatchOpUserResponse{})
-}
-
-func (c *ChatController) UserUpdate(ctx *gin.Context) {
-	var req kfbackend.UpdateUserRequest
-	if !c.BindAndValidate(ctx, &req) {
-		return
-	}
-
-	if len(req.ID) == 0 {
-		// do nothing
-		c.Success(ctx, kfbackend.UpdateUserResponse{})
-		return
-	}
-
-	reqCtx := ctx.Request.Context()
-	cardID := common.GetKFCardID(ctx)
-
-	var repo repository.KFUserRepository
-
-	u := dao.KfUser{
-		RemarkName: req.RemarkName,
-		Mobile:     req.Mobile,
-		Comments:   req.Comments,
-	}
-
-	err := repo.BatchUpdate(reqCtx, []string{req.ID}, u)
-	if err != nil {
-		xlogger.Error(
-			reqCtx,
-			"更新访客失败",
-			xlogger.Err(err),
-			xlogger.Any("cardId", cardID),
-			xlogger.Any("ids", req.ID),
-		)
-		c.Error(ctx, err)
-		return
-	}
-
-	c.Success(ctx, kfbackend.BatchOpUserResponse{})
-}
 
 func user2ChatVO(ctx context.Context, u *dao.KfUser, lastMsgMap map[uint64]*dao.KFMessage) *kfbackend.Chat {
 	unreadCnt, err := caches.UserUnReadCacheInstance.GetUserUnRead(ctx, u.CardID, u.UUID)

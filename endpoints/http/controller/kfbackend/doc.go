@@ -44,14 +44,12 @@ func SwaggerDoc(group *swaggos.Group) {
 	{
 		chat.Post("/list").Body(kfbackend.ChatListRequest{}).JSON(kfbackend.ChatListResponse{}).Description("会话列表")
 		chat.Post("/msgs").Body(kfbackend.MsgListRequest{}).JSON(kfbackend.MsgListResponse{}).Description("消息列表 按消息id倒序滚页查询")
-		chat.Post("/users/op").Body(kfbackend.BatchOpUserRequest{}).JSON(kfbackend.ReadMsgResponse{}).Description("对粉丝的批量操作 拉黑/置顶")
-		chat.Post("/user/update").Body(kfbackend.UpdateUserRequest{}).JSON(kfbackend.UpdateUserResponse{}).Description("更新粉丝信息")
 	}
 
 	user := bg.Group("/user").Tag("客服后台客户信息")
 	{
 		user.Get("/").FormObject(kfbackend.GetKfUserInfoRequest{}).JSON(kfbackend.User{}).Description("获取客户信息")
-		chat.Post("/update").FormObject(kfbackend.UpdateUserInfoRequest{}).JSON(common.EmptyResponse{}).Description(
+		user.Post("/update").FormObject(kfbackend.UpdateUserInfoRequest{}).JSON(common.EmptyResponse{}).Description(
 			"更新用户信息",
 		)
 	}
