@@ -40,3 +40,49 @@ Authorization: {{ kf_token }}
 {
   "guestId": "58|c75b42045c3e456d925de3c5c6d9645a"
 }
+
+
+###
+GET {{ host }}/api/kf-be/user?uuid=51|2c99adb2f80e42559ce4ae475caef17b
+Content-Type: application/json
+Authorization: {{ kf_token }}
+
+
+###
+POST {{ host }}/api/kf-be/user/update
+Content-Type: application/json
+Authorization: {{ kf_token }}
+
+{
+  "uuid":"51|2c99adb2f80e42559ce4ae475caef17b",
+  "updateType": "userinfo",
+  "comments": "wawaw",
+  "remarkName": "remarkddd",
+  "mobile": "110"
+}
+
+
+
+###
+POST {{ host }}/api/kf-be/user/update
+Content-Type: application/json
+Authorization: {{ kf_token }}
+
+{
+  "uuid":"51|2c99adb2f80e42559ce4ae475caef17b",
+  "updateType": "top",
+  "top": 1
+}
+
+
+###
+POST {{ host }}/api/kf-be/user/update
+Content-Type: application/json
+Authorization: {{ kf_token }}
+
+{
+  "uuid":"51|2c99adb2f80e42559ce4ae475caef17b",
+  "updateType": "block",
+  "block": 1
+}
+

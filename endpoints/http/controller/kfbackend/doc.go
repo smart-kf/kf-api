@@ -3,6 +3,7 @@ package kfbackend
 import (
 	"github.com/clearcodecn/swaggos"
 
+	"github.com/smart-fm/kf-api/endpoints/common"
 	"github.com/smart-fm/kf-api/endpoints/http/vo/kfbackend"
 )
 
@@ -47,17 +48,25 @@ func SwaggerDoc(group *swaggos.Group) {
 		chat.Post("/user/update").Body(kfbackend.UpdateUserRequest{}).JSON(kfbackend.UpdateUserResponse{}).Description("更新粉丝信息")
 	}
 
-	msgLib := bg.Group("/msgLib").Tag("话术管理")
+	user := bg.Group("/user").Tag("客服后台客户信息")
 	{
-		// TODO
-		msgLib.Post("/").Body(kfbackend.LoginRequest{}).JSON(kfbackend.LoginResponse{})
+		user.Get("/").FormObject(kfbackend.GetKfUserInfoRequest{}).JSON(kfbackend.User{}).Description("获取客户信息")
+		chat.Post("/update").FormObject(kfbackend.UpdateUserInfoRequest{}).JSON(common.EmptyResponse{}).Description(
+			"更新用户信息",
+		)
 	}
 
-	sysLog := bg.Group("/sysLog").Tag("操作日志")
-	{
-		// TODO
-		sysLog.Post("/").Body(kfbackend.LoginRequest{}).JSON(kfbackend.LoginResponse{})
-	}
+	// msgLib := bg.Group("/msgLib").Tag("话术管理")
+	// {
+	// 	// TODO
+	// 	msgLib.Post("/").Body(kfbackend.LoginRequest{}).JSON(kfbackend.LoginResponse{})
+	// }
+	//
+	// sysLog := bg.Group("/sysLog").Tag("操作日志")
+	// {
+	// 	// TODO
+	// 	sysLog.Post("/").Body(kfbackend.LoginRequest{}).JSON(kfbackend.LoginResponse{})
+	// }
 
 	sysConf := bg.Group("/sysConf").Tag("系统配置")
 	{

@@ -160,7 +160,6 @@ type File struct {
 }
 
 type User struct {
-	CardID      string `json:"card_id" gorm:"column:card_id;index" doc:"卡密id"`                    // 卡密id
 	UUID        string `json:"uuid" gorm:"column:uuid;unique;type:varchar(255)" doc:"用户的uuid"`    // 用户的uuid，不用主键做业务.
 	Avatar      string `json:"avatar" gorm:"column:avatar;type:varchar(255)" doc:"头像地址，存储的是相对路径"` // 头像地址，存储的是相对路径
 	NickName    string `json:"nickName" gorm:"column:nick_name;type:varchar(255)" doc:"昵称"`

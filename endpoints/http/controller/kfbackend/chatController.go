@@ -366,8 +366,6 @@ func user2ChatVO(ctx context.Context, u *dao.KfUser, lastMsgMap map[uint64]*dao.
 func user2VO(ctx context.Context, u *dao.KfUser) kfbackend.User {
 	vo := kfbackend.User{}
 	copier.Copy(&vo, u)
-
-	vo.CardID = ""
 	return vo
 }
 

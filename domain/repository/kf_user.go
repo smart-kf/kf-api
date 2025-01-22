@@ -18,7 +18,11 @@ type KFUserRepository struct{}
 
 func (r *KFUserRepository) SaveOne(ctx context.Context, kfUser *dao.KfUser) error {
 	tx := mysql.GetDBFromContext(ctx)
-	res := tx.Model(&dao.KfUser{}).Save(kfUser)
+	res := tx.Model(&dao.KfUser{})
+	if kfUser.ID > 0 {
+		res = res.Where("id = ?", kfUser.ID)
+	}
+	res = res.Save(kfUser)
 	if err := res.Error; err != nil {
 		xlogger.Error(ctx, "SaveOne-failed", xlogger.Err(err))
 		return err
@@ -26,17 +30,23 @@ func (r *KFUserRepository) SaveOne(ctx context.Context, kfUser *dao.KfUser) erro
 	return nil
 }
 
-func (r *KFUserRepository) FindByToken(ctx context.Context, token string) (kfUser *dao.KfUser, ok bool, err error) {
+func (r *KFUserRepository) FindByToken(ctx context.Context, cardId string, token string) (
+	*dao.KfUser, bool, error,
+) {
+	var (
+		kfUser dao.KfUser
+		err    error
+	)
 	tx := mysql.GetDBFromContext(ctx)
-	res := tx.Model(&dao.KfUser{}).Where("uuid = ?", token).First(&kfUser)
-	if err = res.Error; err != nil {
+	err = tx.Model(&dao.KfUser{}).Where("card_id = ? and uuid = ?", cardId, token).First(&kfUser).Error
+	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, false, nil
 		}
 		xlogger.Error(ctx, "FindByToken-failed", xlogger.Err(err))
-		return
+		return nil, false, nil
 	}
-	return
+	return &kfUser, true, nil
 }
 
 type ListUserOption struct {

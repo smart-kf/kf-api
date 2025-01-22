@@ -45,7 +45,7 @@ func (d *kfUserCache) GetDBUser(ctx context.Context, cardId string, userID strin
 	}
 	// 查数据库.
 	var repo repository.KFUserRepository
-	user, ok, err := repo.FindByToken(ctx, userID)
+	user, ok, err := repo.FindByToken(ctx, cardId, userID)
 	if err != nil {
 		return nil, err
 	}

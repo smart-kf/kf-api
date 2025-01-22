@@ -151,6 +151,13 @@ func registerRouter(g *gin.Engine) {
 			settingGroup.GET("/", sysConfController.Get)
 			settingGroup.POST("/", sysConfController.Post)
 		}
+
+		var kfUserInfo kfbackend.GuestController
+		userInfoGroup := kf.Group("/user")
+		{
+			userInfoGroup.GET("/", kfUserInfo.GetKfUserInfo)
+			userInfoGroup.POST("/update", kfUserInfo.UpdateUserInfo)
+		}
 	}
 
 	// 客服前台
