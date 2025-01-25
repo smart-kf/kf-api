@@ -2,7 +2,6 @@ package kfbackend
 
 import (
 	"github.com/smart-fm/kf-api/endpoints/common"
-	"github.com/smart-fm/kf-api/infrastructure/mysql/dao"
 )
 
 type QRCodeRequest struct{}
@@ -119,46 +118,6 @@ type Message struct {
 	MsgTime int64              `json:"msgTime" doc:"消息创建时间 单位秒 可用作合并时间窗口"`
 }
 
-type Material struct {
-	Type  dao.MaterialType `json:"type" doc:"资源类型 0:文本 1:语音 2:图片 3:视频 4:网址 5:其他文件"`
-	Text  Text             `json:"text,omitempty" doc:"文本"`
-	Voice Voice            `json:"voice,omitempty" doc:"语音" `
-	Image Image            `json:"image,omitempty" doc:"图片"`
-	Video Video            `json:"video,omitempty" doc:"视频"`
-	URL   URL              `json:"url,omitempty" doc:"网址"`
-	File  File             `json:"file,omitempty" doc:"文件"`
-}
-
-type Text struct {
-	Content string `json:"content,omitempty" doc:"文本内容"`
-}
-
-type Voice struct {
-	URL string `json:"url,omitempty" doc:"语音媒体文件的url地址"`
-}
-
-type Image struct {
-	URL string `json:"url,omitempty" doc:"图片文件的url地址"`
-}
-
-type Video struct {
-	URL         string `json:"url,omitempty" doc:"视频文件的url地址"`
-	CoverURL    string `json:"coverUrl,omitempty" doc:"视频首帧图url地址"`
-	DurationSec int64  `json:"duration,omitempty" doc:"视频时长 单位秒"`
-}
-
-type URL struct {
-	URL      string `json:"url,omitempty" doc:"网址地址"`
-	CoverURL string `json:"coverUrl,omitempty" doc:"网址封面图地址"`
-	Desc     string `json:"desc,omitempty" doc:"网站描述"`
-}
-
-type File struct {
-	URL  string `json:"url,omitempty" doc:"文件的url地址"`
-	Type string `json:"type,omitempty" doc:"文件的类型格式 如zip/txt/..."`
-	Size int64  `json:"size,omitempty" doc:"文件的大小 单位字节"`
-}
-
 type User struct {
 	UUID        string `json:"uuid" gorm:"column:uuid;unique;type:varchar(255)" doc:"用户的uuid"`    // 用户的uuid，不用主键做业务.
 	Avatar      string `json:"avatar" gorm:"column:avatar;type:varchar(255)" doc:"头像地址，存储的是相对路径"` // 头像地址，存储的是相对路径
@@ -182,4 +141,9 @@ type User struct {
 	LastChatAt  int64  `json:"lastChatAt" gorm:"column:last_chat_at" doc:"最近聊天时间 毫秒"`
 	LastMsgID   uint64 `json:"lastMsgID" doc:"最近一次由该用户发送的消息id"`
 	IsOnline    bool   `json:"isOnline" doc:"是否在线"`
+}
+
+type BatchSendRequest struct {
+	GuestId []string `json:"guestId" doc:"客户id" binding:"required"`
+	Message Message  `json:"message" doc:"消息体" binding:"required"`
 }

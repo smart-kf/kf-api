@@ -3,7 +3,12 @@ package kfbackend
 import (
 	"context"
 
+	uuid2 "github.com/google/uuid"
+
 	"github.com/smart-fm/kf-api/domain/caches"
+	"github.com/smart-fm/kf-api/domain/dto"
+	"github.com/smart-fm/kf-api/endpoints/common/constant"
+	"github.com/smart-fm/kf-api/infrastructure/httpClient/socketserver"
 
 	xlogger "github.com/clearcodecn/log"
 	"github.com/gin-gonic/gin"
@@ -295,4 +300,65 @@ func msg2VO(m *dao.KFMessage) *kfbackend.Message {
 		MsgTime: m.CreatedAt.Unix(),
 	}
 	return vo
+}
+
+func (c *ChatController) BatchSend(ctx *gin.Context) {
+	var req kfbackend.BatchSendRequest
+	if !c.BindAndValidate(ctx, &req) {
+		return
+	}
+	reqCtx := ctx.Request.Context()
+
+	cardId := common.GetKFCardID(reqCtx)
+	sessionIdMap, err := caches.ImSessionCacheInstance.GetKffeSessionIds(ctx, cardId, req.GuestId)
+	if err != nil {
+		return
+	}
+	var sessionIds []string
+	for _, item := range sessionIdMap {
+		sessionIds = append(sessionIds, item)
+	}
+	// 推给前台
+	newMessage := dto.Message{
+		MessageBase: dto.MessageBase{
+			Event:    constant.EventMessage,
+			Platform: constant.PlatformKfFe,
+		},
+		MsgType: string(req.Message.MsgType),
+		MsgId:   req.Message.MsgId,
+		GuestId: req.Message.GuestId,
+		Content: req.Message.Content,
+		IsKf:    constant.IsKf,
+	}
+	pushMsgRequest := socketserver.PushMessageRequest{
+		SessionIds: sessionIds,
+		Event:      constant.EventMessage,
+	}
+	pushMsgRequest.SetData(newMessage)
+	if err := socketserver.NewSocketServerClient().PushMessage(reqCtx, &pushMsgRequest); err != nil {
+		c.Error(ctx, err)
+		return
+	}
+	// 入库.
+	var msgs []*dao.KFMessage
+	for _, id := range req.GuestId {
+		msgs = append(
+			msgs, &dao.KFMessage{
+				MsgId:   uuid2.NewString(),
+				MsgType: req.Message.MsgType,
+				GuestId: id,
+				CardId:  cardId,
+				Content: req.Message.Content,
+				IsKf:    constant.IsKf,
+			},
+		)
+	}
+
+	var repo repository.KFMessageRepository
+	if err := repo.BatchCreate(reqCtx, msgs); err != nil {
+		c.Error(ctx, err)
+		return
+	}
+
+	c.Success(ctx, nil)
 }

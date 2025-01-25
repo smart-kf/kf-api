@@ -24,6 +24,16 @@ func (r *KFMessageRepository) SaveOne(ctx context.Context, chat *dao.KFMessage) 
 	return nil
 }
 
+func (r *KFMessageRepository) BatchCreate(ctx context.Context, chat []*dao.KFMessage) error {
+	tx := mysql.GetDBFromContext(ctx)
+	res := tx.Model(&dao.KFMessage{}).CreateInBatches(chat, len(chat))
+	if err := res.Error; err != nil {
+		xlogger.Error(ctx, "SaveOne-failed", xlogger.Err(err))
+		return err
+	}
+	return nil
+}
+
 type ListMsgOption struct {
 	CardID        string
 	GuestId       string
