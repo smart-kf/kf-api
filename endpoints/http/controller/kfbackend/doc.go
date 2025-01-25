@@ -44,6 +44,9 @@ func SwaggerDoc(group *swaggos.Group) {
 	{
 		chat.Post("/list").Body(kfbackend.ChatListRequest{}).JSON(kfbackend.ChatListResponse{}).Description("会话列表")
 		chat.Post("/msgs").Body(kfbackend.MsgListRequest{}).JSON(kfbackend.MsgListResponse{}).Description("消息列表 按消息id倒序滚页查询")
+		chat.Post("/batchsend").Body(kfbackend.BatchSendRequest{}).JSON(common.EmptyResponse{}).Description(
+			"群发消息",
+		)
 	}
 
 	user := bg.Group("/user").Tag("客服后台客户信息")

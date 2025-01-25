@@ -144,6 +144,7 @@ func registerRouter(g *gin.Engine) {
 		{
 			chatGroup.POST("/list", chatController.List)
 			chatGroup.POST("/msgs", chatController.Msgs)
+			chatGroup.POST("/batchsend", chatController.BatchSend)
 		}
 
 		var sysConfController kfbackend.SysConfController
