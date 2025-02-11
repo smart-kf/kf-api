@@ -153,3 +153,31 @@ func (c *UsdtPaymentClient) QueryOrder(ctx context.Context, req *QueryOrderReque
 	}
 	return &cor.Data, nil
 }
+
+type SendMailRequest struct {
+	From       string `json:"from" binding:"required"`
+	To         string `json:"to" binding:"required"`
+	HtmlString string `json:"html_string" binding:"required"`
+}
+
+type SendMailResponse struct {
+	Code int    `json:"code"`
+	Msg  string `json:"msg"`
+}
+
+func (c *UsdtPaymentClient) SendMail(ctx context.Context, req *SendMailRequest) error {
+	r := resty.New().R().SetContext(ctx).SetBody(req).SetHeader("Authorization", c.token)
+	rsp, err := r.Post(fmt.Sprintf("%s/api/v1/order/mail", c.host))
+	if err != nil {
+		return NewCodeError(500, err.Error())
+	}
+	var cor SendMailResponse
+	err = json.Unmarshal(rsp.Body(), &cor)
+	if err != nil {
+		return err
+	}
+	if cor.Code != 0 {
+		return NewCodeError(cor.Code, cor.Msg)
+	}
+	return nil
+}

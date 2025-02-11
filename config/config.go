@@ -24,9 +24,10 @@ type LevelDBConfig struct {
 }
 
 type Payment struct {
-	Host  string `json:"host"`
-	Token string `json:"token"`
-	AppId string `json:"appId"`
+	Host     string `json:"host"`
+	Token    string `json:"token"`
+	AppId    string `json:"appId"`
+	FromMail string `json:"fromMail"` // 发邮件的来源地址
 }
 
 type Web struct {

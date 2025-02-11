@@ -1,6 +1,7 @@
 package billfrontend
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -83,7 +84,7 @@ func (c *OrderController) CreateOrder(ctx *gin.Context) {
 			OrderId:     no,
 			Name:        fmt.Sprintf("客服系统-%d日套餐", cardPackage.Day),
 			Amount:      order.Price,
-			FromAddress: order.PayUsdtAddress,
+			FromAddress: order.FromAddress,
 			Expire:      int(config.GetConfig().BillConfig.OrderExpireTime),
 		},
 	)
@@ -308,7 +309,23 @@ func (c *OrderController) Notify(ctx *gin.Context) {
 		return
 	}
 
-	// TODO:: 发送邮件
+	go func() {
+		defer func() {
+			if err := recover(); err != nil {
+
+			}
+			ctx := context.Background()
+			conf := config.GetConfig().Payment
+			paymentClient := sdk.NewUsdtPaymentClient(conf.Host, conf.Token, 60*time.Second)
+			paymentClient.SendMail(
+				ctx, &sdk.SendMailRequest{
+					From:       conf.FromMail,
+					To:         order.Email,
+					HtmlString: "支付成功: " + order.CardID,
+				},
+			)
+		}()
+	}()
 
 	c.Success(ctx, order)
 }
