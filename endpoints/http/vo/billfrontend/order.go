@@ -7,7 +7,9 @@ import (
 type CreateOrderRequest struct {
 	// CaptchaId   string `json:"captchaId" doc:"验证码id"`
 	// CaptchaCode string `json:"captchaCode" doc:"验证码内容"`
-	PackageId string `json:"packageId" doc:"套餐id" binding:"required" validate:"required"`
+	PackageId   string `json:"packageId" doc:"套餐id" binding:"required" validate:"required"`
+	FromAddress string `json:"from_address" doc:"客户的支付地址" binding:"required" validate:"required"`
+	Email       string `json:"email" doc:"客户邮箱地址" binding:"required" validate:"required"`
 }
 
 func (r *CreateOrderRequest) Validate(ctx context.Context) error {
@@ -20,5 +22,5 @@ func (r *CreateOrderRequest) Validate(ctx context.Context) error {
 }
 
 type CreateOrderResponse struct {
-	OrderNo string `json:"orderNo" doc:"订单号"`
+	PaymentUrl string `json:"payment_url"`
 }

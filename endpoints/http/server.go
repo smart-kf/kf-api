@@ -175,7 +175,8 @@ func registerRouter(g *gin.Engine) {
 	{
 		var orderController bill2.OrderController
 		billFe.POST("/order/create", orderController.CreateOrder)
-		billFe.POST("/order/notify", orderController.Notify) // TODO:: 加密处理
+		billFe.POST("/order/notify", orderController.Notify)     // TODO:: 加密处理
+		billFe.GET("/order/pay-success", orderController.Return) // TODO:: 加密处理
 	}
 
 	// 内部调用: websocket on auth 回调.

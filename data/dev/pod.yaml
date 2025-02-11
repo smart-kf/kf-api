@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: smartkf
+  labels:
+    role: smartkf
+spec:
+  containers:
+    - name: redis
+      image: bitnami/redis
+      env:
+        - name: REDIS_DISABLE_COMMANDS
+          value: FLUSHDB,FLUSHALL
+        - name: REDIS_PASSWORD
+          value: "238XSfh98xa"
+      ports:
+        - containerPort: 6379
+          hostPort: 6379
+      volumeMounts:
+        - mountPath: /bitnami/redis/data
+          name: kf-data-redis
+    - name: mysql
+      image: mysql
+      command:
+        - --character-set-server=utf8mb4
+        - --collation-server=utf8mb4_general_ci
+        - --explicit_defaults_for_timestamp=true
+        - --lower_case_table_names=1
+      env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: 124x8Xawdasdx1r140xs$
+        - name: MYSQL_ROOT_HOST
+          value: '%'
+      ports:
+        - containerPort: 3306
+          hostPort: 3306
+      volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: kf-data-mysql
+
+    - name: nsq
+      image: nsqio/nsq
+      ports:
+        - containerPort: 4150
+          hostPort: 4150
+      command:
+        - /nsqd
+        - --data-path=/data
+      volumeMounts:
+        - mountPath: /data
+          name: kf-data-nsq
+
+  restartPolicy: Always
+  volumes:
+    - name: kf-data-redis
+      hostPath:
+        path: ./data/redis_data
+
+    - name: kf-data-mysql
+      hostPath:
+        path: ./data/mysql_data
+
+    - name: nsq-data
+      hostPath:
+        path: ./data/nsq-data

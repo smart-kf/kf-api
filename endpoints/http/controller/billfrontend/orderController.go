@@ -17,6 +17,7 @@ import (
 	"github.com/smart-fm/kf-api/endpoints/nsq/producer"
 	"github.com/smart-fm/kf-api/infrastructure/mysql"
 	"github.com/smart-fm/kf-api/infrastructure/mysql/dao"
+	sdk "github.com/smart-fm/kf-api/pkg/usdtpayment"
 	"github.com/smart-fm/kf-api/pkg/utils"
 	"github.com/smart-fm/kf-api/pkg/xerrors"
 )
@@ -26,7 +27,7 @@ type OrderController struct {
 }
 
 // CreateOrder 卡密出售, 下单接口.
-func (c *BaseController) CreateOrder(ctx *gin.Context) {
+func (c *OrderController) CreateOrder(ctx *gin.Context) {
 	var req billfrontend.CreateOrderRequest
 	if !c.BindAndValidate(ctx, &req) {
 		return
@@ -57,25 +58,42 @@ func (c *BaseController) CreateOrder(ctx *gin.Context) {
 	var orderExpireDelay = config.GetConfig().BillConfig.OrderExpireTime
 	var orderExpireTime = time.Now().UnixMicro() + orderExpireDelay*1000 // 使用毫秒.
 
+	conf := config.GetConfig().Payment
+	client := sdk.NewUsdtPaymentClient(conf.Host, conf.Token, 30*time.Second)
+
 	// 1. 创建订单.
 	var order = dao.Orders{
 		Model: gorm.Model{
 			ID: uint(orderNo),
 		},
-		CardID:         "",
-		PackageId:      cardPackage.Id,
-		PackageDay:     cardPackage.Day,
-		OrderNo:        no,
-		PayUsdtAddress: "",                          // TODO:: 支付地址.
-		Price:          cardPackage.Price * 1000,    // 1 后面4个0
-		Status:         constant.OrderStatusCreated, //
-		ConfirmTime:    0,
-		ExpireTime:     orderExpireTime,
-		Ip:             utils.ClientIP(ctx),
-		Area:           "", // TODO:: ip2region
-		Version:        1,
+		PackageId:   cardPackage.Id,
+		PackageDay:  cardPackage.Day,
+		OrderNo:     no,
+		Price:       cardPackage.Price * 1000,    // 1 后面4个0
+		Status:      constant.OrderStatusCreated, //
+		ExpireTime:  orderExpireTime,
+		Ip:          utils.ClientIP(ctx),
+		Email:       req.Email,
+		FromAddress: req.FromAddress,
 	}
 
+	createOrderResp, err := client.CreateOrder(
+		reqCtx, &sdk.CreateOrderRequest{
+			AppId:       conf.AppId,
+			OrderId:     no,
+			Name:        fmt.Sprintf("客服系统-%d日套餐", cardPackage.Day),
+			Amount:      order.Price,
+			FromAddress: order.PayUsdtAddress,
+			Expire:      int(config.GetConfig().BillConfig.OrderExpireTime),
+		},
+	)
+
+	if err != nil {
+		c.Error(ctx, err)
+		xlogger.Error(reqCtx, "orderCreateOne-usdtpayment-CreateOrder-失败:"+no, xlogger.Err(err))
+		return
+	}
+	order.TradeId = createOrderResp.TradeId
 	if err := orderRepository.CreateOne(reqCtx, &order); err != nil {
 		c.Error(ctx, err)
 		xlogger.Error(reqCtx, "orderCreateOne-失败:"+no, xlogger.Err(err))
@@ -104,16 +122,20 @@ func (c *BaseController) CreateOrder(ctx *gin.Context) {
 
 	c.Success(
 		ctx, billfrontend.CreateOrderResponse{
-			OrderNo: order.OrderNo,
+			PaymentUrl: createOrderResp.PayUrl,
 		},
 	)
 }
 
 // Notify 订单 - 异步通知接口.
-func (c *BaseController) Notify(ctx *gin.Context) {
+func (c *OrderController) Notify(ctx *gin.Context) {
 	// TODO:: 目前是直接设置成 success, 并走购买成功逻辑
 	var req billfront.OrderNotifyRequest
 	if !c.BindAndValidate(ctx, &req) {
+		return
+	}
+	if req.Status == 1 {
+		c.Success(ctx, nil)
 		return
 	}
 	reqCtx := ctx.Request.Context()
@@ -122,7 +144,7 @@ func (c *BaseController) Notify(ctx *gin.Context) {
 	defer tx.Rollback()
 
 	var orderRepository repository.BillOrderRepository
-	order, ok, err := orderRepository.GetOrderByOrderNo(reqCtx, req.OrderNo)
+	order, ok, err := orderRepository.GetOrderByOrderNo(reqCtx, req.OrderId)
 	if err != nil {
 		xlogger.Error(reqCtx, "查询订单失败", xlogger.Err(err))
 		c.Error(ctx, err)
@@ -141,8 +163,27 @@ func (c *BaseController) Notify(ctx *gin.Context) {
 		return
 	}
 
+	if req.Status == 3 {
+		// 失败
+		order.Status = constant.OrderStatusCancel
+		order.ConfirmTime = time.Now().Unix()
+		if err := tx.Where("id = ?", order.ID).Select(
+			"status",
+			"confirm_time",
+		).Updates(order).Error; err != nil {
+			xlogger.Error(reqCtx, "UpdateOrder failed", xlogger.Any("order", order), xlogger.Err(err))
+			return
+		}
+		xlogger.Info(reqCtx, "收到订单失败回调", xlogger.Any("req", req))
+		tx.Commit()
+		c.Success(ctx, nil)
+		return
+	}
+
+	order.TradeId = req.TradeId
+	order.ConfirmTime = req.Timestamp
 	order.Status = constant.OrderStatusPay
-	order.ConfirmTime = time.Now().Unix()
+	order.PayUsdtAddress = req.Address
 
 	// 查询一个卡密分配给他.
 	var cardRepo repository.KFCardRepository
@@ -168,6 +209,8 @@ func (c *BaseController) Notify(ctx *gin.Context) {
 		"card_id",
 		"status",
 		"confirm_time",
+		"trade_id",
+		"pay_usdt_address",
 	).Updates(order).Error; err != nil {
 		xlogger.Error(reqCtx, "UpdateOrder failed", xlogger.Any("order", order), xlogger.Err(err))
 		c.Error(ctx, xerrors.NewCustomError("库存不足"))
@@ -247,7 +290,6 @@ func (c *BaseController) Notify(ctx *gin.Context) {
 	}
 
 	// 分配默认系统配置.
-
 	kfSetting := dao.NewDefaultKFSettings(card.CardID)
 	if err := tx.Create(&kfSetting).Error; err != nil {
 		xlogger.Error(
@@ -265,5 +307,13 @@ func (c *BaseController) Notify(ctx *gin.Context) {
 		c.Error(ctx, err)
 		return
 	}
+
+	// TODO:: 发送邮件
+
 	c.Success(ctx, order)
+}
+
+func (c *OrderController) Return(ctx *gin.Context) {
+	query := ctx.Request.RequestURI
+	ctx.String(200, "支付成功,请检查邮件查看卡密信息:"+query)
 }

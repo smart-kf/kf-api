@@ -9,6 +9,7 @@ type Orders struct {
 	PackageDay     int    `json:"packageDay" gorm:"column:package_day"`                 // 套餐时长
 	OrderNo        string `json:"orderNo" gorm:"column:order_no;unique;type:varchar(255)"`
 	PayUsdtAddress string `json:"payUsdtAddress" gorm:"column:pay_usdt_address;type:varchar(255)"`
+	FromAddress    string `json:"fromAddress" gorm:"column:from_address;type:varchar(255)"`
 	Price          int64  `json:"price" gorm:"column:price"`                 // 1usdt = 1 * 10e6
 	Status         int8   `json:"status" gorm:"column:status"`               // 支付状态
 	ConfirmTime    int64  `json:"confirmTime" gorm:"column:confirm_time"`    // 支付确认时间
@@ -16,6 +17,8 @@ type Orders struct {
 	Ip             string `json:"ip" gorm:"column:ip;type:varchar(255)"`     // ip地址
 	Area           string `json:"area" gorm:"column:area;type:varchar(255)"` // ip对应的地区
 	Version        int    `json:"version" gorm:"column:version"`
+	Email          string `json:"email"`                         // 邮箱
+	TradeId        string `json:"tradeId gorm:"column:trade_id"` // 交易支付的id
 }
 
 func (Orders) TableName() string {

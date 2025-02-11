@@ -16,10 +16,17 @@ type Config struct {
 	NSQ           NSQ           `json:"nsq"`
 	HttpClient    HttpClient    `json:"httpClient"`
 	CardPackages  []CardPackage `json:"cardPackages"`
+	Payment       Payment       `json:"payment"`
 }
 
 type LevelDBConfig struct {
 	Path string `json:"path"`
+}
+
+type Payment struct {
+	Host  string `json:"host"`
+	Token string `json:"token"`
+	AppId string `json:"appId"`
 }
 
 type Web struct {
