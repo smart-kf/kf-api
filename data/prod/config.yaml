@@ -54,6 +54,6 @@ cardPackages:
     day: 30
 
 payment:
-  host: https://payment.smart-kf.top
+  host: https://payment.smartkf.top
   token: dj2D9XRtbG4
   appId: kf
