@@ -120,6 +120,12 @@ func registerRouter(g *gin.Engine) {
 			domainGroup.POST("/list", domainController.ListDomain)
 			domainGroup.POST("/del", domainController.DeleteDomain)
 		}
+
+		var oc bill.OrderController
+		orderGroup := bgAuth.Group("/order")
+		{
+			orderGroup.POST("/list", oc.List)
+		}
 	}
 
 	var authController kfbackend.AuthController

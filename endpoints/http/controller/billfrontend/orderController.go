@@ -183,7 +183,7 @@ func (c *OrderController) Notify(ctx *gin.Context) {
 	order.TradeId = req.TradeId
 	order.ConfirmTime = req.Timestamp
 	order.Status = constant.OrderStatusPay
-	order.PayUsdtAddress = req.Address
+	order.ToAddress = req.Address
 
 	// 查询一个卡密分配给他.
 	var cardRepo repository.KFCardRepository

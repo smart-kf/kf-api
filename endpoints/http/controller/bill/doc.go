@@ -23,4 +23,7 @@ func SwaggerDoc(group *swaggos.Group) {
 	domainC.Post("/add").Body(bill.AddDomainRequest{}).JSON(dao.BillDomain{}).Description("添加域名")
 	domainC.Post("/list").Body(bill.ListDomainRequest{}).JSON(bill.ListDomainResponse{}).Description("域名列表")
 	domainC.Post("/del").Body(bill.DeleteDomainRequest{}).JSON(common.EmptyResponse{}).Description("删除域名")
+
+	orderC := billGroup.Group("/order").Tag("计费后台-订单管理")
+	orderC.Post("/list").Body(bill.ListOrderRequest{}).JSON(bill.ListOrderResponse{}).Description("订单列表")
 }
