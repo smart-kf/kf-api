@@ -3,6 +3,7 @@ services:
     image: kf-api:latest
     volumes:
       - ./data/prod/config.yaml:/app/config.yaml
+      - /www/cdn:/www/cdn
     command:
       - /app/app
     ports:
