@@ -5,14 +5,18 @@
 <!-- Main content -->
 <section class="slice py-7 ">
     <div class="container">
-        <div class="row m-auto" style="max-width: 650px;">
+        <div class="row m-auto" style="max-width: 670px;">
             <div class="mb-3">
-                <label for="email" class="form-label">邮箱地址</label>
+                <label for="email" class="form-label">邮箱地址</label><span class="text-danger" style="font-size: 14px;margin-bottom: 12px;">
+            (邮箱地址做为您接收商品的唯一渠道)
+          </span>
                 <input type="email" class="form-control" id="email"
                        placeholder="请输入正确的邮箱地址，确保您能接收到邮件">
             </div>
             <div class="mb-3">
-                <label for="from_address" class="form-label">USDT地址</label>
+                <label for="from_address" class="form-label">USDT地址</label><span class="text-danger" style="font-size: 14px;margin-bottom: 12px;">
+           (请务必填写TRC2.0协议的USDT地址及转账)
+          </span>
                 <input type="email" class="form-control" id="from_address"
                        placeholder="请输入您付款USDT地址">
             </div>
@@ -34,27 +38,19 @@
             <div class="col-12 mb-3  text-center">
                 <button class="btn btn-primary px-5" type="button" onclick="onPaySubmit()">提交</button>
             </div>
-            <hr>
-            <div class="text-left" id="qr-body" >
-              <div class="text-secondary">说明：</div>
-              <p>
-                邮箱地址：
-              </p>
-              <p style="text-indent: 48px;">
-                邮箱地址做为您接收商品的唯一渠道，我们不提供任何其他渠道发货, 如果您支付成功，一般在3分钟内会收到邮件
-              </p>
-              <p>
-                如果您未收到邮件，请检查垃圾箱, 请认准我们的唯一发货邮箱地址：admin@smartkf.top
-              </p>
-              <p>
-                付款USDT地址:
-              </p>
-              <p style="text-indent: 48px;">
-                为了确定是您自己下单购买的商品，我们将通过付款地址来确定哪一笔订单是您的，请务必填写 TRC2.0 协议的 USDT 地址
-              </p>
-              <p>
-                请您务必使用该地址向我们转账.
-              </p>
+             <hr>
+            <div class="alert alert-secondary " style="font-size: 14px;line-height: 24px;" role="alert">
+              <div class="text-dark">说明：</div>
+              <div>
+                <span class=" fw-bold text-dark">邮箱地址：</span> 做为 <span class="fw-bold text-danger ">唯一</span> 收货渠道,
+                支付成功后3分钟左右会收到邮件。如果未收到, <span class="text-danger">请检查垃圾箱</span> 。
+              </div>
+              <div>
+                请认准唯一发货邮箱地址：<a href="#">admin@smartkf.top</a>
+              </div>
+              <div>
+                <span class=" fw-bold text-dark">USDT地址：</span>我们将通过该地址来确定您的订单 ,请务必填写TRC2.0协议的USDT地址及使用该地址进行转账。
+              </div>
             </div>
         </div>
     </div>
