@@ -1,0 +1,155 @@
+{{ template "header" . }}
+<body>
+<!-- Navbar -->
+{{ template "navbar" . }}
+<!-- Main content -->
+<section class="slice py-7 ">
+    <div class="container">
+        <div class="row m-auto" style="max-width: 650px;">
+            <div class="mb-3">
+                <label for="email" class="form-label">邮箱地址</label>
+                <input type="email" class="form-control" id="email"
+                       placeholder="请输入正确的邮箱地址，确保您能接收到邮件">
+            </div>
+            <div class="mb-3">
+                <label for="from_address" class="form-label">USDT地址</label>
+                <input type="email" class="form-control" id="from_address"
+                       placeholder="请输入您付款USDT地址">
+            </div>
+            <div class="mb-3">
+                <div for="exampleFormControlTextarea1" class="form-label">选择套餐</div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="package" id="daily" value="daily">
+                    <label class="form-check-label" for="daily">$10(日卡/人)</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="package" id="weekly" value="weekly">
+                    <label class="form-check-label" for="weekly"> $50 (周卡/人)</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="package" id="monthly" value="monthly">
+                    <label class="form-check-label" for="monthly"> $180(月卡/人)</label>
+                </div>
+            </div>
+            <div class="col-12 mb-3  text-center">
+                <button class="btn btn-primary px-5" type="button" onclick="onPaySubmit()">提交</button>
+            </div>
+            <hr>
+            <div class="text-left" id="qr-body" >
+              <div class="text-secondary">说明：</div>
+              <p>
+                邮箱地址：
+              </p>
+              <p style="text-indent: 48px;">
+                邮箱地址做为您接收商品的唯一渠道，我们不提供任何其他渠道发货, 如果您支付成功，一般在3分钟内会收到邮件
+              </p>
+              <p>
+                如果您未收到邮件，请检查垃圾箱, 请认准我们的唯一发货邮箱地址：admin@smartkf.top
+              </p>
+              <p>
+                付款USDT地址:
+              </p>
+              <p style="text-indent: 48px;">
+                为了确定是您自己下单购买的商品，我们将通过付款地址来确定哪一笔订单是您的，请务必填写 TRC2.0 协议的 USDT 地址
+              </p>
+              <p>
+                请您务必使用该地址向我们转账.
+              </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- index.html -->
+<div id="loading-overlay" style="display: none;">
+    <div class="loader"></div>
+</div>
+<!-- 提示框 -->
+<div id="top-toast" class="top-toast" style="display:none;"></div>
+</div>
+
+</body>
+{{ template "footer" . }}
+<script>
+
+    var selectedPackageId = '{{ .packageId }}';
+
+    // 提交按钮，校验，提示，请求，然后生成二维码
+    var udst = '1PyMi4EYzGZKoxK7DOzMGHoQ91EdrMMkBP'
+
+    function isValidEmail(email) {
+        const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/; // 使用你选择的正则表达式
+        return regex.test(email);
+    }
+
+    function onPaySubmit() {
+        // 校验
+        let emailVal = $('#email').val()
+        let from_address = $('#from_address').val()
+        let packageId = $('input[name="package"]:checked').val();
+
+        if (!isValidEmail(emailVal)) {
+            showToast('请输入正确的邮箱地址', 'error')
+            return
+        }
+        if (from_address === '') {
+            showToast('请输入USDT支付地址', 'error')
+            return
+        }
+        let params = {
+            email: emailVal,
+            from_address: from_address,
+            packageId: packageId
+        }
+        showMask(true)
+        $.ajax({
+            url: "/api/bill-fe/order/create",
+            method: "POST",
+            data: JSON.stringify(params),
+            contentType: 'application/json',
+            dataType: 'json',
+            success: function (res) {
+                showMask(false)
+                if (statusCheck(res)) {
+                    window.open(res.data.payment_url, '_blank')
+                }
+            },
+            error: function (xhr, status, error) {
+                showMask(false)
+                showToast('操作失败，请重试', 'error')
+            }
+        });
+    }
+
+    function createQrcode(url) {
+        $('#qr-body').css('display', 'block')
+        $('#qrcode').qrcode({
+            text: url,
+            width: 200,
+            height: 200
+        });
+    }
+
+    // 获取url后面的参数
+    function getUrlParams(url) {
+        const reg = /(\w+)=([^&]+)/g;
+        const params = {};
+        let match;
+
+        while ((match = reg.exec(url)) !== null) {
+            params[match[1]] = match[2];
+        }
+
+        return params;
+    }
+
+    $(document).ready(function () {
+        initData()
+    });
+
+    function initData() {
+        // 获取url 初始化选项
+        let packageId = selectedPackageId;
+        $('#' + packageId).prop('checked', true);
+    }
+</script>

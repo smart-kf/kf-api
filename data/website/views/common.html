@@ -1,0 +1,70 @@
+{{ define "header" }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="icon" href="../static/assets/logo.svg"/>
+    <title>云客服</title>
+    <!-- 引入Bootstrap CSS -->
+    <link rel="stylesheet" href="/website/static/style/index.css"/>
+    <link rel="stylesheet" href="/website/static/lib/bootstrap@5.3.2.min.css"/>
+</head>
+{{ end }}
+{{ define "navbar" }}
+<nav class="navbar navbar-expand-lg navbar-light bg-white">
+    <div class="container d-flex align-items-center justify-content-between">
+        <!-- Brand -->
+        <a class="navbar-brand d-flex align-items-center" href="index.html">
+            <img alt="Image placeholder" src="/website/static/assets/logo.png" width="44" id="navbar-logo">
+            <span class="fs-2 fw-bold px-1 main-color">云客服</span>
+        </a>
+        <!-- Toggler -->
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
+                aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <!-- Collapse -->
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav mt-4 mt-lg-0 ms-auto fw-bold ">
+                <li class="nav-item px-2">
+                    <a class="nav-link main-color" href="index.html">首页</a>
+                </li>
+                <li class="nav-item px-2">
+                    <a class="nav-link main-color" href="package.html">套餐方案</a>
+                </li>
+                <li class="nav-item px-2">
+                    <a class="nav-link main-color" href="domain.html">域名购买</a>
+                </li>
+                <li class="nav-item px-2">
+                    <a class="nav-link main-color" href="pay.html">免费开户</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+{{ end }}
+{{ define "footer" }}
+<section class="bg-section-dark">
+    <div class="container mt-4 py-5  "></div>
+</section>
+<!-- Core JS  -->
+<!-- 引入jQuery和Bootstrap的JavaScript依赖 -->
+<script src="/website/static/lib/jquery@3.4.1.min.js"></script>
+<script src="/website/static/lib/bootstrap@5.3.2.bundle.min.js"></script>
+<script src="/website/static/lib/popper.min.js"></script>
+<script src="/website/static/lib/jquery.qrcode.min.js"></script>
+<script src="/website/static/lib/common.js"></script>
+<script>
+    // 提交按钮，校验，提示，请求，然后生成二维码
+    function onPaySubmit() {
+        $('#qrcode').qrcode({
+            text: "http://jindo.dev.naver.com/collie",
+            width: 200,
+            height: 200
+        });
+    }
+</script>
+</body>
+</html>
+{{ end }}

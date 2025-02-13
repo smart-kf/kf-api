@@ -42,11 +42,20 @@ cardPackages:
   - id: "daily"
     price: 10
     day: 1
+    name: '日卡'
 
   - id: "weekly"
     price: 50
     day: 7
+    name: '周卡'
 
   - id: "monthly"
     price: 180
     day: 30
+    name: '月卡'
+
+payment:
+  host: http://localhost:8082
+  token: 1234
+  appId: kf
+  fromMail: admin@smartkf.top

@@ -70,7 +70,7 @@ func (c *OrderController) CreateOrder(ctx *gin.Context) {
 		PackageId:   cardPackage.Id,
 		PackageDay:  cardPackage.Day,
 		OrderNo:     no,
-		Price:       cardPackage.Price * 1000,    // 1 后面4个0
+		Price:       cardPackage.Price * 1e6,     // 1 后面6个0
 		Status:      constant.OrderStatusCreated, //
 		ExpireTime:  orderExpireTime,
 		Ip:          utils.ClientIP(ctx),
@@ -328,9 +328,4 @@ func (c *OrderController) Notify(ctx *gin.Context) {
 	}()
 
 	c.Success(ctx, order)
-}
-
-func (c *OrderController) Return(ctx *gin.Context) {
-	query := ctx.Request.RequestURI
-	ctx.String(200, "支付成功,请检查邮件查看卡密信息:"+query)
 }

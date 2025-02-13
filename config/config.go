@@ -87,6 +87,7 @@ type CardPackage struct {
 	Id    string `json:"id"`
 	Price int64  `json:"price"` // 精确到具体多少U，数据库存储  会带上 4个0
 	Day   int    `json:"day"`
+	Name  string `json:"name"`
 }
 
 func (c Config) GetPackageByID(id string) (CardPackage, bool) {

@@ -2,6 +2,8 @@ package http
 
 import (
 	"fmt"
+	"html/template"
+	"net/http"
 	"time"
 
 	xlogger "github.com/clearcodecn/log"
@@ -10,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/make-money-fast/captcha"
 
+	"github.com/smart-fm/kf-api/data/website"
 	"github.com/smart-fm/kf-api/endpoints/http/controller/bill"
 	bill2 "github.com/smart-fm/kf-api/endpoints/http/controller/billfrontend"
 	dev2 "github.com/smart-fm/kf-api/endpoints/http/controller/dev"
@@ -76,12 +79,25 @@ func Run() error {
 	)
 
 	g.Static("/static", conf.Web.StaticDir)
+	if conf.Debug {
+		g.Static("/website/static", "data/website/static")
+		g.LoadHTMLGlob("data/website/views/*.html")
+	} else {
+		g.StaticFS("/website/", http.FS(website.StaticFS))
+		tpl, err := template.ParseFS(website.FS, "views/*.html")
+		if err != nil {
+			panic(err)
+		}
+		g.SetHTMLTemplate(tpl)
+	}
 
 	g.RedirectTrailingSlash = true
 	g.RedirectFixedPath = true
 
 	registerRouter(g)
 	swaggerAPI(g)
+
+	registerWebsiteRouter(g)
 
 	return g.Run(conf.Web.String())
 }
@@ -184,12 +200,6 @@ func registerRouter(g *gin.Engine) {
 		billFe.POST("/order/notify", orderController.Notify) // TODO:: 加密处理
 	}
 
-	bill := g.Group("/bill")
-	{
-		var orderController bill2.OrderController
-		bill.GET("/order/pay-success", orderController.Return) // TODO:: 加密处理
-	}
-
 	// 内部调用: websocket on auth 回调.
 	internal := g.Group("/internal")
 	{
@@ -206,6 +216,14 @@ func registerRouter(g *gin.Engine) {
 		var dc dev2.DevController
 		dev.POST("/push", dc.PushMsg)
 	}
+}
+
+func registerWebsiteRouter(g *gin.Engine) {
+	var wc bill2.WebsiteController
+	g.GET("/", wc.Index)
+	g.GET("/package.html", wc.Package)
+	g.GET("/order", wc.Order)
+	g.GET("/order/pay-success", wc.PaySuccess)
 }
 
 func swaggerAPI(g *gin.Engine) {

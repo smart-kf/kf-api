@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="../static/assets/logo.svg" />
+  <title>云客服</title>
+  <!-- 引入Bootstrap CSS -->
+  <link rel="stylesheet" href="stylendex.css" />
+  <link rel="stylesheet" href="libootstrap@5.3.2.min.css" />
+</head>
+
+
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-white">
+    <div class="container d-flex align-items-center justify-content-between">
+      <!-- Brand -->
+      <a class="navbar-brand d-flex align-items-center" href="index.html">
+        <img alt="Image placeholder" src="../static/assets/logo.png" width="44" id="navbar-logo">
+        <span class="fs-2 fw-bold px-1 main-color">云客服</span>
+      </a>
+      <!-- Toggler -->
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
+        aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <!-- Collapse -->
+      <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav mt-4 mt-lg-0 ms-auto fw-bold ">
+          <li class="nav-item px-2">
+            <a class="nav-link main-color" href="index.html">首页</a>
+          </li>
+          <li class="nav-item px-2">
+            <a class="nav-link main-color" href="package.html">套餐方案</a>
+          </li>
+          <li class="nav-item px-2">
+            <a class="nav-link main-color" href="domain.html">域名购买</a>
+          </li>
+          <li class="nav-item px-2">
+            <a class="nav-link main-color" href="pay.html">免费开户</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Main content -->
+  <section class="slice py-7 ">
+    <div class="container">
+      <div class="alert alert-primary" role="alert">
+        使用独立域名，能更好提升XXX
+      </div>
+      <div class="row m-auto" style="max-width: 650px;">
+        <div class="mb-3">
+          <label for="email" class="form-label">邮箱地址</label>
+          <input type="email" class="form-control" id="email" placeholder="请输入正确的邮箱地址，确保您能接收到邮件">
+        </div>
+        <div class="mb-3">
+          <label for="from_address" class="form-label">USDT地址</label>
+          <input type="email" class="form-control" id="from_address" placeholder="请输入正确的USDT支付地址，确保您能准确支付">
+        </div>
+        <div class="mb-3">
+          <div for="exampleFormControlTextarea1" class="form-label">选择套餐</div>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="package" id="daily" value="daily">
+            <label class="form-check-label" for="daily">$10/个</label>
+          </div>
+          <!-- <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="package" id="weekly" value="weekly">
+            <label class="form-check-label" for="weekly"> $50 (周卡/人)</label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="package" id="monthly" value="monthly">
+            <label class="form-check-label" for="monthly"> $180(月卡/人)</label>
+          </div>
+        </div> -->
+        <div class="col-12 mb-3  text-center">
+          <button class="btn btn-primary px-5" type="button" onclick="onPaySubmit()">提交</button>
+        </div>
+        <hr>
+        <div class="text-center" id="qr-body" style="display: none;">
+          <div class="text-secondary"> 请扫描二维码进行转账USDT(trc-20)支付。</div>
+          <div class="text-danger"> 转账金额必须为下方显示的金额且需要在倒计时内完成转账，否则无法被系统确认!</div>
+          <div id="qrcode" class="my-3"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- index.html -->
+  <div id="loading-overlay" style="display: none;">
+    <div class="loader"></div>
+  </div>
+  <!-- 提示框 -->
+  <div id="top-toast" class="top-toast" style="display:none;"></div>
+  </div>
+  <!-- Core JS  -->
+  <!-- 引入jQuery和Bootstrap的JavaScript依赖 -->
+  <script src="libquery@3.4.1.min.js"></script>
+  <script src="libootstrap@5.3.2.bundle.min.js"></script>
+  <script src="libopper.min.js"></script>
+  <script src="libquery.qrcode.min.js"></script>
+  <script src="libommon.js"></script>
+</body>
+<script>
+  // 提交按钮，校验，提示，请求，然后生成二维码
+  var httpUrl = 'https://api.smartkf.top/'
+
+  function isValidEmail(email) {
+    const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/; // 使用你选择的正则表达式
+    return regex.test(email);
+  }
+
+  function onPaySubmit() {
+
+    // 校验
+    let emailVal = $('#email').val()
+    let from_address = $('#from_address').val()
+    let packageId = $('input[name="package"]:checked').val();
+
+    if (!isValidEmail(emailVal)) {
+      showToast('请输入正确的邮箱地址', 'error')
+      return
+    }
+    if (from_address == '') {
+      showToast('请输入USDT支付地址', 'error')
+      return
+    }
+    let params = {
+      email: emailVal,
+      from_address: from_address,
+      packageId: packageId
+    }
+    console.log(params);
+    // let url = httpUrl +":8082/pay?trade_id=5219749f05425b6f8a54b1fb7a12cb661ac0088e&app_id=kf"
+    // createQrcode(url)
+    // http://localhost:8082/pay?trade_id=5219749f05425b6f8a54b1fb7a12cb661ac0088e&app_id=kf
+    showMask(true)
+    $.ajax({
+      url: httpUrl + "api/bill-fe/order/create",
+      method: "POST",
+      data: params,
+      success: function (res) {
+        showMask(false)
+        if (statusCheck(res)) {
+          let qeCodeUrl = res.data
+          createQrcode(qeCodeUrl)
+        }
+      },
+      error: function (xhr, status, error) {
+        showMask(false)
+        showToast('请求失败', 'error')
+      }
+    });
+  }
+
+  function createQrcode(url) {
+    $('#qr-body').css('display', 'block')
+    $('#qrcode').qrcode({
+      text: url,
+      width: 200,
+      height: 200
+    });
+  }
+
+  // 获取url后面的参数
+  function getUrlParams(url) {
+    const reg = /(\w+)=([^&]+)/g;
+    const params = {};
+    let match;
+
+    while ((match = reg.exec(url)) !== null) {
+      params[match[1]] = match[2];
+    }
+    return params;
+  }
+
+  $(document).ready(function () {
+    initData()
+  });
+
+  function initData() {
+    // 获取url 初始化选项
+    let query = getUrlParams(window.location.href)
+    let types = ['daily', 'weekly', 'monthly']
+    let packageId = 'daily'
+    if (query.page === 'package' && types.includes(query.t)) {
+      packageId = query.t
+    }
+    $('#' + packageId).prop('checked', true);
+  }
+
+</script>
+
+</html>

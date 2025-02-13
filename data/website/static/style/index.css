@@ -1,0 +1,96 @@
+.main-color {
+  color: #4a90e2 !important;
+}
+.main-bg-color {
+  background: #4a90e2;
+}
+
+.bg-section-dark {
+  background-color: #0e0b2b !important;
+}
+
+.slice-lg {
+  padding-top: 6rem;
+  padding-bottom: 6rem;
+}
+.bg-section {
+  background: linear-gradient(180deg, #003675 30%, #582dad);
+}
+.text-sc {
+  color: #cbcbcb;
+}
+.pb-10 {
+  padding-bottom: 10rem;
+}
+
+.mt-n7 {
+  margin-top: -5rem !important;
+}
+/* 顶部提示条 */
+.top-toast {
+  visibility: visible; /* 确保元素在隐藏时不会被布局占据空间 */
+  min-width: 150px;
+  background-color: #fff;
+  box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08),
+    0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
+  color: #333;
+  text-align: center;
+  border-radius: 8px;
+  padding: 9px 16px;
+  position: fixed;
+  z-index: 1;
+  left: 50%; /* 水平居中 */
+  transform: translateX(-50%);
+  top: 20px;
+}
+
+.top-toast.success {
+  color: #52c41a;
+}
+
+.top-toast.error {
+  color: #ff4d4f;
+}
+
+.top-toast.info {
+  color: #1677ff;
+}
+
+/* 全局加载 */
+/* styles.css */
+#loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8); /* 半透明背景 */
+  z-index: 9999; /* 确保在最上层 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loader {
+  border: 16px solid #f3f3f3; /* Light grey */
+  border-top: 16px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .mt-n7 {
+    margin-top: 2rem !important;
+  }
+}

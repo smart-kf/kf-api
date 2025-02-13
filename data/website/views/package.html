@@ -1,0 +1,93 @@
+{{ template "header" . }}
+
+<body>
+  <!-- Navbar -->
+  {{ template "navbar" . }}
+  <!-- Main content -->
+  <section class="slice slice-lg bg-section  pt-5 pb-10 ">
+    <!-- Container -->
+    <div class="container position-relative zindex-100">
+      <div class="col">
+        <div class="row justify-content-center">
+          <div class="col-md-10 text-center">
+            <div class="mt-4 mb-6">
+              <h1 class="h1 text-white">
+                方案清晰，价格明了，无需顾虑
+              </h1>
+              <p class="text-sc  mt-3 mb-0">您可以根据您的需求和预算，找到最适合的选择。让我们助您提升客服效率，同时保证成本在掌控之中。</p>
+              <p class="text-sc  mt-1 mb-0">立即注册开始试用，体验云客服的全部潜能。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <section>
+    <div class="container text-center">
+      <!-- Pricing -->
+      <div class="row justify-content-center">
+        <div class="col-lg-4 col-md mt-n7">
+          <div class="card card-pricing bg-dark text-center px-3 border-0 hover-scale-110">
+            <div class="card-title text-white text-start fw-bold h2 pt-3">日卡</div>
+            <div class="card-header  border-0 delimiter-bottom">
+              <div class="h1 text-white text-center mb-0">${{ .dailyPrice }} </div>
+              <span class="h6 text-white">标准版</span>
+            </div>
+            <div class="card-body">
+              <ul class="list-unstyled text-white text-sm opacity-8 mb-4 ">
+                <li class="py-2">网页渠道接入</li>
+                <li class="py-2">攻击防护系统</li>
+                <li class="py-2">素材管理、消息群发</li>
+                <li class="py-2">聊天机器人、智能回复</li>
+                <li class="py-2">支持文本、图片、视频</li>
+                <li class="py-2">一键生成聊天链接、二维码</li>
+              </ul>
+              <a href="/order?packageId=daily" class="btn btn-secondary ">立刻开始试用</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4 col-md mt-n7">
+          <div class="card card-pricing bg-dark text-center px-3 border-0 hover-scale-110">
+            <div class="card-title text-white text-start fw-bold h2 pt-3">周卡</div>
+            <div class="card-header  border-0 delimiter-bottom">
+              <div class="h1 text-white text-center mb-0">${{ .weeklyPrice }} </div>
+              <span class="h6 text-white">标准版</span>
+            </div>
+            <div class="card-body">
+              <ul class="list-unstyled text-white text-sm opacity-8 mb-4">
+                <li class="py-2">网页渠道接入</li>
+                <li class="py-2">攻击防护系统</li>
+                <li class="py-2">素材管理、消息群发</li>
+                <li class="py-2">聊天机器人、智能回复</li>
+                <li class="py-2">支持文本、图片、视频</li>
+                <li class="py-2">一键生成聊天链接、二维码</li>
+              </ul>
+              <a href="/order?packageId=weekly" class="btn btn-secondary ">立刻开始试用</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4 col-md mt-n7">
+          <div class="card card-pricing bg-dark text-center px-3 border-0 hover-scale-110">
+            <div class="card-title text-white text-start fw-bold h2 pt-3">月卡</div>
+            <div class="card-header  border-0 delimiter-bottom">
+              <div class="h1 text-white text-center mb-0">${{ .monthlyPrice }} </div>
+              <span class="h6 text-white">标准版</span>
+            </div>
+            <div class="card-body">
+              <ul class="list-unstyled text-white text-sm opacity-8 mb-4">
+                <li class="py-2">网页渠道接入</li>
+                <li class="py-2">攻击防护系统</li>
+                <li class="py-2">素材管理、消息群发</li>
+                <li class="py-2">聊天机器人、智能回复</li>
+                <li class="py-2">支持文本、图片、视频</li>
+                <li class="py-2">一键生成聊天链接、二维码</li>
+              </ul>
+              <a href="/order?packageId=monthly" class="btn btn-secondary ">立刻开始试用</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+{{ template "footer" . }}
