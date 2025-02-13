@@ -14,8 +14,8 @@ github.com/bytedance/sonic/loader v0.1.1 h1:c+e5Pt1k/cy5wMveRDyk2X4B9hF4g7an8N3z
 github.com/bytedance/sonic/loader v0.1.1/go.mod h1:ncP89zfokxS5LZrJxl5z0UJcsk4M4yY2JpfqGeCtNLU=
 github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
 github.com/cespare/xxhash/v2 v2.3.0/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
-github.com/clearcodecn/log v1.1.2 h1:+8dPD0uxaFEgVaa3t14YP4FuzwHX5E9a6Eq7V51uPfk=
-github.com/clearcodecn/log v1.1.2/go.mod h1:M6omVt0OHcZT8wmnGVX0ezIXCMZ38CNVcuqL+NcsvXk=
+github.com/clearcodecn/log v1.1.4 h1:uYypJhTK1JMKf5J4vR2V3qm+8HUTGlK9OKzbw3fQC6w=
+github.com/clearcodecn/log v1.1.4/go.mod h1:M6omVt0OHcZT8wmnGVX0ezIXCMZ38CNVcuqL+NcsvXk=
 github.com/clearcodecn/swaggos v0.0.7 h1:PIvFJzyeZXZSo8BZK8fv1/Mu7AP5QildQR1hHMAPkzs=
 github.com/clearcodecn/swaggos v0.0.7/go.mod h1:mT+M1EbltdXk0bKTmvC5X2QBRhvQtnOkxxV3kzXDyx8=
 github.com/cloudwego/base64x v0.1.4 h1:jwCgWpFanWmN8xoIUHa2rtzmkd5J2plF/dnLS6Xd/0Y=

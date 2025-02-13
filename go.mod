@@ -3,7 +3,8 @@ module github.com/smart-fm/kf-api
 go 1.23.2
 
 require (
-	github.com/clearcodecn/log v1.1.2
+	github.com/brianvoe/gofakeit/v6 v6.28.0
+	github.com/clearcodecn/log v1.1.4
 	github.com/clearcodecn/swaggos v0.0.7
 	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-gonic/gin v1.10.0
@@ -13,6 +14,7 @@ require (
 	github.com/go-resty/resty/v2 v2.16.2
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.6.0
+	github.com/h2non/filetype v1.1.3
 	github.com/jinzhu/copier v0.4.0
 	github.com/make-money-fast/captcha v1.0.1
 	github.com/make-money-fast/xconfig v0.0.0-20231220023435-03d97a0a1e92
@@ -31,7 +33,6 @@ require (
 require (
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
-	github.com/brianvoe/gofakeit/v6 v6.28.0 // indirect
 	github.com/bytedance/sonic v1.11.6 // indirect
 	github.com/bytedance/sonic/loader v0.1.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
@@ -49,7 +50,6 @@ require (
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
