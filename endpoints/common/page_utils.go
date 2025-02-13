@@ -13,9 +13,9 @@ const (
 )
 
 type PageRequest struct {
-	Page     *uint  `json:"page" doc:"分页,从1开始"`        // 不要直接使用.
+	Page     *uint  `json:"page" doc:"分页,从1开始"`       // 不要直接使用.
 	PageSize *uint  `json:"pageSize" doc:"分页大小,默认20"` // 不要直接使用.
-	OrderBy  string `json:"order_by" doc:"排序,默认id"`     // 排序字段: 默认传 id
+	OrderBy  string `json:"order_by" doc:"排序,默认id"`   // 排序字段: 默认传 id
 	Asc      bool   `json:"asc" doc:"是否升序，默认倒序"`
 }
 
