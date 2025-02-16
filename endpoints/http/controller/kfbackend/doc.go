@@ -74,4 +74,15 @@ func SwaggerDoc(group *swaggos.Group) {
 		sysConf.Get("/").JSON(GetSysConfResponse{})
 		sysConf.Post("/").Body(PostSysConfRequest{}).JSON(PostSysConfResponse{})
 	}
+
+	// 欢迎语.
+	wel := bg.Group("/welcome").Tag("客服后台-欢迎语管理")
+	{
+		wel.Post("/upsert").Body(kfbackend.UpsertWelcomeMsgRequest{}).JSON(common.EmptyResponse{}).Description(
+			"创建||更新欢迎语",
+		)
+		wel.Get("/list").JSON([]*kfbackend.KfWelcomeMessageResp{}).Description("欢迎语列表")
+		wel.Post("/del").Body(kfbackend.DeleteWelcomeRequest{}).JSON(common.EmptyResponse{}).Description("删除欢迎语")
+	}
+
 }

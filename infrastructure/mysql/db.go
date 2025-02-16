@@ -75,6 +75,7 @@ func syncTable(db *gorm.DB) {
 		&dao.KFQRCodeDomain{},
 		&dao.BillDomain{},
 		&dao.KfFile{},
+		&dao.KfWelcomeMessage{},
 	); err != nil {
 		log.Fatal(err)
 	}

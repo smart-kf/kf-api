@@ -182,6 +182,14 @@ func registerRouter(g *gin.Engine) {
 			userInfoGroup.GET("", kfUserInfo.GetKfUserInfo)
 			userInfoGroup.POST("/update", kfUserInfo.UpdateUserInfo)
 		}
+
+		var wc kfbackend.WelcomeMsgController
+		welGroup := kf.Group("/welcome")
+		{
+			welGroup.POST("/upsert", wc.Upsert)
+			welGroup.GET("/list", wc.ListAll)
+			welGroup.POST("/del", wc.Delete)
+		}
 	}
 
 	// 客服前台

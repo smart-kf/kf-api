@@ -13,7 +13,7 @@ Authorization: {{ kf_token }}
 > {%
     // 将响应中的 orderNo 存储到变量 {{orderNo}} 中
     var token = response.body.data.token;
-    client.global.set("kf_token",token);
+    client.global.set("kf_token", token);
 %}
 
 ### 获取二维码:
@@ -54,7 +54,7 @@ Content-Type: application/json
 Authorization: {{ kf_token }}
 
 {
-  "uuid":"51|2c99adb2f80e42559ce4ae475caef17b",
+  "uuid": "51|2c99adb2f80e42559ce4ae475caef17b",
   "updateType": "userinfo",
   "comments": "wawaw",
   "remarkName": "remarkddd",
@@ -69,7 +69,7 @@ Content-Type: application/json
 Authorization: {{ kf_token }}
 
 {
-  "uuid":"51|2c99adb2f80e42559ce4ae475caef17b",
+  "uuid": "51|2c99adb2f80e42559ce4ae475caef17b",
   "updateType": "top",
   "top": 1
 }
@@ -81,8 +81,28 @@ Content-Type: application/json
 Authorization: {{ kf_token }}
 
 {
-  "uuid":"51|2c99adb2f80e42559ce4ae475caef17b",
+  "uuid": "51|2c99adb2f80e42559ce4ae475caef17b",
   "updateType": "block",
   "block": 1
 }
+
+
+###
+GET {{ host }}/api/kf-be/welcome/list
+Content-Type: application/json
+Authorization: {{ kf_token }}
+
+
+###
+POST {{ host }}/api/kf-be/welcome/upsert
+Content-Type: application/json
+Authorization: {{ kf_token }}
+
+{
+  "content": "哈哈999",
+  "type": "text",
+  "sort": 1,
+  "enable": true
+}
+
 
