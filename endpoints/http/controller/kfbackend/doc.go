@@ -81,7 +81,7 @@ func SwaggerDoc(group *swaggos.Group) {
 		wel.Post("/upsert").Body(kfbackend.UpsertWelcomeMsgRequest{}).JSON(common.EmptyResponse{}).Description(
 			"创建||更新欢迎语",
 		)
-		wel.Get("/list").JSON([]*kfbackend.KfWelcomeMessageResp{}).Description("欢迎语列表")
+		wel.Get("/list").FormObject(kfbackend.ListAllRequest{}).JSON([]*kfbackend.KfWelcomeMessageResp{}).Description("欢迎语列表")
 		wel.Post("/del").Body(kfbackend.DeleteWelcomeRequest{}).JSON(common.EmptyResponse{}).Description("删除欢迎语")
 	}
 }
