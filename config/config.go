@@ -17,6 +17,7 @@ type Config struct {
 	HttpClient    HttpClient    `json:"httpClient"`
 	CardPackages  []CardPackage `json:"cardPackages"`
 	Payment       Payment       `json:"payment"`
+	DomainPrice   float64       `json:"domainPrice"`
 }
 
 type LevelDBConfig struct {
@@ -99,7 +100,3 @@ func (c Config) GetPackageByID(id string) (CardPackage, bool) {
 	}
 	return CardPackage{}, false
 }
-
-var (
-	qrcodeDomainIndex int64 = 0
-)

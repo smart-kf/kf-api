@@ -89,3 +89,16 @@ func (r *BillDomainRepository) FindFirstPublic(ctx context.Context) (*dao.BillDo
 
 	return domain[rand.Intn(len(domain))], true, nil
 }
+
+func (r *BillDomainRepository) CountPrivateDomain(ctx context.Context) (int64, error) {
+	var cnt int64
+	tx := mysql.GetDBFromContext(ctx)
+	err := tx.Model(&dao.BillDomain{}).Where(
+		"is_public = ? and status = ?", false,
+		constant.DomainStatusNormal,
+	).Count(&cnt).Error
+	if err != nil {
+		return 0, err
+	}
+	return cnt, nil
+}
