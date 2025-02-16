@@ -80,6 +80,7 @@ func (c *WelcomeMsgController) ListAll(ctx *gin.Context) {
 	if req.Page != nil && req.PageSize != nil {
 		tx = tx.Limit(int(req.GetPage())).Offset(int((req.GetPage() - 1) * req.GetPageSize()))
 	}
+	tx.Find(&data)
 	var rsp []*kfbackend.KfWelcomeMessageResp
 	for _, item := range data {
 		rsp = append(
