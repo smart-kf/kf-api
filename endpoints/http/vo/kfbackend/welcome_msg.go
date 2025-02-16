@@ -46,6 +46,11 @@ type KfWelcomeMessageResp struct {
 	Keyword string `json:"keyword"`
 }
 
+type KfWelcomeMessageListResp struct {
+	List  []*KfWelcomeMessageResp `json:"list"`
+	Total int64                   `json:"total"`
+}
+
 type ListAllRequest struct {
 	common.PageRequest
 	MsgType string `form:"msgType" json:"msgType" binding:"required"  doc:"快捷回复=quick_reply, 

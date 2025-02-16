@@ -74,12 +74,12 @@ func (c *WelcomeMsgController) ListAll(ctx *gin.Context) {
 	cardId := common.GetKFCardID(reqCtx)
 
 	var data []*dao.KfWelcomeMessage
+	var cnt int64
 	tx := db.Where("card_id = ? and msg_type = ?", cardId, req.MsgType).Order("sort asc")
+	tx = tx.Model(&dao.KfWelcomeMessage{}).Count(&cnt)
 	if req.Page != nil && req.PageSize != nil {
 		tx = tx.Limit(int(req.GetPage())).Offset(int((req.GetPage() - 1) * req.GetPageSize()))
 	}
-	tx.Find(&data)
-
 	var rsp []*kfbackend.KfWelcomeMessageResp
 	for _, item := range data {
 		rsp = append(
@@ -94,7 +94,12 @@ func (c *WelcomeMsgController) ListAll(ctx *gin.Context) {
 		)
 	}
 
-	c.Success(ctx, rsp)
+	c.Success(
+		ctx, &kfbackend.KfWelcomeMessageListResp{
+			List:  rsp,
+			Total: cnt,
+		},
+	)
 }
 
 func (c *WelcomeMsgController) Delete(ctx *gin.Context) {

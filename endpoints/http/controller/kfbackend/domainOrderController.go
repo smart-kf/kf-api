@@ -38,6 +38,4 @@ func (c *DomainOrderController) CreateOrder(ctx *gin.Context) {
 		c.Error(ctx, xerrors.NewParamsErrors(fmt.Sprintf("域名库存不足，本次最多可购买: %d 个", req.Num)))
 		return
 	}
-
-	// 检查是否有域名订单.
 }
