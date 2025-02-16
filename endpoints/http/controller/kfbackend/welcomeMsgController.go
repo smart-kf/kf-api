@@ -89,6 +89,7 @@ func (c *WelcomeMsgController) ListAll(ctx *gin.Context) {
 				Type:    item.Type,
 				Sort:    item.Sort,
 				Enable:  item.Enable,
+				Keyword: item.Keyword,
 			},
 		)
 	}

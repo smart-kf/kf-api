@@ -14,6 +14,7 @@ type KfWelcomeMessage struct {
 	Type    string `json:"type" gorm:"type:varchar(255)"`
 	Sort    int    `json:"sort"`    // 排序
 	Enable  bool   `json:"enable"`  // 是否启用.
+	Keyword string `json:"keyword"` // 关键词.
 	MsgType string `json:"msgType"` // 类型：welcome_msg=欢迎语, quick_reply=快捷回复.
 }
 
