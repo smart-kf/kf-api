@@ -3,6 +3,7 @@ package kfbackend
 import (
 	"unicode/utf8"
 
+	"github.com/smart-fm/kf-api/endpoints/common"
 	"github.com/smart-fm/kf-api/pkg/xerrors"
 )
 
@@ -12,6 +13,7 @@ type UpsertWelcomeMsgRequest struct {
 	Type    string `json:"type" doc:"text,video,image" binding:"required"`
 	Sort    int    `json:"sort" doc:"排序编号"`
 	Enable  bool   `json:"enable" doc:"是否启用"`
+	MsgType string `json:"msgType" binding:"required"  doc:"快捷回复=quick_reply, 欢迎语=welcome_msg" validate:"oneof=quick_reply welcome_msg"`
 }
 
 func (r *UpsertWelcomeMsgRequest) Validate() error {
@@ -36,4 +38,10 @@ type KfWelcomeMessageResp struct {
 	Type    string `json:"type" gorm:"type:varchar(255)"`
 	Sort    int    `json:"sort"`   // 排序
 	Enable  bool   `json:"enable"` // 是否启用.
+}
+
+type ListAllRequest struct {
+	common.PageRequest
+	MsgType string `form:"msgType" json:"msgType" binding:"required"  doc:"快捷回复=quick_reply, 
+欢迎语=welcome_msg" validate:"oneof=quick_reply welcome_msg"`
 }

@@ -88,7 +88,7 @@ Authorization: {{ kf_token }}
 
 
 ###
-GET {{ host }}/api/kf-be/welcome/list
+GET {{ host }}/api/kf-be/welcome/list?msgType=welcome_msg
 Content-Type: application/json
 Authorization: {{ kf_token }}
 
@@ -102,7 +102,8 @@ Authorization: {{ kf_token }}
   "content": "哈哈999",
   "type": "text",
   "sort": 1,
-  "enable": true
+  "enable": true,
+  "msgType": "welcome_msg"
 }
 
 
