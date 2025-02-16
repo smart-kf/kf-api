@@ -12,6 +12,7 @@ web:
   staticDir: ./data/static
   cdnHost: http://localhost:8081/static/upload
   uploadDir: ./data/static/upload
+  kfManagerAddress: https://manager.smartkf.top
 
 redis:
   db: 0

@@ -1,25 +1,36 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>SmartKF - 订单支付通知</title>
-</head>
-<body>
-您已支付成功，订单信息如下:
-<p>
-    订单号: {{ .order.OrderNo }}
-</p>
-<p>
-    卡密: {{ .order.CardID }}
-</p>
-<p>
-    套餐时长: {{ .order.PackageDay }} , 首次登录开始计费
-</p>
-<p>
-    后台登录地址: todo
-</p>
+{{ template "header" . }}
 
-如有疑问请联系 telegram 客服: <a href="https://t.me/smartkf">@smartkf</a>
-</body>
-</html>
+<body>
+<!-- Navbar -->
+{{ template "navbar" . }}
+<!-- Main content -->
+<section class="slice slice-lg pt-lg-6 pb-0 pb-lg-6 bg-section-secondary">
+    <div class="container">
+        <div class="row justify-content-center text-center">
+            <div class="col-12 ">
+                <!-- Heading -->
+                <div class="card" style="width: 100%;">
+                    <div class="card-body">
+                        <h5 class="display-7 fw-bold">购买成功!</h5>
+                        <div>
+                            <div>
+                                订单编号: <span>{{ .order.OrderNo }} </span>
+                            </div>
+                            <div>
+                                登录地址: <span>{{ .KfManagerAddress }} </span>
+                            </div>
+                            <div>
+                                卡密id: <span>{{ .order.CardID }} </span>
+                            </div>
+                            <div>
+                                卡密密码: 无密码
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{{ template "footer" . }}

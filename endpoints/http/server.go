@@ -195,6 +195,7 @@ func registerRouter(g *gin.Engine) {
 	// 计费前台.
 	billFe := api.Group("/bill-fe")
 	{
+		// /api/bill-fe/order/notify
 		var orderController bill2.OrderController
 		billFe.POST("/order/create", orderController.CreateOrder)
 		billFe.POST("/order/notify", orderController.Notify) // TODO:: 加密处理

@@ -85,7 +85,8 @@ func (c *WebsiteController) PaySuccess(ctx *gin.Context) {
 
 	ctx.HTML(
 		200, "order-mail.html", gin.H{
-			"order": order,
+			"order":            order,
+			"KfManagerAddress": config.GetConfig().Web.KfManagerAddress,
 		},
 	)
 }

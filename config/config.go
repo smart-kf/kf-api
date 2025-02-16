@@ -31,11 +31,12 @@ type Payment struct {
 }
 
 type Web struct {
-	Addr      string `json:"addr" default:"127.0.0.1"`
-	Port      int    `json:"port" default:"8081"`
-	StaticDir string `json:"staticDir" default:"static"`
-	CdnHost   string `json:"cdnHost"`   // 用户上传的文件cdn域名
-	UploadDir string `json:"uploadDir"` // 上传文件夹
+	Addr             string `json:"addr" default:"127.0.0.1"`
+	Port             int    `json:"port" default:"8081"`
+	StaticDir        string `json:"staticDir" default:"static"`
+	CdnHost          string `json:"cdnHost"`          // 用户上传的文件cdn域名
+	UploadDir        string `json:"uploadDir"`        // 上传文件夹
+	KfManagerAddress string `json:"kfManagerAddress"` // 客服登录地址
 }
 
 func (w Web) String() string {
