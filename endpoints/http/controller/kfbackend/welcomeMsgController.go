@@ -53,7 +53,10 @@ func (c *WelcomeMsgController) Upsert(ctx *gin.Context) {
 	} else {
 		if req.MsgType == dao.WelcomeMsg {
 			var cnt int64
-			err := db.Model(&dao.KfWelcomeMessage{}).Where("card_id = ?", cardId).Count(&cnt).Error
+			err := db.Model(&dao.KfWelcomeMessage{}).Where(
+				"card_id = ? and deleted_at is null",
+				cardId,
+			).Count(&cnt).Error
 			if err != nil {
 				c.Error(ctx, err)
 				return
