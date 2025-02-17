@@ -36,13 +36,13 @@ type LogRequest struct {
 	common.PageRequest
 	BeginTime int64  `json:"beginTime" form:"beginTime" doc:"开始时间 毫秒"`
 	EndTime   int64  `json:"endTime" form:"endTime" doc:"结束时间 毫秒"`
-	Function  string `json:"function" form:"function" doc:"操作类型"`
+	Function  string `json:"function" form:"function" doc:"操作类型枚举:客户,欢迎语,快速发送,智能回复,二维码,设置,话术复制"`
 }
 
 type LogResponse struct {
 	Id         int64  `json:"id"`
 	HandleFunc string `json:"function" gorm:"column:handle_func;type:varchar(255)" doc:"操作类型"` // 操作类型
-	Content    string `json:"content" gorm:"column:content;longtext;" doc:"内容"`                // 操作内容
+	Content    string `json:"content" gorm:"column:content;longtext;" doc:"内容"`                  // 操作内容
 	Ip         string `json:"ip" gorm:"column:ip" doc:"ip"`
 	CreateTime int64  `json:"createTime" gorm:"createTime" doc:"创建时间：毫秒"`
 }
