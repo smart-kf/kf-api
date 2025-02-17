@@ -39,7 +39,17 @@ func (c *WelcomeMsgController) Upsert(ctx *gin.Context) {
 
 	var err error
 	if req.Id > 0 {
-		err = db.Where("id = ? and msg_type = ?", req.Id, req.MsgType).Save(&model).Error
+		var exist dao.KfWelcomeMessage
+		err := db.Where("id = ? and msg_type = ?", req.Id, req.MsgType).First(&exist).Error
+		if err != nil {
+			c.Error(ctx, err)
+			return
+		}
+		exist.Content = req.Content
+		exist.Type = req.Type
+		exist.Enable = req.Enable
+		exist.Sort = req.Sort
+		err = db.Where("id = ? and msg_type = ?", req.Id, req.MsgType).Save(exist).Error
 	} else {
 		if req.MsgType == dao.WelcomeMsg {
 			var cnt int64
