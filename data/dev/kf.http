@@ -99,7 +99,6 @@ Content-Type: application/json
 Authorization: {{ kf_token }}
 
 {
-  "id": 2,
   "content": "哈哈99911",
   "type": "text",
   "sort": 1,
