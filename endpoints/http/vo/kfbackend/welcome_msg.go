@@ -9,6 +9,7 @@ import (
 
 type UpsertWelcomeMsgRequest struct {
 	Id      int    `json:"id" doc:"id: 创建传0或者不传"`
+	Title   string `json:"title" doc:"标题"`
 	Content string `json:"content" doc:"内容: text: 不超过255个字符, video: url, image: url" binding:"required"`
 	Type    string `json:"type" doc:"text,video,image" binding:"required"`
 	Sort    int    `json:"sort" doc:"排序编号,欢迎语、快捷回复需要"`
@@ -44,6 +45,7 @@ type KfWelcomeMessageResp struct {
 	Sort    int    `json:"sort"`   // 排序
 	Enable  bool   `json:"enable"` // 是否启用.
 	Keyword string `json:"keyword"`
+	Title   string `json:"title"`
 }
 
 type KfWelcomeMessageListResp struct {

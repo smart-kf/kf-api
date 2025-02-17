@@ -9,6 +9,7 @@ const (
 
 type KfWelcomeMessage struct {
 	gorm.Model
+	Title   string `json:"title" gorm:"column:title"`           // 标题
 	CardId  string `json:"card_id" gorm:"column:card_id;index"` // 卡密id
 	Content string `json:"content" gorm:"type:text"`
 	Type    string `json:"type" gorm:"type:varchar(255)"`

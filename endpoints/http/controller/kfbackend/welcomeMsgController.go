@@ -35,6 +35,7 @@ func (c *WelcomeMsgController) Upsert(ctx *gin.Context) {
 		Sort:    req.Sort,
 		Enable:  req.Enable,
 		MsgType: req.MsgType,
+		Title:   req.Title,
 	}
 
 	var err error
@@ -49,6 +50,8 @@ func (c *WelcomeMsgController) Upsert(ctx *gin.Context) {
 		exist.Type = req.Type
 		exist.Enable = req.Enable
 		exist.Sort = req.Sort
+		exist.Title = req.Title
+
 		err = db.Where("id = ? and msg_type = ?", req.Id, req.MsgType).Save(exist).Error
 	} else {
 		if req.MsgType == dao.WelcomeMsg {
@@ -105,6 +108,7 @@ func (c *WelcomeMsgController) ListAll(ctx *gin.Context) {
 				Sort:    item.Sort,
 				Enable:  item.Enable,
 				Keyword: item.Keyword,
+				Title:   item.Title,
 			},
 		)
 	}
