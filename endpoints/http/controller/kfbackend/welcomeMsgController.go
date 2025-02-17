@@ -4,7 +4,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 
+	"github.com/smart-fm/kf-api/domain/caches"
+	"github.com/smart-fm/kf-api/domain/repository"
 	"github.com/smart-fm/kf-api/endpoints/common"
+	"github.com/smart-fm/kf-api/endpoints/common/constant"
 	"github.com/smart-fm/kf-api/endpoints/http/vo/kfbackend"
 	"github.com/smart-fm/kf-api/infrastructure/mysql"
 	"github.com/smart-fm/kf-api/infrastructure/mysql/dao"
@@ -54,7 +57,7 @@ func (c *WelcomeMsgController) Upsert(ctx *gin.Context) {
 
 		err = db.Where("id = ? and msg_type = ?", req.Id, req.MsgType).Save(exist).Error
 	} else {
-		if req.MsgType == dao.WelcomeMsg {
+		if req.MsgType == constant.WelcomeMsg {
 			var cnt int64
 			err := db.Model(&dao.KfWelcomeMessage{}).Where(
 				"card_id = ? and msg_type = ? and deleted_at is null",
@@ -139,4 +142,99 @@ func (c *WelcomeMsgController) Delete(ctx *gin.Context) {
 
 	c.Success(ctx, nil)
 	return
+}
+
+func (c *WelcomeMsgController) CopyCardMsg(ctx *gin.Context) {
+	var req kfbackend.CopyCardMsgRequest
+	if !c.BindAndValidate(ctx, &req) {
+		return
+	}
+	reqCtx := ctx.Request.Context()
+	cardId := common.GetKFCardID(reqCtx)
+
+	// 1. 查询对方的卡密.
+	var cardRepo repository.KFCardRepository
+	_, ok, err := cardRepo.FindByCardID(reqCtx, cardId)
+	if err != nil {
+		c.Error(ctx, err)
+		return
+	}
+	if !ok {
+		c.Error(ctx, xerrors.NewParamsErrors("卡密不存在"))
+		return
+	}
+
+	tx, txCtx := mysql.Begin(reqCtx)
+	defer func() {
+		tx.Rollback()
+	}()
+
+	var msgRepo repository.KfWelcomeMessage
+
+	if req.QuickReply {
+		err = msgRepo.CopyFromCard(
+			txCtx, repository.CopyParams{
+				FromCardId:           req.CardID,
+				ToCardId:             cardId,
+				ReplaceTargetContent: req.ReplaceTargetContent,
+				ReplaceContent:       req.ReplaceContent,
+				MsgType:              constant.QuickReply,
+			},
+		)
+		if err != nil {
+			c.Error(ctx, err)
+			return
+		}
+	}
+	if req.WelcomeMsg {
+		err = msgRepo.CopyFromCard(
+			txCtx, repository.CopyParams{
+				FromCardId:           req.CardID,
+				ToCardId:             cardId,
+				ReplaceTargetContent: req.ReplaceTargetContent,
+				ReplaceContent:       req.ReplaceContent,
+				MsgType:              constant.WelcomeMsg,
+			},
+		)
+		if err != nil {
+			c.Error(ctx, err)
+			return
+		}
+	}
+	if req.SmartReply {
+		err = msgRepo.CopyFromCard(
+			txCtx, repository.CopyParams{
+				FromCardId:           req.CardID,
+				ToCardId:             cardId,
+				ReplaceTargetContent: req.ReplaceTargetContent,
+				ReplaceContent:       req.ReplaceContent,
+				MsgType:              constant.SmartReply,
+			},
+		)
+		if err != nil {
+			c.Error(ctx, err)
+			return
+		}
+	}
+
+	if req.Nickname || req.Avatar || req.Settings {
+		var settingRepo repository.KFSettingRepository
+		err = settingRepo.CopyFromCard(
+			txCtx, repository.CopySettingParam{
+				FromCardId: req.CardID,
+				ToCardId:   cardId,
+				Nickname:   req.Nickname,
+				Avatar:     req.Avatar,
+				Settings:   req.Settings,
+			},
+		)
+		if err != nil {
+			c.Error(ctx, err)
+			return
+		}
+		caches.KfSettingCache.DeleteOne(ctx, cardId)
+	}
+
+	tx.Commit()
+	c.Success(ctx, nil)
 }

@@ -2,11 +2,6 @@ package dao
 
 import "gorm.io/gorm"
 
-const (
-	WelcomeMsg = "welcome_msg"
-	QuickReply = "quick_reply"
-)
-
 type KfWelcomeMessage struct {
 	gorm.Model
 	Title   string `json:"title" gorm:"column:title"`           // 标题

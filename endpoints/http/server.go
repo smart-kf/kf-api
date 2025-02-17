@@ -189,6 +189,7 @@ func registerRouter(g *gin.Engine) {
 			welGroup.POST("/upsert", wc.Upsert)
 			welGroup.GET("/list", wc.ListAll)
 			welGroup.POST("/del", wc.Delete)
+			welGroup.POST("/copy", wc.CopyCardMsg)
 		}
 	}
 

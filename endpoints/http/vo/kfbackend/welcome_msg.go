@@ -58,3 +58,15 @@ type ListAllRequest struct {
 	MsgType string `form:"msgType" json:"msgType" binding:"required"  doc:"快捷回复=quick_reply, 
 欢迎语=welcome_msg 智能回复=smart_msg" validate:"oneof=quick_reply welcome_msg smart_msg"`
 }
+
+type CopyCardMsgRequest struct {
+	CardID               string `json:"cardId" doc:"复制的卡密id" binding:"required"`
+	Avatar               bool   `json:"avatar" doc:"是否复制头像"`
+	Nickname             bool   `json:"nickname" doc:"是否复制昵称"`
+	WelcomeMsg           bool   `json:"welcomeMsg" doc:"是否复制欢迎语"`
+	QuickReply           bool   `json:"quickReply" doc:"是否复制快速发送"`
+	SmartReply           bool   `json:"smartReply" doc:"是否复制智能回复"`
+	Settings             bool   `json:"settings" doc:"是否复制设置"`
+	ReplaceTargetContent string `json:"replaceTargetContent" doc:"被替换内容"`
+	ReplaceContent       string `json:"replaceContent" doc:"替换内容"`
+}

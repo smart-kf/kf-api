@@ -25,3 +25,9 @@ const (
 )
 
 const CardTimeExpire = 15 * time.Minute // 测试卡片有效期15分钟.
+
+const (
+	WelcomeMsg = "welcome_msg"
+	QuickReply = "quick_reply"
+	SmartReply = "smart_reply"
+)

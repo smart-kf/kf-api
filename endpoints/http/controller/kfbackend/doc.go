@@ -83,5 +83,6 @@ func SwaggerDoc(group *swaggos.Group) {
 		)
 		wel.Get("/list").FormObject(kfbackend.ListAllRequest{}).JSON([]*kfbackend.KfWelcomeMessageResp{}).Description("欢迎语列表")
 		wel.Post("/del").Body(kfbackend.DeleteWelcomeRequest{}).JSON(common.EmptyResponse{}).Description("删除欢迎语")
+		wel.Post("/copy").Body(kfbackend.CopyCardMsgRequest{}).JSON(common.EmptyResponse{}).Description("复制话术")
 	}
 }

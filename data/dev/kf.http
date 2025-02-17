@@ -2,6 +2,7 @@
 ### 测试环境客服token: f64366a9-19dc-43fb-b1ed-c33bb11180b6
 ### dev: TM-J9pWlL8GfI
 ### dev: 5755b35f-fecc-4ff1-8b43-5c4a6cb6c5c5
+# TM-OyEMPX8BQv
 POST {{ host }}/api/kf-be/login
 Content-Type: application/json
 Authorization: {{ kf_token }}
@@ -107,3 +108,20 @@ Authorization: {{ kf_token }}
 }
 
 
+
+###
+POST {{ host }}/api/kf-be/welcome/copy
+Content-Type: application/json
+Authorization: {{ kf_token }}
+
+{
+  "cardId": "TM-FFsET0B2bZ",
+  "avatar": true,
+  "nickname": true,
+  "welcomeMsg": true,
+  "quickReply": true,
+  "smartReply": true,
+  "settings": true,
+  "replaceTargetContent": "哈哈",
+  "replaceContent": "替换了"
+}
