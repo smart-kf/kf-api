@@ -91,6 +91,6 @@ func SwaggerDoc(group *swaggos.Group) {
 	// 日志
 	log := bg.Group("/log")
 	{
-		log.Get("/list").Body(kfbackend.LogRequest{}).JSON(kfbackend.ListLogResponse{}).Description("日志列表")
+		log.Get("/list").QueryObject(kfbackend.LogRequest{}).JSON(kfbackend.ListLogResponse{}).Description("日志列表")
 	}
 }
