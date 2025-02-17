@@ -25,6 +25,8 @@ func SwaggerDoc(group *swaggos.Group) {
 		Form("fileType", swaggos.Attribute{Required: true, Description: "文件类型: image || video"}).
 		JSON(kfbackend.UploadResponse{}).Description("文件上传")
 
+	bg.Post("/logout").JSON(common.EmptyResponse{}).Description("退出")
+
 	qrcode := bg.Group("/qrcode").Tag("二维码管理")
 	{
 		qrcode.Get("/").
@@ -84,5 +86,11 @@ func SwaggerDoc(group *swaggos.Group) {
 		wel.Get("/list").FormObject(kfbackend.ListAllRequest{}).JSON([]*kfbackend.KfWelcomeMessageResp{}).Description("欢迎语列表")
 		wel.Post("/del").Body(kfbackend.DeleteWelcomeRequest{}).JSON(common.EmptyResponse{}).Description("删除欢迎语")
 		wel.Post("/copy").Body(kfbackend.CopyCardMsgRequest{}).JSON(common.EmptyResponse{}).Description("复制话术")
+	}
+
+	// 日志
+	log := bg.Group("/log")
+	{
+		log.Get("/list").Body(kfbackend.LogRequest{}).JSON(kfbackend.ListLogResponse{}).Description("日志列表")
 	}
 }

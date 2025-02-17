@@ -8,7 +8,9 @@ import (
 	"github.com/smart-fm/kf-api/domain/caches"
 	"github.com/smart-fm/kf-api/domain/dto"
 	"github.com/smart-fm/kf-api/endpoints/common/constant"
+	"github.com/smart-fm/kf-api/endpoints/cron/kflog"
 	"github.com/smart-fm/kf-api/infrastructure/httpClient/socketserver"
+	"github.com/smart-fm/kf-api/pkg/utils"
 
 	xlogger "github.com/clearcodecn/log"
 	"github.com/gin-gonic/gin"
@@ -359,6 +361,8 @@ func (c *ChatController) BatchSend(ctx *gin.Context) {
 		c.Error(ctx, err)
 		return
 	}
+
+	kflog.AddKFLog(cardId, "客户", "群发了一条信息", utils.ClientIP(ctx))
 
 	c.Success(ctx, nil)
 }

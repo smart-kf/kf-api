@@ -152,6 +152,7 @@ func registerRouter(g *gin.Engine) {
 	{
 		var publicController kfbackend.PublicController
 		kf.POST("/upload", publicController.Upload)
+		kf.POST("/logout", authController.Logout)
 
 		var qrcodeController kfbackend.QRCodeController
 		qrCodeGroup := kf.Group("/qrcode")
@@ -190,6 +191,12 @@ func registerRouter(g *gin.Engine) {
 			welGroup.GET("/list", wc.ListAll)
 			welGroup.POST("/del", wc.Delete)
 			welGroup.POST("/copy", wc.CopyCardMsg)
+		}
+
+		var logc kfbackend.LogController
+		logGroup := kf.Group("/log")
+		{
+			logGroup.GET("/list", logc.List)
 		}
 	}
 

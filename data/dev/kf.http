@@ -125,3 +125,8 @@ Authorization: {{ kf_token }}
   "replaceTargetContent": "哈哈",
   "replaceContent": "替换了"
 }
+
+###
+GET {{ host }}/api/kf-be/log/list
+Content-Type: application/json
+Authorization: {{ kf_token }}

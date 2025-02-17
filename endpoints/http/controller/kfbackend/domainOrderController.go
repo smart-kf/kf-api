@@ -1,14 +1,11 @@
 package kfbackend
 
 import (
-	"fmt"
-
 	"github.com/gin-gonic/gin"
 
 	"github.com/smart-fm/kf-api/config"
 	"github.com/smart-fm/kf-api/domain/repository"
 	"github.com/smart-fm/kf-api/endpoints/http/vo/kfbackend"
-	"github.com/smart-fm/kf-api/pkg/xerrors"
 )
 
 type DomainOrderController struct {
@@ -33,9 +30,10 @@ func (c *DomainOrderController) CreateOrder(ctx *gin.Context) {
 		c.Error(ctx, err)
 		return
 	}
+	_ = cnt
 
-	if cnt < req.Num {
-		c.Error(ctx, xerrors.NewParamsErrors(fmt.Sprintf("域名库存不足，本次最多可购买: %d 个", req.Num)))
-		return
-	}
+	// if cnt < req.Num {
+	// 	c.Error(ctx, xerrors.NewParamsErrors(fmt.Sprintf("域名库存不足，本次最多可购买: %d 个", req.Num)))
+	// 	return
+	// }
 }

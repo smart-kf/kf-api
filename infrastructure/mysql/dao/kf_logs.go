@@ -10,6 +10,7 @@ type KFLog struct {
 	CardID     string `json:"card_id" gorm:"column:card_id;type:varchar(255)"`
 	HandleFunc string `json:"handle_func" gorm:"column:handle_func;type:varchar(255)"` // 操作类型
 	Content    string `json:"content" gorm:"column:content;longtext;"`                 // 操作内容
+	Ip         string `json:"ip"`
 }
 
 func (KFLog) TableName() string {

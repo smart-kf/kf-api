@@ -11,6 +11,7 @@ import (
 	"github.com/smart-fm/kf-api/domain/caches"
 	"github.com/smart-fm/kf-api/domain/repository"
 	"github.com/smart-fm/kf-api/endpoints/common"
+	"github.com/smart-fm/kf-api/endpoints/cron/kflog"
 	"github.com/smart-fm/kf-api/endpoints/http/vo/kfbackend"
 	"github.com/smart-fm/kf-api/pkg/utils"
 )
@@ -115,6 +116,7 @@ func (c *QRCodeController) Switch(ctx *gin.Context) {
 	if len(qrCodeDomain) > 0 {
 		firstDomain = qrCodeDomain[0].Domain
 	}
+	kflog.AddKFLog(cardID, "二维码", "更换了二维码图片", utils.ClientIP(ctx))
 	c.Success(
 		ctx, kfbackend.QRCodeSwitchResponse{
 			QRCodeURL: fmt.Sprintf("%s%s", firstDomain, qrCode.Path),
@@ -160,5 +162,6 @@ func (c *QRCodeController) OnOff(ctx *gin.Context) {
 		}
 		caches.KfSettingCache.DeleteOne(ctx, cardID)
 	}
+	kflog.AddKFLog(cardID, "二维码", "更新了二维码开关", utils.ClientIP(ctx))
 	c.Success(ctx, kfbackend.QRCodeOnOffResponse{})
 }

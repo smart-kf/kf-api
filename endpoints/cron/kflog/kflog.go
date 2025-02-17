@@ -34,15 +34,21 @@ func InitKFLogBackgroundTask(duration time.Duration, bufferSize int) *KFLogBackG
 	return _kfBackgroundTask
 }
 
-func AddKFLog(cardID string, handleFunc string, content string) {
+func AddKFLog(cardID string, handleFunc string, content string, ip string) {
 	if _kfBackgroundTask == nil {
 		return
 	}
+	fn, ok := Functions[handleFunc]
+	if !ok {
+		fn = handleFunc
+	}
+
 	log := &KFLog{
 		Model:      gorm.Model{},
 		CardID:     cardID,
-		HandleFunc: handleFunc,
+		HandleFunc: fn,
 		Content:    content,
+		Ip:         ip,
 	}
 	select {
 	case _kfBackgroundTask.buffer <- log:

@@ -8,9 +8,11 @@ import (
 	"github.com/smart-fm/kf-api/domain/repository"
 	"github.com/smart-fm/kf-api/endpoints/common"
 	"github.com/smart-fm/kf-api/endpoints/common/constant"
+	"github.com/smart-fm/kf-api/endpoints/cron/kflog"
 	"github.com/smart-fm/kf-api/endpoints/http/vo/kfbackend"
 	"github.com/smart-fm/kf-api/infrastructure/mysql"
 	"github.com/smart-fm/kf-api/infrastructure/mysql/dao"
+	"github.com/smart-fm/kf-api/pkg/utils"
 	"github.com/smart-fm/kf-api/pkg/xerrors"
 )
 
@@ -54,31 +56,20 @@ func (c *WelcomeMsgController) Upsert(ctx *gin.Context) {
 		exist.Enable = req.Enable
 		exist.Sort = req.Sort
 		exist.Title = req.Title
-
 		err = db.Where("id = ? and msg_type = ?", req.Id, req.MsgType).Save(exist).Error
 	} else {
-		if req.MsgType == constant.WelcomeMsg {
-			var cnt int64
-			err := db.Model(&dao.KfWelcomeMessage{}).Where(
-				"card_id = ? and msg_type = ? and deleted_at is null",
-				cardId,
-				req.MsgType,
-			).Count(&cnt).Error
-			if err != nil {
-				c.Error(ctx, err)
-				return
-			}
-			if cnt >= 10 {
-				c.Error(ctx, xerrors.NewCustomError("最多设置10条欢迎语"))
-				return
-			}
-		}
 		err = db.Create(&model).Error
 	}
 
 	if err != nil {
 		c.Error(ctx, err)
 		return
+	}
+
+	if req.Id > 0 {
+		kflog.AddKFLog(cardId, req.MsgType, "创建了话术", utils.ClientIP(ctx))
+	} else {
+		kflog.AddKFLog(cardId, req.MsgType, "更新了话术", utils.ClientIP(ctx))
 	}
 
 	c.Success(ctx, nil)
@@ -132,6 +123,13 @@ func (c *WelcomeMsgController) Delete(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
 	db := mysql.GetDBFromContext(reqCtx)
 
+	var msg dao.KfWelcomeMessage
+	err := db.Where("id = ? and card_id = ? and deleted_at is null").First(&msg).Error
+	if err != nil {
+		c.Error(ctx, xerrors.NewCustomError("数据不存在"))
+		return
+	}
+
 	cardId := common.GetKFCardID(reqCtx)
 	n := db.Where("id = ? and card_id = ?", req.Id, cardId).Delete(&dao.KfWelcomeMessage{}).RowsAffected
 
@@ -140,6 +138,7 @@ func (c *WelcomeMsgController) Delete(ctx *gin.Context) {
 		return
 	}
 
+	kflog.AddKFLog(cardId, msg.MsgType, "删除了话术", utils.ClientIP(ctx))
 	c.Success(ctx, nil)
 	return
 }
@@ -235,6 +234,7 @@ func (c *WelcomeMsgController) CopyCardMsg(ctx *gin.Context) {
 		caches.KfSettingCache.DeleteOne(ctx, cardId)
 	}
 
+	kflog.AddKFLog(cardId, "话术复制", "从卡密:"+kflog.MaskContent(req.CardID)+" 复制了话术", utils.ClientIP(ctx))
 	tx.Commit()
 	c.Success(ctx, nil)
 }

@@ -12,10 +12,12 @@ import (
 	"github.com/smart-fm/kf-api/config"
 	"github.com/smart-fm/kf-api/domain/caches"
 	"github.com/smart-fm/kf-api/domain/repository"
+	"github.com/smart-fm/kf-api/endpoints/common"
 	"github.com/smart-fm/kf-api/endpoints/common/constant"
 	"github.com/smart-fm/kf-api/endpoints/cron/kflog"
 	"github.com/smart-fm/kf-api/endpoints/http/vo/kfbackend"
 	"github.com/smart-fm/kf-api/infrastructure/redis"
+	"github.com/smart-fm/kf-api/pkg/utils"
 	"github.com/smart-fm/kf-api/pkg/xerrors"
 )
 
@@ -87,7 +89,7 @@ func (c *AuthController) Login(ctx *gin.Context) {
 		c.Error(ctx, xerrors.NewCustomError("登录失败，请重试"))
 		return
 	}
-	kflog.AddKFLog(card.CardID, "login", "登录成功")
+	kflog.AddKFLog(card.CardID, "login", "登录成功", utils.ClientIP(ctx))
 
 	token := uuid.New().String()
 
@@ -108,5 +110,14 @@ func (c *AuthController) Login(ctx *gin.Context) {
 			Notice:    caches.BillSettingCacheInstance.GetNotice(),
 			CdnDomain: config.GetConfig().Web.CdnHost,
 		},
+	)
+}
+
+func (c *AuthController) Logout(ctx *gin.Context) {
+	cardId := common.GetKFCardID(ctx.Request.Context())
+	kflog.AddKFLog(cardId, "客户", "退出了系统", utils.ClientIP(ctx))
+
+	c.Success(
+		ctx, nil,
 	)
 }

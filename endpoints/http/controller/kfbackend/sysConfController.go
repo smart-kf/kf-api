@@ -7,6 +7,8 @@ import (
 	"github.com/smart-fm/kf-api/domain/caches"
 	"github.com/smart-fm/kf-api/domain/repository"
 	"github.com/smart-fm/kf-api/endpoints/common"
+	"github.com/smart-fm/kf-api/endpoints/cron/kflog"
+	"github.com/smart-fm/kf-api/pkg/utils"
 )
 
 type SysConfController struct {
@@ -109,5 +111,6 @@ func (c *SysConfController) Post(ctx *gin.Context) {
 	}
 
 	caches.KfSettingCache.DeleteOne(ctx, cardID)
+	kflog.AddKFLog(cardID, "设置", "更新了系统设置", utils.ClientIP(ctx))
 	c.Success(ctx, PostSysConfResponse{})
 }

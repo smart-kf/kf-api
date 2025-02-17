@@ -1,6 +1,7 @@
 package kfbackend
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -8,7 +9,9 @@ import (
 	"github.com/smart-fm/kf-api/domain/caches"
 	"github.com/smart-fm/kf-api/domain/repository"
 	"github.com/smart-fm/kf-api/endpoints/common"
+	"github.com/smart-fm/kf-api/endpoints/cron/kflog"
 	"github.com/smart-fm/kf-api/endpoints/http/vo/kfbackend"
+	"github.com/smart-fm/kf-api/pkg/utils"
 	"github.com/smart-fm/kf-api/pkg/xerrors"
 )
 
@@ -59,6 +62,9 @@ func (c GuestController) UpdateUserInfo(ctx *gin.Context) {
 		c.Error(ctx, xerrors.NewCustomError("获取客户信息失败"))
 		return
 	}
+	var (
+		oldName = kfUser.RemarkName
+	)
 	var update bool
 	if req.IsUserInfo() {
 		kfUser.RemarkName = req.RemarkName
@@ -91,6 +97,21 @@ func (c GuestController) UpdateUserInfo(ctx *gin.Context) {
 	if err := repo.SaveOne(ctx, kfUser); err != nil {
 		c.Error(ctx, err)
 		return
+	}
+	if oldName != "" && oldName != kfUser.RemarkName {
+		kflog.AddKFLog(
+			cardId,
+			"客户",
+			fmt.Sprintf("更新了客户信息: %s => %s", kfUser.RemarkName, kfUser.RemarkName),
+			utils.ClientIP(ctx),
+		)
+	} else {
+		kflog.AddKFLog(
+			cardId,
+			"客户",
+			fmt.Sprintf("更新了 %s 的客户信息", kfUser.RemarkName),
+			utils.ClientIP(ctx),
+		)
 	}
 	c.Success(ctx, nil)
 }
