@@ -61,7 +61,8 @@ func (c *AuthController) Login(ctx *gin.Context) {
 			card.ExpireTime = time.Now().Unix() + int64(card.Day*86400) // 首次登录，设置卡密过期时间
 		} else {
 			// 测试卡.
-			card.ExpireTime = time.Now().Unix() + int64(constant.CardTimeExpire.Seconds())
+			min := caches.BillSettingCacheInstance.GetTestingCardMinute()
+			card.ExpireTime = time.Now().Unix() + int64(min*60)
 		}
 	} else {
 		// 判断过期时间
@@ -103,13 +104,18 @@ func (c *AuthController) Login(ctx *gin.Context) {
 	redisClient := redis.GetRedisClient()
 	redisClient.Set(reqCtx, fmt.Sprintf("kfbe.%s", token), card.CardID, 7*24*time.Hour) // 7 天token
 
+	rsp := kfbackend.LoginResponse{
+		Token:     token,
+		CdnDomain: config.GetConfig().Web.CdnHost,
+	}
+
+	notice := caches.BillSettingCacheInstance.GetNotice()
+	if notice.Enable {
+		rsp.Notice = notice.Content
+	}
 	// 查找公告.
 	c.Success(
-		ctx, kfbackend.LoginResponse{
-			Token:     token,
-			Notice:    caches.BillSettingCacheInstance.GetNotice(),
-			CdnDomain: config.GetConfig().Web.CdnHost,
-		},
+		ctx, rsp,
 	)
 }
 

@@ -11,6 +11,7 @@ import (
 
 	"github.com/smart-fm/kf-api/config"
 	"github.com/smart-fm/kf-api/domain/caches"
+	"github.com/smart-fm/kf-api/domain/repository"
 	"github.com/smart-fm/kf-api/endpoints/cron/billlog"
 	"github.com/smart-fm/kf-api/endpoints/cron/kflog"
 	"github.com/smart-fm/kf-api/endpoints/http"
@@ -42,8 +43,13 @@ func main() {
 		doGenerateFakeMessage()
 		return
 	}
-
 	caches.InitCacheInstances()
+
+	go func() {
+		setRepo := repository.BillSettingRepository{}
+		setRepo.InitDefault()
+	}()
+
 	var (
 		eg       errgroup.Group
 		stopChan = make(chan struct{})

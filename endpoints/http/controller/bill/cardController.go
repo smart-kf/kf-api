@@ -29,7 +29,7 @@ func (c *CardController) BatchAddCard(ctx *gin.Context) {
 
 	var cards []*dao.KFCard
 	oneDayCardPrice := caches.BillSettingCacheInstance.OneDayCardPrice()
-	price := int64(oneDayCardPrice * req.Days)
+	price := float64(oneDayCardPrice * float64(req.Days))
 
 	mainIds, err := caches.IdAtomicCacheInstance.GetBizIds(reqCtx, req.Num)
 	if err != nil {

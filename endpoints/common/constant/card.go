@@ -1,7 +1,5 @@
 package constant
 
-import "time"
-
 type SaleStatus int8
 
 const (
@@ -23,8 +21,6 @@ const (
 	CardTypeNormal  = iota + 1 // 正式卡
 	CardTypeTesting            // 测试卡
 )
-
-const CardTimeExpire = 15 * time.Minute // 测试卡片有效期15分钟.
 
 const (
 	WelcomeMsg = "welcome_msg"

@@ -142,6 +142,13 @@ func registerRouter(g *gin.Engine) {
 		{
 			orderGroup.POST("/list", oc.List)
 		}
+
+		var settingController bill.SettingController
+		settingGroup := bgAuth.Group("/setting")
+		{
+			settingGroup.GET("/get", settingController.Get)
+			settingGroup.POST("/update", settingController.Set)
+		}
 	}
 
 	var authController kfbackend.AuthController

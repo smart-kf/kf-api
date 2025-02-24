@@ -26,4 +26,8 @@ func SwaggerDoc(group *swaggos.Group) {
 
 	orderC := billGroup.Group("/order").Tag("计费后台-订单管理")
 	orderC.Post("/list").Body(bill.ListOrderRequest{}).JSON(bill.ListOrderResponse{}).Description("订单列表")
+
+	settingC := billGroup.Group("/setting").Tag("计费后台-系统配置")
+	settingC.Get("/get").JSON(bill.SettingRequest{}).Description("获取配置")
+	settingC.Post("/update").Body(bill.SettingRequest{}).JSON(bill.SettingRequest{}).Description("更新配置")
 }
