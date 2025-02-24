@@ -15,20 +15,14 @@ import (
 type BillDomainRepository struct {
 }
 
-func (r *BillDomainRepository) FindByTopName(ctx context.Context, topName string) (*dao.BillDomain, bool, error) {
+func (r *BillDomainRepository) CountByTopNames(ctx context.Context, topName []string) (int64, error) {
 	tx := mysql.DB()
-
-	var domain dao.BillDomain
-	err := tx.Where("top_name = ?", topName).First(&domain).Error
-
+	var cnt int64
+	err := tx.Model(&dao.BillDomain{}).Where("top_name in ?", topName).Count(&cnt).Error
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, false, nil
-		}
-		return nil, false, err
+		return 0, err
 	}
-
-	return &domain, true, nil
+	return cnt, nil
 }
 
 func (r *BillDomainRepository) FindByID(ctx context.Context, id int64) (*dao.BillDomain, bool, error) {

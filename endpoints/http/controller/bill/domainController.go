@@ -1,6 +1,8 @@
 package bill
 
 import (
+	"strings"
+
 	"github.com/gin-gonic/gin"
 
 	"github.com/smart-fm/kf-api/domain/repository"
@@ -20,36 +22,45 @@ func (c *DomainController) AddDomain(ctx *gin.Context) {
 		return
 	}
 
+	var topNames = strings.Split(req.TopName, "\n")
+
 	reqCtx := ctx.Request.Context()
 
 	// 1. 判重.
 	var domainRepo repository.BillDomainRepository
-	_, exist, err := domainRepo.FindByTopName(reqCtx, req.TopName)
+	cnt, err := domainRepo.CountByTopNames(reqCtx, topNames)
 	if err != nil {
 		c.Error(ctx, err)
 		return
 	}
-
-	if exist {
+	if cnt > 0 {
 		c.Error(ctx, xerrors.NewCustomError("域名已存在，请勿重复添加"))
 		return
 	}
-
-	// 2. 添加域名
-	var domain = dao.BillDomain{
-		TopName:  req.TopName,
-		IsPublic: *req.IsPublic,
-		IsBind:   false,
-		Status:   req.Status,
+	var (
+		domains []*dao.BillDomain
+	)
+	for _, topName := range topNames {
+		if !strings.HasPrefix(topName, "https://") {
+			// 默认https.
+			topName = "https://" + topName
+		}
+		var domain = dao.BillDomain{
+			TopName:  topName,
+			IsPublic: *req.IsPublic,
+			IsBind:   false,
+			Status:   req.Status,
+		}
+		domains = append(domains, &domain)
 	}
 
 	tx := mysql.DB()
-	if err := tx.Create(&domain).Error; err != nil {
+	if err := tx.CreateInBatches(domains, len(domains)).Error; err != nil {
 		c.Error(ctx, err)
 		return
 	}
 
-	c.Success(ctx, domain)
+	c.Success(ctx, domains)
 }
 
 func (c *DomainController) ListDomain(ctx *gin.Context) {

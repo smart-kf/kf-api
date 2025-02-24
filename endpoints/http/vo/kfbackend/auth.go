@@ -42,7 +42,7 @@ type LogRequest struct {
 type LogResponse struct {
 	Id         int64  `json:"id"`
 	HandleFunc string `json:"function" gorm:"column:handle_func;type:varchar(255)" doc:"操作类型"` // 操作类型
-	Content    string `json:"content" gorm:"column:content;longtext;" doc:"内容"`                  // 操作内容
+	Content    string `json:"content" gorm:"column:content;longtext;" doc:"内容"`                // 操作内容
 	Ip         string `json:"ip" gorm:"column:ip" doc:"ip"`
 	CreateTime int64  `json:"createTime" gorm:"createTime" doc:"创建时间：毫秒"`
 }

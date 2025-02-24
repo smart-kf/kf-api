@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/smart-fm/kf-api/config"
-	"github.com/smart-fm/kf-api/domain/repository"
 	"github.com/smart-fm/kf-api/endpoints/http/vo/kfbackend"
 )
 
@@ -22,18 +21,13 @@ func (c *DomainOrderController) CreateOrder(ctx *gin.Context) {
 		return
 	}
 
-	reqCtx := ctx.Request.Context()
-
-	var domainRepo repository.BillDomainRepository
-	cnt, err := domainRepo.CountPrivateDomain(reqCtx)
-	if err != nil {
-		c.Error(ctx, err)
-		return
-	}
-	_ = cnt
-
-	// if cnt < req.Num {
-	// 	c.Error(ctx, xerrors.NewParamsErrors(fmt.Sprintf("域名库存不足，本次最多可购买: %d 个", req.Num)))
+	// reqCtx := ctx.Request.Context()
+	//
+	// var domainRepo repository.BillDomainRepository
+	// cnt, err := domainRepo.CountPrivateDomain(reqCtx)
+	// if err != nil {
+	// 	c.Error(ctx, err)
 	// 	return
 	// }
+	// tx, newCtx := mysql.Begin(reqCtx)
 }
