@@ -1,0 +1,137 @@
+{
+  "ip": "125.70.175.75",
+  "type": "IPv4",
+  "hostname": "75.175.70.125.broad.cd.sc.dynamic.163data.com.cn",
+  "carrier": {
+    "name": null,
+    "mcc": null,
+    "mnc": null
+  },
+  "company": {
+    "domain": "chinatelecom.com.cn",
+    "name": "Chinanet Sichuan Province Network",
+    "type": "isp"
+  },
+  "connection": {
+    "asn": 4134,
+    "domain": "chinatelecom.cn",
+    "organization": "No.31,jin-rong Street",
+    "route": "125.64.0.0/13",
+    "type": "isp"
+  },
+  "currency": {
+    "code": "CNY",
+    "name": "Chinese Yuan",
+    "name_native": "人民币",
+    "plural": "Chinese yuan",
+    "plural_native": "人民币",
+    "symbol": "CN¥",
+    "symbol_native": "¥",
+    "format": {
+      "decimal_separator": ".",
+      "group_separator": ",",
+      "negative": {
+        "prefix": "-¥",
+        "suffix": ""
+      },
+      "positive": {
+        "prefix": "¥",
+        "suffix": ""
+      }
+    }
+  },
+  "location": {
+    "continent": {
+      "code": "AS",
+      "name": "Asia"
+    },
+    "country": {
+      "area": 9596960,
+      "borders": [
+        "AF",
+        "BT",
+        "HK",
+        "IN",
+        "KG",
+        "KP",
+        "KZ",
+        "LA",
+        "MM",
+        "MN",
+        "MO",
+        "NP",
+        "PK",
+        "RU",
+        "TJ",
+        "VN"
+      ],
+      "calling_code": "86",
+      "capital": "Beijing",
+      "code": "CN",
+      "name": "China",
+      "population": 1410710000,
+      "population_density": 147.0,
+      "flag": {
+        "emoji": "\uD83C\uDDE8\uD83C\uDDF3",
+        "emoji_unicode": "U+1F1E8 U+1F1F3",
+        "emojitwo": "https://cdn.ipregistry.co/flags/emojitwo/cn.svg",
+        "noto": "https://cdn.ipregistry.co/flags/noto/cn.png",
+        "twemoji": "https://cdn.ipregistry.co/flags/twemoji/cn.svg",
+        "wikimedia": "https://cdn.ipregistry.co/flags/wikimedia/cn.svg"
+      },
+      "languages": [
+        {
+          "code": "zh",
+          "name": "Chinese",
+          "native": "中文"
+        },
+        {
+          "code": "ug",
+          "name": "Uyghur",
+          "native": "ئۇيغۇرچە"
+        },
+        {
+          "code": "za",
+          "name": "Zhuang",
+          "native": "Vahcuengh"
+        }
+      ],
+      "tld": ".cn"
+    },
+    "region": {
+      "code": "CN-SC",
+      "name": "Sichuan Sheng"
+    },
+    "city": "Chengdu",
+    "postal": "610400",
+    "latitude": 30.66677,
+    "longitude": 104.06666,
+    "language": {
+      "code": "zh",
+      "name": "Chinese",
+      "native": "中文"
+    },
+    "in_eu": false
+  },
+  "security": {
+    "is_abuser": false,
+    "is_attacker": false,
+    "is_bogon": false,
+    "is_cloud_provider": false,
+    "is_proxy": false,
+    "is_relay": false,
+    "is_tor": false,
+    "is_tor_exit": false,
+    "is_vpn": false,
+    "is_anonymous": false,
+    "is_threat": false
+  },
+  "time_zone": {
+    "id": "Asia/Shanghai",
+    "abbreviation": "CST",
+    "current_time": "2025-02-26T21:58:00+08:00",
+    "name": "China Standard Time",
+    "offset": 28800,
+    "in_daylight_saving": false
+  }
+}

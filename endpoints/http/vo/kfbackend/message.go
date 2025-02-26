@@ -36,7 +36,7 @@ func (r QRCodeOnOffRequest) Validate() error {
 		return xerrors.NewCustomError("参数错误")
 	}
 
-	if r.Id > 0 {
+	if r.Status != 0 {
 		switch r.Status {
 		case constant.QRCodeNormal:
 		case constant.QRCodeDisable:

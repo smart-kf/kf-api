@@ -65,7 +65,6 @@ func (r *KFSettingRepository) CopyFromCard(ctx context.Context, param CopySettin
 		newSetting.SimulatorFilter = setting.SimulatorFilter
 		newSetting.NewMessageVoice = setting.NewMessageVoice
 		newSetting.QRCodeEnabled = setting.QRCodeEnabled
-		newSetting.QRCodeEnabledNewUser = setting.QRCodeEnabledNewUser
 	}
 
 	return db.Where("card_id = ?", newSetting.CardID).Save(&newSetting).Error

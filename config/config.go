@@ -18,6 +18,14 @@ type Config struct {
 	CardPackages  []CardPackage `json:"cardPackages"`
 	Payment       Payment       `json:"payment"`
 	DomainPrice   float64       `json:"domainPrice"`
+	Ip2Region     Ip2Region     `json:"ip2Region"`
+}
+
+type Ip2Region struct {
+	XDBPath        string `json:"xdbPath"`
+	RegistryApiKey string `json:"registryApiKey"`
+	Proxy          string `json:"proxy"`
+	Timeout        int    `json:"timeout"`
 }
 
 type LevelDBConfig struct {

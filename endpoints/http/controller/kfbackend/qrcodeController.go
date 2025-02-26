@@ -113,7 +113,7 @@ func (c *QRCodeController) OnOff(ctx *gin.Context) {
 			c.Error(ctx, xerrors.NewCustomError("查找数据失败"))
 			return
 		}
-		if err := qrCodeDomainRepo.DisableOld(reqCtx, cardID, int64(domain.ID)); err != nil {
+		if err := qrCodeDomainRepo.DisableOld(reqCtx, cardID, domain.Domain, int64(domain.ID)); err != nil {
 			c.Error(ctx, xerrors.NewCustomError("操作失败"))
 			return
 		}

@@ -12,3 +12,10 @@ const (
 	DomainStatusNormal = iota + 1
 	DomainStatusDisable
 )
+
+const (
+	QRCodeFilterClose              = 1 // 关闭
+	QRCodeFilterRoom               = 2 // 过滤机房
+	QRCodeFilterNonMainland        = 3 // 过滤非大陆
+	QRCodeFilterRoomAndNonMainland = 4 // 过滤机房及非大陆
+)

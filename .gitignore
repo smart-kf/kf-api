@@ -7,3 +7,4 @@ cache/*
 node_modules
 data/test/
 .DS_Store
+ip2region.xdb

@@ -11,3 +11,6 @@ build-image:
 
 reload:
 	@docker compose stop && docker compose rm -f && docker compose up -d
+
+xdb:
+	@sh ./third_party/xdb.sh

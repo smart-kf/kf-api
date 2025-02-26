@@ -60,3 +60,9 @@ payment:
   token: 1234
   appId: kf
   fromMail: admin@smartkf.top
+
+ip2region:
+  xdbPath: ./ip2region.xdb
+  registryApiKey: ira_AnrzYNqRz8M64Mj7VvqFylbrIj67Rh3yFi29
+  proxy: http://127.0.0.1:10081
+  timeout: 5
