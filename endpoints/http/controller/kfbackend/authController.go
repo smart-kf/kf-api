@@ -105,8 +105,9 @@ func (c *AuthController) Login(ctx *gin.Context) {
 	redisClient.Set(reqCtx, fmt.Sprintf("kfbe.%s", token), card.CardID, 7*24*time.Hour) // 7 天token
 
 	rsp := kfbackend.LoginResponse{
-		Token:     token,
-		CdnDomain: config.GetConfig().Web.CdnHost,
+		Token:      token,
+		CdnDomain:  config.GetConfig().Web.CdnHost,
+		CardExpire: card.ExpireTime * 1000,
 	}
 
 	notice := caches.BillSettingCacheInstance.GetNotice()

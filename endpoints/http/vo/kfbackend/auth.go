@@ -27,9 +27,10 @@ func (r *LoginRequest) Validate(ctx context.Context) error {
 }
 
 type LoginResponse struct {
-	Token     string `json:"token" doc:"用户的token"`
-	Notice    string `json:"notice,omitempty" doc:"公告通知"`
-	CdnDomain string `json:"cdnDomain" doc:"静态资源域名"`
+	Token      string `json:"token" doc:"用户的token"`
+	Notice     string `json:"notice,omitempty" doc:"公告通知"`
+	CdnDomain  string `json:"cdnDomain" doc:"静态资源域名"`
+	CardExpire int64  `json:"cardExpire" doc:"卡密过期时间: 毫秒"`
 }
 
 type LogRequest struct {
@@ -42,7 +43,7 @@ type LogRequest struct {
 type LogResponse struct {
 	Id         int64  `json:"id"`
 	HandleFunc string `json:"function" gorm:"column:handle_func;type:varchar(255)" doc:"操作类型"` // 操作类型
-	Content    string `json:"content" gorm:"column:content;longtext;" doc:"内容"`                // 操作内容
+	Content    string `json:"content" gorm:"column:content;longtext;" doc:"内容"`                  // 操作内容
 	Ip         string `json:"ip" gorm:"column:ip" doc:"ip"`
 	CreateTime int64  `json:"createTime" gorm:"createTime" doc:"创建时间：毫秒"`
 }
