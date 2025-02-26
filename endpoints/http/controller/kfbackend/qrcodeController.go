@@ -39,7 +39,7 @@ func (c *QRCodeController) List(ctx *gin.Context) {
 	for _, item := range qrCodeDomain {
 		domains = append(
 			domains, kfbackend.QRCodeDomain{
-				Id:        0,
+				Id:        int(item.ID),
 				QRCodeURL: item.Path,
 				Domain:    item.Domain,
 				CreateAt:  item.CreatedAt.Unix(),

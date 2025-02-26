@@ -8,9 +8,7 @@ import (
 
 type QRCodeRequest struct{}
 type QRCodeResponse struct {
-	Enable        bool           `json:"enable" doc:"启用停用状态"`
-	EnableNewUser bool           `json:"enableNewUser" doc:"启用停用新粉状态"`
-	Domains       []QRCodeDomain `json:"domains,omitempty" doc:"域名列表"`
+	Domains []QRCodeDomain `json:"domains,omitempty" doc:"域名列表"`
 }
 
 type QRCodeDomain struct {
