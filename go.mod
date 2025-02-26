@@ -1,6 +1,8 @@
 module github.com/smart-fm/kf-api
 
-go 1.20
+go 1.23.2
+
+toolchain go1.23.6
 
 require (
 	github.com/brianvoe/gofakeit/v6 v6.28.0

@@ -22,7 +22,7 @@ func NewBaseController() *BaseController {
 
 func (c *BaseController) getCard(ctx *gin.Context, req kffrontend.QRCodeScanRequest) (
 	bool,
-	*dao.KFQRCode, *dao.KFCard,
+	*dao.KFQRCodeDomain, *dao.KFCard,
 ) {
 	reqCtx := ctx.Request.Context()
 

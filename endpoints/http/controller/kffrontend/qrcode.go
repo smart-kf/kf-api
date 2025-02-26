@@ -10,7 +10,6 @@ import (
 	"github.com/smart-fm/kf-api/endpoints/common"
 	"github.com/smart-fm/kf-api/endpoints/http/vo/kffrontend"
 	"github.com/smart-fm/kf-api/infrastructure/mysql/dao"
-	"github.com/smart-fm/kf-api/pkg/xerrors"
 )
 
 type QRCodeController struct {
@@ -29,14 +28,16 @@ func (c *QRCodeController) Scan(ctx *gin.Context) {
 		return
 	}
 
-	// TODO:: 判断card的状态.
-	// TODO:: 判断域名.
+	cardID := card.CardID
+
 	// 先返回success, 使前端能联调.
 	var (
 		isNewUser = false
 		user      *dao.KfUser
 		userRepo  repository.KFUserRepository
 	)
+
+	var err error
 	// 1. 获取token，如果没有拿到token，则生成新token，生成新用户返回用户信息.
 	kfToken := common.GetKFToken(reqCtx)
 	if kfToken == "" {
@@ -49,7 +50,7 @@ func (c *QRCodeController) Scan(ctx *gin.Context) {
 			return
 		}
 		isNewUser = true
-		err := caches.KfAuthCacheInstance.SetFrontToken(reqCtx, kfToken, cardID)
+		err = caches.KfAuthCacheInstance.SetFrontToken(reqCtx, kfToken, cardID)
 		if err != nil {
 			xlogger.Error(reqCtx, "SetFrontToken failed", xlogger.Err(err))
 			c.Error(ctx, err)
