@@ -75,7 +75,10 @@ func (r *QRCodeDomainRepository) CreateOne(ctx context.Context, qrCode *dao.KFQR
 
 func (r *QRCodeDomainRepository) DisableOld(ctx context.Context, cardId string, domain string, notId int64) error {
 	tx := mysql.GetDBFromContext(ctx)
-	if err := tx.Model(&dao.KFQRCodeDomain{}).Where("card_id = ? and domain = ? and id != ?", cardId, notId).Update(
+	if err := tx.Model(&dao.KFQRCodeDomain{}).Where(
+		"card_id = ? and domain = ? and id != ?", cardId, domain,
+		notId,
+	).Update(
 		"status",
 		constant.QRCodeDisable,
 	).Error; err != nil {

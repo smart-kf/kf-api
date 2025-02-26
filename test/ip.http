@@ -15,3 +15,47 @@ curl 'https://ipinfo.io/widget/demo/171.217.166.53' \
   -H 'sec-fetch-site: same-origin' \
   -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36' \
   -H 'x-ca-stage: PRE'
+
+
+###
+
+# curl 'https://manager.smartkf.top/api/kf-be/qrcode/on-off'
+#  -H 'accept: application/json, text/plain, */*'
+#  -H 'accept-language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7,zh-HK;q=0.6'
+#  -H 'authorization: 6848f2b7-0414-4870-9b2c-7b809280df5a'
+#  -H 'content-type: application/json'
+#  -H 'origin: https://manager.smartkf.top'
+#  -H 'priority: u=1, i'
+#  -H 'referer: https://manager.smartkf.top/'
+#  -H 'sec-ch-ua: "Not(A:Brand";v="99", "Google Chrome";v="133", "Chromium";v="133"'
+#  -H 'sec-ch-ua-mobile: ?0'
+#  -H 'sec-ch-ua-platform: "macOS"'
+#  -H 'sec-fetch-dest: empty'
+#  -H 'sec-fetch-mode: cors'
+#  -H 'sec-fetch-site: same-origin'
+#  -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36'
+#  -H 'x-ca-stage: PRE'
+#  -H 'x-requested-with: XMLHttpRequest'
+#  --data-raw '{"id":9}'
+POST https://manager.smartkf.top/api/kf-be/qrcode/on-off
+accept: application/json, text/plain, */*
+accept-language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7,zh-HK;q=0.6
+authorization: 6848f2b7-0414-4870-9b2c-7b809280df5a
+origin: https://manager.smartkf.top
+priority: u=1, i
+referer: https://manager.smartkf.top/
+sec-ch-ua: "Not(A:Brand";v="99", "Google Chrome";v="133", "Chromium";v="133"
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: "macOS"
+sec-fetch-dest: empty
+sec-fetch-mode: cors
+sec-fetch-site: same-origin
+user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36
+x-ca-stage: PRE
+x-requested-with: XMLHttpRequest
+Content-Type: application/json
+
+{"id":10,"disableOld":true}
+
+###
+
