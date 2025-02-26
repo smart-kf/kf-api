@@ -1,6 +1,8 @@
 package kffrontend
 
 import (
+	"fmt"
+
 	xlogger "github.com/clearcodecn/log"
 	"github.com/gin-gonic/gin"
 
@@ -10,6 +12,8 @@ import (
 	"github.com/smart-fm/kf-api/endpoints/common"
 	"github.com/smart-fm/kf-api/endpoints/http/vo/kffrontend"
 	"github.com/smart-fm/kf-api/infrastructure/mysql/dao"
+	"github.com/smart-fm/kf-api/pkg/ipinfo"
+	"github.com/smart-fm/kf-api/pkg/utils"
 )
 
 type QRCodeController struct {
@@ -44,6 +48,16 @@ func (c *QRCodeController) Scan(ctx *gin.Context) {
 		// 生成用户信息.
 		// token := uuid.New().String()
 		user = factory.FactoryNewKfUser(int64(card.ID), cardID, ctx.ClientIP())
+		info, _ := ipinfo.Crawl(reqCtx, ctx.Request.UserAgent(), utils.ClientIP(ctx))
+		user.IP = utils.ClientIP(ctx)
+		user.Area = fmt.Sprintf("%s-%s-%s-%s", info.Country, info.Province, info.City, info.Net)
+		user.Comments = ""
+		user.Mobile = ""
+		user.RemarkName = ""
+		if info.IsProxy || info.IsVpn {
+			user.IsProxy = 1
+		}
+		
 		if err := userRepo.SaveOne(reqCtx, user); err != nil {
 			xlogger.Error(reqCtx, "FindByPath failed", xlogger.Err(err))
 			c.Error(ctx, err)

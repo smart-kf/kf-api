@@ -3,6 +3,7 @@ package kffrontend
 import (
 	"github.com/clearcodecn/swaggos"
 
+	"github.com/smart-fm/kf-api/endpoints/common"
 	"github.com/smart-fm/kf-api/endpoints/http/vo/kffrontend"
 )
 
@@ -13,4 +14,8 @@ func SwaggerDoc(group *swaggos.Group) {
 	bg.Post("/qrcode/scan").Body(kffrontend.QRCodeScanRequest{}).JSON(kffrontend.QRCodeScanResponse{}).Description(
 		"扫码接口",
 	)
+
+	bg.Post("/qrcode/check").Body(kffrontend.QRCodeScanRequest{}).JSON(common.EmptyResponse{}).Description(
+		"检测接口",
+	).Summary("返回错误，代表不能继续访问")
 }

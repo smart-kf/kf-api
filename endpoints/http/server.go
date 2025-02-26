@@ -213,6 +213,7 @@ func registerRouter(g *gin.Engine) {
 	{
 		var qr kffrontend.QRCodeController
 		kffe.POST("/qrcode/scan", qr.Scan)
+		kffe.POST("/qrcode/check", qr.Check)
 	}
 
 	// 计费前台.

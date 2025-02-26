@@ -23,6 +23,11 @@ type Error struct {
 	parent error
 }
 
+func (e Error) Append(s string, args ...interface{}) *Error {
+	e.Msg += ": " + fmt.Sprintf(s, args...)
+	return &e
+}
+
 func (e *Error) Error() string {
 	str := fmt.Sprintf("code=%d msg=%s", e.Code, e.Msg)
 	if e.parent != nil {

@@ -14,3 +14,5 @@ type QRCodeScanResponse struct {
 	UserInfo  KFUserInfo `json:"userInfo" doc:"用户信息"`
 	IsNewUser bool       `json:"isNewUser" doc:"是否是新用户"`
 }
+
+type CheckResponse struct{}
