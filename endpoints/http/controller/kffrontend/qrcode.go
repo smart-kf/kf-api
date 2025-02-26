@@ -24,23 +24,8 @@ func (c *QRCodeController) Scan(ctx *gin.Context) {
 	}
 	reqCtx := ctx.Request.Context()
 
-	var qrcodeDomainRepo repository.QRCodeDomainRepository
-	qrcodeDomain, exist, err := qrcodeDomainRepo.FindByPath(reqCtx, req.Code)
-	if err != nil {
-		xlogger.Error(reqCtx, "FindByPath failed", xlogger.Err(err))
-		c.Error(ctx, err)
-		return
-	}
-
-	if !exist {
-		c.Error(ctx, xerrors.NewCustomError("二维码已失效"))
-		return
-	}
-
-	cardID := qrcodeDomain.CardID
-	card, err := caches.KfCardCacheInstance.GetCardByID(reqCtx, cardID)
-	if err != nil {
-		c.Error(ctx, err)
+	ok, _, card := c.getCard(ctx, req)
+	if !ok {
 		return
 	}
 

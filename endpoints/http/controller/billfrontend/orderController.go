@@ -227,20 +227,6 @@ func (c *OrderController) Notify(ctx *gin.Context) {
 		return
 	}
 
-	// 创建前台二维码
-	var qrCode = dao.KFQRCode{
-		Path:             "/s/" + utils.RandomPath(),
-		CardID:           card.CardID,
-		Status:           constant.QRCodeNormal,
-		ChangeQRCodeTime: time.Now().Unix(),
-		Version:          1,
-	}
-
-	if err := tx.Create(&qrCode).Error; err != nil {
-		c.Error(ctx, err)
-		return
-	}
-
 	// 分配前台域名
 	// 查找公共域名.
 	var domainRepo repository.BillDomainRepository
@@ -257,10 +243,14 @@ func (c *OrderController) Notify(ctx *gin.Context) {
 
 	// 分配公共域名
 	qrCodeDomain := dao.KFQRCodeDomain{
-		CardID:    card.CardID,
-		Domain:    domain.TopName,
-		DomainId:  int64(domain.ID),
-		IsPrivate: false,
+		Version:          1,
+		ChangeQRCodeTime: time.Now().Unix(),
+		Status:           constant.QRCodeNormal,
+		Path:             "/s/" + utils.RandomPath(),
+		CardID:           card.CardID,
+		Domain:           domain.TopName,
+		DomainId:         int64(domain.ID),
+		IsPrivate:        false,
 	}
 
 	if err := tx.Create(&qrCodeDomain).Error; err != nil {

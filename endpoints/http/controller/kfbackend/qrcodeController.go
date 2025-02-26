@@ -3,17 +3,17 @@ package kfbackend
 import (
 	"errors"
 	"fmt"
-	"time"
 
 	xlogger "github.com/clearcodecn/log"
 	"github.com/gin-gonic/gin"
 
-	"github.com/smart-fm/kf-api/domain/caches"
 	"github.com/smart-fm/kf-api/domain/repository"
 	"github.com/smart-fm/kf-api/endpoints/common"
+	"github.com/smart-fm/kf-api/endpoints/common/constant"
 	"github.com/smart-fm/kf-api/endpoints/cron/kflog"
 	"github.com/smart-fm/kf-api/endpoints/http/vo/kfbackend"
 	"github.com/smart-fm/kf-api/pkg/utils"
+	"github.com/smart-fm/kf-api/pkg/xerrors"
 )
 
 type QRCodeController struct {
@@ -28,55 +28,29 @@ func (c *QRCodeController) List(ctx *gin.Context) {
 
 	reqCtx := ctx.Request.Context()
 	cardID := common.GetKFCardID(ctx)
-
-	var kfsetting repository.KFSettingRepository
-	setting, err := kfsetting.MustGetByCardID(reqCtx, cardID)
-	if err != nil {
-		xlogger.Error(reqCtx, "查询客服设置失败", xlogger.Err(err), xlogger.Any("cardId", cardID))
-		c.Error(ctx, err)
-		return
-	}
-	enable := setting.QRCodeEnabled
-	enableNewUser := setting.QRCodeEnabledNewUser
-
 	var qrCodeDomainRepo repository.QRCodeDomainRepository
-	// 获取二维码列表.
-	qrCode, exist, err := qrCodeDomainRepo.FindByCardID(reqCtx, cardID)
-	if err != nil {
-		xlogger.Error(reqCtx, "查询客服设置失败", xlogger.Err(err), xlogger.Any("cardId", cardID))
-		c.Error(ctx, err)
-		return
-	}
-	if !exist {
-		c.Error(ctx, errors.New("查找二维码失败"))
-		return
-	}
-
 	// 获取域名列表
-	qrCodeDomain, err := qrCodeDomainRepo.FindDomain(reqCtx, qrCode.CardID)
+	qrCodeDomain, err := qrCodeDomainRepo.FindDomain(reqCtx, cardID)
 	if err != nil {
 		c.Error(ctx, err)
 		return
 	}
-
 	var domains []kfbackend.QRCodeDomain
-	for idx, item := range qrCodeDomain {
+	for _, item := range qrCodeDomain {
 		domains = append(
 			domains, kfbackend.QRCodeDomain{
-				Id:        idx + 1,
-				QRCodeURL: qrCode.Path,
+				Id:        0,
+				QRCodeURL: item.Path,
 				Domain:    item.Domain,
 				CreateAt:  item.CreatedAt.Unix(),
 				IsPrivate: item.IsPrivate,
-				Status:    1, // TODO:: 处理域名状态
+				Status:    item.Status,
 			},
 		)
 	}
 	c.Success(
 		ctx, kfbackend.QRCodeResponse{
-			Enable:        enable,
-			EnableNewUser: enableNewUser,
-			Domains:       domains,
+			Domains: domains,
 		},
 	)
 }
@@ -97,29 +71,23 @@ func (c *QRCodeController) Switch(ctx *gin.Context) {
 		c.Error(ctx, errors.New("查找二维码失败"))
 		return
 	}
-	qrCode.ID = 0
-	qrCode.CreatedAt = time.Now()
 	qrCode.Version++
+	qrCode.ID = 0
+	qrCode.Status = constant.QRCodeNormal
 	qrCode.Path = "/s/" + utils.RandomPath()
+
 	err = qrCodeDomainRepo.CreateOne(reqCtx, qrCode)
 	if err != nil {
 		xlogger.Error(reqCtx, "Switch-error2", xlogger.Err(err), xlogger.Any("cardId", cardID))
 		c.Error(ctx, err)
 		return
 	}
-	qrCodeDomain, err := qrCodeDomainRepo.FindDomain(reqCtx, qrCode.CardID)
-	if err != nil {
-		c.Error(ctx, err)
-		return
-	}
-	firstDomain := ""
-	if len(qrCodeDomain) > 0 {
-		firstDomain = qrCodeDomain[0].Domain
-	}
+
 	kflog.AddKFLog(cardID, "二维码", "更换了二维码图片", utils.ClientIP(ctx))
+
 	c.Success(
 		ctx, kfbackend.QRCodeSwitchResponse{
-			QRCodeURL: fmt.Sprintf("%s%s", firstDomain, qrCode.Path),
+			QRCodeURL: fmt.Sprintf("%s%s", qrCode.Domain, qrCode.Path),
 		},
 	)
 }
@@ -133,35 +101,47 @@ func (c *QRCodeController) OnOff(ctx *gin.Context) {
 	if !c.BindAndValidate(ctx, &req) {
 		return
 	}
+	var qrCodeDomainRepo repository.QRCodeDomainRepository
 
-	var kfsetting repository.KFSettingRepository
-	setting, err := kfsetting.MustGetByCardID(reqCtx, cardID)
-	if err != nil {
-		xlogger.Error(reqCtx, "查询客服设置失败", xlogger.Err(err), xlogger.Any("cardId", cardID))
-		c.Error(ctx, err)
-		return
-	}
-
-	settingChange := false
-	if req.OnOffNewUser != nil {
-		setting.QRCodeEnabledNewUser = *req.OnOffNewUser
-		settingChange = true
-	}
-
-	if req.OnOff != nil {
-		setting.QRCodeEnabled = *req.OnOff
-		settingChange = true
-	}
-
-	if settingChange {
-		err = kfsetting.SaveOne(reqCtx, setting)
+	if req.DisableOld {
+		domain, ok, err := qrCodeDomainRepo.FindByCardID(ctx, cardID)
 		if err != nil {
-			xlogger.Error(reqCtx, "保存客服设置失败", xlogger.Err(err), xlogger.Any("cardId", cardID))
 			c.Error(ctx, err)
 			return
 		}
-		caches.KfSettingCache.DeleteOne(ctx, cardID)
+		if !ok {
+			c.Error(ctx, xerrors.NewCustomError("查找数据失败"))
+			return
+		}
+		if err := qrCodeDomainRepo.DisableOld(reqCtx, cardID, int64(domain.ID)); err != nil {
+			c.Error(ctx, xerrors.NewCustomError("操作失败"))
+			return
+		}
+		c.Success(ctx, nil)
+		return
 	}
+
+	if req.Id <= 0 {
+		c.Success(ctx, nil)
+		return
+	}
+
+	_, ok, err := qrCodeDomainRepo.FindByIdAndCardID(reqCtx, req.Id, cardID)
+	if err != nil {
+		c.Error(ctx, err)
+		return
+	}
+	if !ok {
+		c.Error(ctx, xerrors.NewCustomError("查找数据失败"))
+		return
+	}
+
+	err = qrCodeDomainRepo.UpdateStatus(reqCtx, cardID, req.Id, req.Status)
+	if err != nil {
+		c.Error(ctx, xerrors.NewCustomError("操作失败"))
+		return
+	}
+
 	kflog.AddKFLog(cardID, "二维码", "更新了二维码开关", utils.ClientIP(ctx))
 	c.Success(ctx, kfbackend.QRCodeOnOffResponse{})
 }

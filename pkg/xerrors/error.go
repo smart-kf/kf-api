@@ -13,7 +13,8 @@ import (
 // 500 = 服务器内部错误，前端弹出服务器内部错误
 
 var (
-	AuthError = New(401, "用户认证失败")
+	AuthError  = New(401, "用户认证失败")
+	CheckError = New(403, "禁止访问")
 )
 
 type Error struct {
