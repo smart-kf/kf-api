@@ -21,6 +21,9 @@ func (c *OrderController) List(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
 	tx := mysql.GetDBFromContext(reqCtx)
 
+	req.OrderBy = "created_at"
+	req.Asc = false
+
 	if req.FromAddress != "" {
 		tx = tx.Where("from_address = ?", req.FromAddress)
 	}
