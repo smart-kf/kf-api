@@ -108,6 +108,8 @@ func (c *AuthController) Login(ctx *gin.Context) {
 		Token:      token,
 		CdnDomain:  config.GetConfig().Web.CdnHost,
 		CardExpire: card.ExpireTime * 1000,
+		WsFullHost: config.GetConfig().SocketIO.FullHost,
+		WsHost:     config.GetConfig().SocketIO.Host,
 	}
 
 	notice := caches.BillSettingCacheInstance.GetNotice()

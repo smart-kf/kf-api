@@ -23,7 +23,7 @@ func (c *IpClient) init() {
 	if c.httpClient != nil {
 		return
 	}
-
+	c.httpClient = &http.Client{}
 	proxy := config.GetConfig().Ip2Region.Proxy
 	if proxy != "" {
 		u, _ := url.Parse(proxy)
@@ -38,7 +38,6 @@ func (c *IpClient) init() {
 		ti = config.GetConfig().Ip2Region.Timeout
 	}
 	c.httpClient.Timeout = time.Second * time.Duration(ti)
-	c.httpClient = &http.Client{}
 }
 
 func (c *IpClient) Crawl(ctx context.Context, ua string, ip string) (common.IpInfo, error) {

@@ -1,15 +1,20 @@
 package kffrontend
 
 import (
+	"fmt"
 	"strings"
 
 	xlogger "github.com/clearcodecn/log"
 	"github.com/gin-gonic/gin"
 
+	"github.com/smart-fm/kf-api/config"
 	"github.com/smart-fm/kf-api/domain/caches"
+	"github.com/smart-fm/kf-api/domain/factory"
+	"github.com/smart-fm/kf-api/domain/repository"
 	"github.com/smart-fm/kf-api/endpoints/common"
 	"github.com/smart-fm/kf-api/endpoints/common/constant"
 	"github.com/smart-fm/kf-api/endpoints/http/vo/kffrontend"
+	"github.com/smart-fm/kf-api/infrastructure/mysql/dao"
 	"github.com/smart-fm/kf-api/pkg/ipinfo"
 	"github.com/smart-fm/kf-api/pkg/utils"
 	"github.com/smart-fm/kf-api/pkg/xerrors"
@@ -25,7 +30,7 @@ func (c *QRCodeController) Check(ctx *gin.Context) {
 	ip := utils.ClientIP(ctx)
 	reqCtx := ctx.Request.Context()
 
-	ok, qrcode, card := c.getCard(ctx, req)
+	ok, qrcode, card := c.getCard(ctx, &req)
 	if !ok {
 		return
 	}
@@ -111,5 +116,73 @@ func (c *QRCodeController) Check(ctx *gin.Context) {
 		}
 	}
 
-	c.Success(ctx, nil)
+	c.scan(ctx, &req)
+}
+
+func (c *QRCodeController) scan(ctx *gin.Context, req *kffrontend.QRCodeScanRequest) {
+	ok, _, card := c.getCard(ctx, req)
+	if !ok {
+		return
+	}
+
+	reqCtx := ctx.Request.Context()
+
+	cardID := card.CardID
+
+	// 先返回success, 使前端能联调.
+	var (
+		isNewUser = false
+		user      *dao.KfUser
+		userRepo  repository.KFUserRepository
+	)
+
+	var err error
+	// 1. 获取token，如果没有拿到token，则生成新token，生成新用户返回用户信息.
+	kfToken := common.GetKFToken(reqCtx)
+	if kfToken == "" {
+		// 生成用户信息.
+		// token := uuid.New().String()
+		user = factory.FactoryNewKfUser(int64(card.ID), cardID, ctx.ClientIP())
+		info, _ := ipinfo.Crawl(reqCtx, ctx.Request.UserAgent(), utils.ClientIP(ctx))
+		user.IP = utils.ClientIP(ctx)
+		user.Area = fmt.Sprintf("%s-%s-%s-%s", info.Country, info.Province, info.City, info.Net)
+		user.Comments = ""
+		user.Mobile = ""
+		user.RemarkName = ""
+		if info.IsProxy || info.IsVpn {
+			user.IsProxy = 1
+		}
+
+		if err := userRepo.SaveOne(reqCtx, user); err != nil {
+			xlogger.Error(reqCtx, "FindByPath failed", xlogger.Err(err))
+			c.Error(ctx, err)
+			return
+		}
+		isNewUser = true
+		err = caches.KfAuthCacheInstance.SetFrontToken(reqCtx, kfToken, cardID)
+		if err != nil {
+			xlogger.Error(reqCtx, "SetFrontToken failed", xlogger.Err(err))
+			c.Error(ctx, err)
+			return
+		}
+	} else {
+		user, err = caches.KfUserCacheInstance.GetDBUser(ctx, cardID, kfToken)
+		if err != nil {
+			xlogger.Error(reqCtx, "GetDBUser-failed", xlogger.Err(err))
+			c.Error(ctx, err)
+			return
+		}
+	}
+	resp := kffrontend.QRCodeScanResponse{
+		UserInfo: kffrontend.KFUserInfo{
+			UUID:       user.UUID,
+			Avatar:     user.Avatar,
+			NickName:   user.NickName,
+			WsHost:     config.GetConfig().SocketIO.Host,
+			WsFullHost: config.GetConfig().SocketIO.FullHost,
+		},
+		IsNewUser: isNewUser,
+	}
+
+	c.Success(ctx, resp)
 }

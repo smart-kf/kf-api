@@ -31,6 +31,8 @@ type LoginResponse struct {
 	Notice     string `json:"notice,omitempty" doc:"公告通知"`
 	CdnDomain  string `json:"cdnDomain" doc:"静态资源域名"`
 	CardExpire int64  `json:"cardExpire" doc:"卡密过期时间: 毫秒"`
+	WsHost     string `json:"wsHost" doc:"ws的host"`
+	WsFullHost string `json:"wsFullHost" doc:"ws全路径"`
 }
 
 type LogRequest struct {

@@ -1,0 +1,27 @@
+### http://localhost:8082/pay?trade_id=534d3c53a06143bd70021fbdcb3520fd5fd28b58&app_id=kf
+#
+#type OrderNotifyRequest struct {
+#	TradeId   string `json:"trade_id"`
+#	OrderId   string `json:"order_id"`
+#	Status    int    `json:"status"`    // 1=wait，2=success，3=fail
+#Timestamp int64  `json:"timestamp"` // 确认时间
+#Address   string `json:"address"`
+#}
+
+### mock 通知
+POST http://localhost:8081/api/bill-fe/order/notify
+Content-Type: application/json
+
+{
+  "trade_id": "3171eca6560f505a62125fb099f6f57dc1b31c5e",
+  "order_id": "N842560302212501161",
+  "status": 2,
+  "timestamp": 1647925200,
+  "address": "axsasdasdj123451"
+}
+
+###
+POST http://localhost:5173/api/kf-fe/qrcode/check
+Content-Type: application/json
+
+{"code":"/s/j2MgyS/lYwCDn/zkiYTx.html"}

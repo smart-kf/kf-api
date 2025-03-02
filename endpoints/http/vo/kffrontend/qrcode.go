@@ -5,9 +5,11 @@ type QRCodeScanRequest struct {
 }
 
 type KFUserInfo struct {
-	UUID     string `json:"uuid" gorm:"column:uuid;unique;type:varchar(32)"` // 用户的uuid，不用主键做业务.
-	Avatar   string `json:"avatar" gorm:"column:avatar;type:varchar(255)"`   // 头像地址，存储的是相对路径
-	NickName string `json:"nickName" gorm:"column:nick_name;type:varchar(255)" doc:"昵称"`
+	UUID       string `json:"uuid" gorm:"column:uuid;unique;type:varchar(32)"` // 用户的uuid，不用主键做业务.
+	Avatar     string `json:"avatar" gorm:"column:avatar;type:varchar(255)"`   // 头像地址，存储的是相对路径
+	NickName   string `json:"nickName" gorm:"column:nick_name;type:varchar(255)" doc:"昵称"`
+	WsHost     string `json:"wsHost" doc:"ws地址"`
+	WsFullHost string `json:"wsFullHost" doc:"ws带域名协议地址"`
 }
 
 type QRCodeScanResponse struct {

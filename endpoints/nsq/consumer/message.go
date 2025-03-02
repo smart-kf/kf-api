@@ -260,7 +260,7 @@ func (m *MessageConsumer) handleEventMessage(msg *dto.Message) {
 		if err != nil {
 			return
 		}
-		// 找前台的sessionid
+		// 找后台的sessionid
 		sids, err := caches.ImSessionCacheInstance.GetKfbeSessionIds(ctx, cardId)
 		if err != nil {
 			return

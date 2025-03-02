@@ -3,7 +3,9 @@ POST {{ host }}/api/bill-fe/order/create
 Content-Type: application/json
 
 {
-  "packageId": "monthly"
+  "packageId": "weekly",
+  "from_address": "axsasdasdj",
+  "email": "adasd@qq.com"
 }
 
 > {%

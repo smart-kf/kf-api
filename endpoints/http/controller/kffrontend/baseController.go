@@ -20,7 +20,7 @@ func NewBaseController() *BaseController {
 	return &BaseController{}
 }
 
-func (c *BaseController) getCard(ctx *gin.Context, req kffrontend.QRCodeScanRequest) (
+func (c *BaseController) getCard(ctx *gin.Context, req *kffrontend.QRCodeScanRequest) (
 	bool,
 	*dao.KFQRCodeDomain, *dao.KFCard,
 ) {

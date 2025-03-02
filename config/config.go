@@ -19,6 +19,7 @@ type Config struct {
 	Payment       Payment       `json:"payment"`
 	DomainPrice   float64       `json:"domainPrice"`
 	Ip2Region     Ip2Region     `json:"ip2Region"`
+	SocketIO      SocketIO      `json:"socketIo"`
 }
 
 type Ip2Region struct {
@@ -107,4 +108,9 @@ func (c Config) GetPackageByID(id string) (CardPackage, bool) {
 		}
 	}
 	return CardPackage{}, false
+}
+
+type SocketIO struct {
+	Host     string `json:"host"`     // 域名:
+	FullHost string `json:"fullHost"` // 完整域名带端口
 }

@@ -66,3 +66,7 @@ ip2region:
   registryApiKey: ira_AnrzYNqRz8M64Mj7VvqFylbrIj67Rh3yFi29
   proxy: http://127.0.0.1:10081
   timeout: 5
+
+socketIo:
+  host: 'localhost:9000'
+  fullHost: 'ws://localhost:9000/'

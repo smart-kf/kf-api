@@ -34,7 +34,7 @@ func NewDefaultKFSettings(cardID string) *KFSettings {
 		IPProxyFilter:   false,
 		DeviceFilter:    false,
 		SimulatorFilter: false,
-		NewMessageVoice: false,
-		QRCodeEnabled:   false,
+		NewMessageVoice: true,
+		QRCodeEnabled:   true,
 	}
 }

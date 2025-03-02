@@ -16,7 +16,7 @@ func (imSessionCache) getKfBeOnlineSessionKey(cardId string) string {
 	return fmt.Sprintf("kfbe_online_session_%s", cardId)
 }
 
-// SetKfbeOnlineSession 设置后台用户上线session
+// SetKfbeOnlineSession 设置后台用户上线session  // kfbe_online_session_TM-oyTZ3v1toG
 func (c *imSessionCache) SetKfbeOnlineSession(ctx context.Context, cardId string, sessionId string) {
 	key := c.getKfBeOnlineSessionKey(cardId)
 	cli := redis.GetRedisClient()
