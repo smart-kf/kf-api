@@ -30,16 +30,22 @@ func Run() error {
 	g.Use(gin.Recovery())
 	g.Use(
 		func(ctx *gin.Context) {
-			// 对所有源、所有方法、所有header、响应跨域
 			origin := ctx.Request.Header.Get("Origin")
 			ctx.Header("Access-Control-Allow-Origin", origin)
 			ctx.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD, PATCH")
-			ctx.Header("Access-Control-Allow-Headers", "*")
 			ctx.Header("Access-Control-Max-Age", "86400")
+			// ctx.Header("Access-Control-Allow-Credentials", "true") // 如果需要凭据
+			// 处理预检请求
 			if ctx.Request.Method == http.MethodOptions {
+				// 动态设置允许的请求头
+				reqHeaders := ctx.Request.Header.Get("Access-Control-Request-Headers")
+				if reqHeaders != "" {
+					ctx.Header("Access-Control-Allow-Headers", reqHeaders)
+				}
 				ctx.AbortWithStatus(http.StatusNoContent)
 				return
 			}
+
 			ctx.Next()
 		},
 	)
