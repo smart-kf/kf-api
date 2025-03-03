@@ -130,3 +130,32 @@ Authorization: {{ kf_token }}
 GET {{ host }}/api/kf-be/log/list
 Content-Type: application/json
 Authorization: {{ kf_token }}
+
+
+###
+
+# curl 'https://api.smartkf.top/api/kf-fe/qrcode/check'
+#  -H 'sec-ch-ua-platform: "macOS"'
+#  -H 'Authorization: 26|a716a39f72cc4309b1f31133bb328b8b'
+#  -H 'Referer;'
+#  -H 'sec-ch-ua: "Not(A:Brand";v="99", "Google Chrome";v="133", "Chromium";v="133"'
+#  -H 'sec-ch-ua-mobile: ?0'
+#  -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36'
+#  -H 'Accept: application/json, text/plain, */*'
+#  -H 'Content-Type: application/json'
+#  --data-raw '{"code":"/s/sioz2T/InsJri/LDDchq.html"}'
+POST https://api.smartkf.top/api/kf-fe/qrcode/check
+sec-ch-ua-platform: "macOS"
+Authorization: 26|a716a39f72cc4309b1f31133bb328b8b
+Referer:
+sec-ch-ua: "Not(A:Brand";v="99", "Google Chrome";v="133", "Chromium";v="133"
+sec-ch-ua-mobile: ?0
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36
+Accept: application/json, text/plain, */*
+Content-Type: application/json
+
+{"code":"/s/sioz2T/InsJri/LDDchq.html"}
+
+###
+
+
