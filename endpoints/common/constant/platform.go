@@ -14,6 +14,10 @@ const (
 )
 
 const (
+	MsgTypeRead = "read" // 读取消息事件
+)
+
+const (
 	IsKf    = 1
 	IsNotKf = 2
 )

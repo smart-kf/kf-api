@@ -35,7 +35,11 @@ func (m *MessageConsumer) HandleMessage(message *nsq.Message) error {
 	}
 	switch msg.Event {
 	case constant.EventMessage:
-		m.handleEventMessage(&msg)
+		if msg.MsgType == constant.MsgTypeRead {
+			m.handleReadMessage(&msg)
+		} else {
+			m.handleEventMessage(&msg)
+		}
 	case constant.EventOnline:
 		m.handleOnline(&msg)
 	case constant.EventOffline:
@@ -270,6 +274,8 @@ func (m *MessageConsumer) handleEventMessage(msg *dto.Message) {
 			// TODO:: 离线消息操作
 			return
 		}
+		// 未读 + 1
+		caches.UserUnReadCacheInstance.IncrUserUnRead(ctx, cardId, msg.Token, 1)
 		newMessage = dto.Message{
 			MessageBase: dto.MessageBase{
 				Event:    constant.EventMessage,
@@ -289,4 +295,15 @@ func (m *MessageConsumer) handleEventMessage(msg *dto.Message) {
 		req.SetData(newMessage)
 		client.PushMessage(context.Background(), &req)
 	}
+}
+
+func (m *MessageConsumer) handleReadMessage(msg *dto.Message) {
+	ctx := context.Background()
+	// 清空未读消息.
+	cardId, err := caches.ImSessionCacheInstance.GetCardIDByKFFEToken(ctx, msg.Token)
+	if err != nil {
+		return
+	}
+	caches.UserUnReadCacheInstance.IncrUserUnRead(ctx, cardId, msg.GuestId, -1)
+	return
 }

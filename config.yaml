@@ -10,7 +10,7 @@ web:
   addr: 0.0.0.0
   port: 8081
   staticDir: ./data/static
-  cdnHost: http://localhost:8081/static/upload
+  cdnHost: http://localhost:8081
   uploadDir: ./data/static/upload
   kfManagerAddress: https://manager.smartkf.top
 

@@ -180,6 +180,9 @@ func (c *ChatController) Msgs(ctx *gin.Context) {
 		},
 	)
 
+	// 清空未读消息.
+	caches.UserUnReadCacheInstance.IncrUserUnRead(reqCtx, cardID, req.GuestId, -1)
+
 	c.Success(
 		ctx, kfbackend.MsgListResponse{
 			Messages: msgsVO,
