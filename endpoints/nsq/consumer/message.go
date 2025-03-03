@@ -9,6 +9,7 @@ import (
 	xlogger "github.com/clearcodecn/log"
 	"github.com/nsqio/go-nsq"
 
+	"github.com/smart-fm/kf-api/config"
 	"github.com/smart-fm/kf-api/domain/caches"
 	"github.com/smart-fm/kf-api/domain/dto"
 	event2 "github.com/smart-fm/kf-api/domain/event"
@@ -244,7 +245,7 @@ func (m *MessageConsumer) handleEventMessage(msg *dto.Message) {
 			MsgType:     msg.MsgType,
 			MsgId:       msg.MsgId,
 			GuestName:   msg.GuestName,
-			GuestAvatar: msg.GuestAvatar,
+			GuestAvatar: config.GetConfig().Web.CdnHost + msg.GuestAvatar,
 			GuestId:     msg.GuestId,
 			Content:     msg.Content,
 			KfId:        msg.KfId,
@@ -277,8 +278,8 @@ func (m *MessageConsumer) handleEventMessage(msg *dto.Message) {
 			MsgType:     msg.MsgType,
 			MsgId:       msg.MsgId,
 			GuestName:   msg.GuestName,
-			GuestAvatar: msg.GuestAvatar,
-			GuestId:     msg.GuestId,
+			GuestAvatar: config.GetConfig().Web.CdnHost + msg.GuestAvatar,
+			GuestId:     msg.Token,
 			Content:     msg.Content,
 			KfId:        msg.KfId,
 			IsKf:        msg.IsKf,
