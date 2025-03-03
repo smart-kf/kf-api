@@ -32,7 +32,7 @@ func Run() error {
 		func(ctx *gin.Context) {
 			origin := ctx.Request.Header.Get("Origin")
 			ctx.Header("Access-Control-Allow-Origin", origin)
-			ctx.Header("Access-Control-Allow-Methods", ctx.Request.Header.Get("Access-Control-Allow-Methods"))
+			ctx.Header("Access-Control-Allow-Methods", ctx.Request.Header.Get("access-control-request-method"))
 			// ctx.Header("Access-Control-Allow-Credentials", "true") // 如果需要凭据
 			// 处理预检请求
 			if ctx.Request.Method == http.MethodOptions {
