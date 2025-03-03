@@ -31,12 +31,14 @@ func Run() error {
 	g.Use(
 		func(ctx *gin.Context) {
 			// 对所有源、所有方法、所有header、响应跨域
-			ctx.Header("Access-Control-Allow-Origin", "*")
+			origin := ctx.Request.Header.Get("Origin")
+			ctx.Header("Access-Control-Allow-Origin", origin)
 			ctx.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD, PATCH")
 			ctx.Header("Access-Control-Allow-Headers", "*")
 			ctx.Header("Access-Control-Max-Age", "86400")
 			if ctx.Request.Method == http.MethodOptions {
 				ctx.AbortWithStatus(http.StatusNoContent)
+				return
 			}
 			ctx.Next()
 		},
