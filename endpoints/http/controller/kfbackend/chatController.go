@@ -2,6 +2,8 @@ package kfbackend
 
 import (
 	"context"
+	"sort"
+	"time"
 
 	uuid2 "github.com/google/uuid"
 
@@ -152,20 +154,17 @@ func (c *ChatController) Msgs(ctx *gin.Context) {
 
 	var repo repository.KFMessageRepository
 
+	var ti time.Time
+	if req.LastMsgTime != 0 {
+		ti = time.Unix(req.LastMsgTime, 0)
+	}
+
 	msgsDTO, err := repo.List(
 		reqCtx, &repository.ListMsgOption{
-			CardID:  cardID,
-			GuestId: req.GuestId,
-			ScrollRequest: &common.ScrollRequest{
-				Sorters: []common.Sorter{
-					{
-						Key: "id",
-						Asc: false,
-					},
-				},
-				ScrollID: req.ScrollID,
-				PageSize: req.PageSize,
-			},
+			CardID:      cardID,
+			GuestId:     req.GuestId,
+			LastMsgTime: ti,
+			PageSize:    int(req.PageSize),
 		},
 	)
 	if err != nil {
@@ -173,6 +172,12 @@ func (c *ChatController) Msgs(ctx *gin.Context) {
 		c.Error(ctx, err)
 		return
 	}
+
+	sort.Slice(
+		msgsDTO, func(i, j int) bool {
+			return msgsDTO[i].CreatedAt.Unix() < msgsDTO[j].CreatedAt.Unix()
+		},
+	)
 
 	msgsVO := lo.Map(
 		msgsDTO, func(item *dao.KFMessage, index int) *kfbackend.Message {

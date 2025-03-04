@@ -71,7 +71,6 @@ func syncTable(db *gorm.DB) {
 		&dao.Orders{},
 		&dao.KFMessage{},
 		&dao.KfUser{},
-		&dao.KFQRCode{},
 		&dao.KFQRCodeDomain{},
 		&dao.BillDomain{},
 		&dao.KfFile{},

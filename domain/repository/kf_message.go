@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"time"
 
 	xlogger "github.com/clearcodecn/log"
 
@@ -35,9 +36,10 @@ func (r *KFMessageRepository) BatchCreate(ctx context.Context, chat []*dao.KFMes
 }
 
 type ListMsgOption struct {
-	CardID        string
-	GuestId       string
-	ScrollRequest *common.ScrollRequest
+	CardID      string
+	GuestId     string
+	LastMsgTime time.Time
+	PageSize    int
 }
 
 func (r *KFMessageRepository) List(ctx context.Context, options *ListMsgOption) ([]*dao.KFMessage, error) {
@@ -45,9 +47,18 @@ func (r *KFMessageRepository) List(ctx context.Context, options *ListMsgOption) 
 	if len(options.CardID) == 0 {
 		return nil, errors.New("cardID is required")
 	}
+	var msgList []*dao.KFMessage
+
 	tx = tx.Where("card_id = ?", options.CardID)
 	tx = tx.Where("guest_id = ?", options.GuestId)
-	msgList, err := common.Scroll[*dao.KFMessage](tx, options.ScrollRequest)
+	if !options.LastMsgTime.IsZero() {
+		tx = tx.Where("created_at < ?", options.LastMsgTime)
+	}
+	err := tx.
+		Order("created_at desc").
+		Limit(options.PageSize).
+		Find(&msgList).Error
+
 	if err != nil {
 		return nil, err
 	}

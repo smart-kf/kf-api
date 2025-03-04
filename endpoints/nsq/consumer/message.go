@@ -7,14 +7,18 @@ import (
 	"time"
 
 	xlogger "github.com/clearcodecn/log"
+	uuid2 "github.com/google/uuid"
 	"github.com/nsqio/go-nsq"
 
 	"github.com/smart-fm/kf-api/config"
 	"github.com/smart-fm/kf-api/domain/caches"
 	"github.com/smart-fm/kf-api/domain/dto"
 	event2 "github.com/smart-fm/kf-api/domain/event"
+	"github.com/smart-fm/kf-api/domain/repository"
+	"github.com/smart-fm/kf-api/endpoints/common"
 	"github.com/smart-fm/kf-api/endpoints/common/constant"
 	"github.com/smart-fm/kf-api/infrastructure/httpClient/socketserver"
+	"github.com/smart-fm/kf-api/infrastructure/mysql/dao"
 )
 
 // MessageConsumer 消息消费者.
@@ -201,6 +205,17 @@ func (m *MessageConsumer) handleOffline(msg *dto.Message) {
 func (m *MessageConsumer) handleEventMessage(msg *dto.Message) {
 	ctx := context.Background()
 	_ = ctx
+
+	guestId := msg.GuestId
+	// 插入db.
+	r := repository.KFMessageRepository{}
+	msgDao := dao.KFMessage{
+		MsgId:   uuid2.NewString(),
+		MsgType: common.MessageType(msg.MsgType),
+		GuestId: guestId,
+		Content: msg.Content,
+	}
+
 	client := socketserver.NewSocketServerClient()
 	// 1. 回复已收到ACK
 	var req = socketserver.PushMessageRequest{
@@ -223,10 +238,17 @@ func (m *MessageConsumer) handleEventMessage(msg *dto.Message) {
 	data, _ := json.Marshal(msg)
 	fmt.Println(string(data))
 	// 2. 推送给接收方.
-	if msg.Platform == constant.PlatformKfBe {
+	if msg.FromBackend() {
+		fmt.Println("收到消息 后台->前台: ", msg.Content)
 		// 查询接收方的id.
 		// 前台找后台的id.
 		cardId, err := caches.ImSessionCacheInstance.GetCardIDByKFFEToken(ctx, msg.GuestId)
+		if err != nil {
+			return
+		}
+		msgDao.CardId = cardId
+		msgDao.IsKf = constant.IsKf
+		err = r.SaveOne(context.Background(), &msgDao)
 		if err != nil {
 			return
 		}
@@ -260,11 +282,19 @@ func (m *MessageConsumer) handleEventMessage(msg *dto.Message) {
 		req.SetData(newMessage)
 		client.PushMessage(context.Background(), &req)
 	} else {
+		fmt.Println("收到消息：前台-> 后台: ", msg.Content)
 		// 发给后台
 		cardId, err := caches.ImSessionCacheInstance.GetCardIDByKFFEToken(ctx, msg.Token)
 		if err != nil {
 			return
 		}
+		msgDao.CardId = cardId
+		msgDao.IsKf = constant.IsNotKf
+		err = r.SaveOne(context.Background(), &msgDao)
+		if err != nil {
+			return
+		}
+
 		// 找后台的sessionid
 		sids, err := caches.ImSessionCacheInstance.GetKfbeSessionIds(ctx, cardId)
 		if err != nil {
@@ -295,6 +325,7 @@ func (m *MessageConsumer) handleEventMessage(msg *dto.Message) {
 		req.SetData(newMessage)
 		client.PushMessage(context.Background(), &req)
 	}
+
 }
 
 func (m *MessageConsumer) handleReadMessage(msg *dto.Message) {

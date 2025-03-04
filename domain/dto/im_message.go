@@ -1,10 +1,16 @@
 package dto
 
+import "github.com/smart-fm/kf-api/endpoints/common/constant"
+
 type MessageBase struct {
 	Event     string `json:"event"`
-	Platform  string `json:"platform,omitempty"`  // platform
+	Platform  string `json:"platform,omitempty"`  // platform  来源平台.
 	SessionId string `json:"sessionId,omitempty"` // sessionId
 	Token     string `json:"token,omitempty"`     // token
+}
+
+func (m MessageBase) FromBackend() bool {
+	return m.Platform == constant.PlatformKfBe
 }
 
 type Message struct {
