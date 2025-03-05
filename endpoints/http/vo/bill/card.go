@@ -58,3 +58,8 @@ type UpdateStatusRequest struct {
 	ID     uint                `json:"id" binding:"required" doc:"主键id" validate:"required,gt=0"`
 	Status constant.SaleStatus `json:"status" binding:"required" doc:"卡片状态,1=销售中，2=下架，3=已出售" validate:"required,oneof=1 2 3"`
 }
+
+type ModifyCardExpireDate struct {
+	ID         int64 `json:"id" binding:"required" doc:"主键id" validate:"required,gt=0"`
+	ExpireTime int64 `json:"expireTime" doc:"过期时间，需要比当前时间大，单位：秒"`
+}

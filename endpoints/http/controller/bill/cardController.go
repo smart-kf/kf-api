@@ -1,6 +1,8 @@
 package bill
 
 import (
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 
@@ -10,7 +12,6 @@ import (
 	"github.com/smart-fm/kf-api/endpoints/cron/billlog"
 	"github.com/smart-fm/kf-api/endpoints/http/middleware"
 	"github.com/smart-fm/kf-api/endpoints/http/vo/bill"
-	"github.com/smart-fm/kf-api/infrastructure/mysql"
 	"github.com/smart-fm/kf-api/infrastructure/mysql/dao"
 	"github.com/smart-fm/kf-api/pkg/utils"
 	"github.com/smart-fm/kf-api/pkg/xerrors"
@@ -122,31 +123,64 @@ func (c *CardController) UpdateStatus(ctx *gin.Context) {
 		return
 	}
 
-	tx, txCtx := mysql.Begin(ctx)
-	defer tx.Rollback()
-
-	var cardRepo repository.KFCardRepository
-	card, ok, err := cardRepo.GetByID(txCtx, req.ID)
-	if err != nil {
-		c.Error(ctx, err)
-		return
-	}
-	if !ok {
-		c.Error(ctx, xerrors.NewParamsErrors("数据不存在"))
-		return
-	}
-	if card.SaleStatus == req.Status {
-		c.Success(ctx, nil)
-		return
-	}
-	card.SaleStatus = req.Status
-
-	err = cardRepo.UpdateOne(txCtx, card)
-	if err != nil {
-		c.Error(ctx, err)
-		return
-	}
-	tx.Commit()
+	// tx, txCtx := mysql.Begin(ctx)
+	// defer tx.Rollback()
+	//
+	// var cardRepo repository.KFCardRepository
+	// card, ok, err := cardRepo.GetByID(txCtx, req.ID)
+	// if err != nil {
+	// 	c.Error(ctx, err)
+	// 	return
+	// }
+	// if !ok {
+	// 	c.Error(ctx, xerrors.NewParamsErrors("数据不存在"))
+	// 	return
+	// }
+	// if card.SaleStatus == req.Status {
+	// 	c.Success(ctx, nil)
+	// 	return
+	// }
+	// card.SaleStatus = req.Status
+	//
+	// err = cardRepo.UpdateOne(txCtx, card)
+	// if err != nil {
+	// 	c.Error(ctx, err)
+	// 	return
+	// }
+	// tx.Commit()
 	c.Success(ctx, nil)
 	return
+}
+
+func (c *CardController) ModifyCardExpireTime(ctx *gin.Context) {
+	var req bill.ModifyCardExpireDate
+	if !c.BindAndValidate(ctx, &req) {
+		return
+	}
+	reqCtx := ctx.Request.Context()
+
+	now := time.Now().Unix()
+	if req.ExpireTime < now {
+		c.Error(ctx, xerrors.NewParamsErrors("过期时间不能小于当前时间"))
+		return
+	}
+	var cardRepo repository.KFCardRepository
+	card, exist, err := cardRepo.FindByMainId(reqCtx, req.ID)
+	if err != nil {
+		c.Error(ctx, xerrors.NewCustomError("查询卡密失败: "+err.Error()))
+		return
+	}
+	if !exist {
+		c.Error(ctx, xerrors.NewCustomError("查询卡密失败: 卡密不存在"))
+		return
+	}
+	card.ExpireTime = req.ExpireTime
+	err = cardRepo.UpdateOne(reqCtx, card)
+	if err != nil {
+		c.Error(ctx, err)
+		return
+	}
+
+	caches.KfCardCacheInstance.Delete(reqCtx, card.CardID)
+	c.Success(ctx, nil)
 }

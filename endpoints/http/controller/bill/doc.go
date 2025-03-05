@@ -18,6 +18,7 @@ func SwaggerDoc(group *swaggos.Group) {
 	cardC.Post("/batch-add").Body(bill.BatchAddCardRequest{}).JSON(bill.BatchAddResponse{}).Description("批量添加卡片")
 	cardC.Post("/updateStatus").Body(bill.UpdateStatusRequest{}).JSON(common.EmptyResponse{}).Description("更新卡片出售状态")
 	cardC.Post("/list").Body(bill.ListCardRequest{}).JSON(bill.ListCardResponse{}).Description("卡密列表")
+	cardC.Post("/updateCardExpire").Body(bill.ModifyCardExpireDate{}).JSON(common.EmptyResponse{}).Description("修改卡密过期时间")
 
 	domainC := billGroup.Group("/domain").Tag("计费后台-域名管理")
 	domainC.Post("/add").Body(bill.AddDomainRequest{}).JSON(dao.BillDomain{}).Description("添加域名")

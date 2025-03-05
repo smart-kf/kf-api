@@ -116,6 +116,7 @@ func registerRouter(g *gin.Engine) {
 		{
 			cardGroup.POST("/batch-add", cardController.BatchAddCard)
 			cardGroup.POST("/updateStatus", cardController.UpdateStatus)
+			cardGroup.POST("/updateCardExpire", cardController.ModifyCardExpireTime)
 			cardGroup.POST("/list", cardController.List)
 		}
 

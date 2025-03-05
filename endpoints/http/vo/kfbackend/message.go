@@ -130,31 +130,31 @@ type UpdateUserResponse struct {
 
 type Message struct {
 	MsgId   string             `doc:"消息id" json:"msgId"`
-	MsgType common.MessageType `json:"msgType" doc:"消息类型:text||image||video"`               // 消息类型
-	GuestId string             `gorm:"column:guest_id" json:"guestId" doc:"客户id"`             // 客服id
+	MsgType common.MessageType `json:"msgType" doc:"消息类型:text||image||video"`           // 消息类型
+	GuestId string             `gorm:"column:guest_id" json:"guestId" doc:"客户id"`       // 客服id
 	CardId  string             `gorm:"column:card_id" json:"cardId" doc:"卡密id: 只有后台有值"` // 卡密id
-	Content string             `json:"content" doc:"消息的内容"`                                // 内容.
-	IsKf    int                `gorm:"column:is_kf;type:tinyint(4)" json:"isKf"`                // 是否是客服
+	Content string             `json:"content" doc:"消息的内容"`                             // 内容.
+	IsKf    int                `gorm:"column:is_kf;type:tinyint(4)" json:"isKf"`        // 是否是客服
 	MsgTime int64              `json:"msgTime" doc:"消息创建时间 单位秒 可用作合并时间窗口"`
 }
 
 type User struct {
-	UUID        string `json:"uuid" gorm:"column:uuid;unique;type:varchar(255)" doc:"用户的uuid"`             // 用户的uuid，不用主键做业务.
+	UUID        string `json:"uuid" gorm:"column:uuid;unique;type:varchar(255)" doc:"用户的uuid"`    // 用户的uuid，不用主键做业务.
 	Avatar      string `json:"avatar" gorm:"column:avatar;type:varchar(255)" doc:"头像地址，存储的是相对路径"` // 头像地址，存储的是相对路径
 	NickName    string `json:"nickName" gorm:"column:nick_name;type:varchar(255)" doc:"昵称"`
-	RemarkName  string `json:"remarkName" gorm:"column:remark_name" doc:"备注名称"`          // 备注名称.
-	Mobile      string `json:"mobile" gorm:"column:mobile" doc:"手机号"`                     // 手机号
-	Comments    string `json:"comments" gorm:"column:comments" doc:"备注信息"`               // 备注信息
-	IP          string `json:"ip" gorm:"column:ip;type:varchar(255)" doc:"注册ip"`           // 注册ip
+	RemarkName  string `json:"remarkName" gorm:"column:remark_name" doc:"备注名称"`         // 备注名称.
+	Mobile      string `json:"mobile" gorm:"column:mobile" doc:"手机号"`                   // 手机号
+	Comments    string `json:"comments" gorm:"column:comments" doc:"备注信息"`              // 备注信息
+	IP          string `json:"ip" gorm:"column:ip;type:varchar(255)" doc:"注册ip"`        // 注册ip
 	Area        string `json:"area" gorm:"column:area;type:varchar(255)" doc:"ip对应的地区"` // ip对应的地区
 	UserAgent   string `json:"userAgent" gorm:"column:user_agent;type:varchar(1000)" doc:"浏览器user-agent"`
-	Browser     string `json:"browser"  doc:"浏览器 Chrome/Safari/firfox/..."`                          // 浏览器 Chrome/Safari/firfox/...
-	Device      string `json:"device" doc:"设备类型： iphone、android、"`                                  // 设备类型： iphone、android、
-	IsProxy     int    `json:"isProxy" gorm:"column:is_proxy" doc:"是否使用了代理ip访问: 1=是，2=不是."` // 是否使用了代理ip访问: 1=是，2=不是.
-	IsEmulator  int    `json:"isEmulator" gorm:"column:is_emulator" doc:"是否是模拟器 1=是，2=不是"`     // 是否是模拟器 1=是，2=不是
-	Source      string `json:"source" gorm:"column:source" doc:"来源"`                                  // 来源
-	OfflineAt   int64  `json:"offlineAt" gorm:"column:offline_at" doc:"离线时间 秒"`                    // ws断开链接时记录
-	NetworkType string `json:"networkType" gorm:"column:network_type" doc:"网络类型:wifi/4G/5G"`        // wifi/4G/5G
+	Browser     string `json:"browser"  doc:"浏览器 Chrome/Safari/firfox/..."`                  // 浏览器 Chrome/Safari/firfox/...
+	Device      string `json:"device" doc:"设备类型： iphone、android、"`                           // 设备类型： iphone、android、
+	IsProxy     int    `json:"isProxy" gorm:"column:is_proxy" doc:"是否使用了代理ip访问: 1=是，2=不是."`  // 是否使用了代理ip访问: 1=是，2=不是.
+	IsEmulator  int    `json:"isEmulator" gorm:"column:is_emulator" doc:"是否是模拟器 1=是，2=不是"`   // 是否是模拟器 1=是，2=不是
+	Source      string `json:"source" gorm:"column:source" doc:"来源"`                         // 来源
+	OfflineAt   int64  `json:"offlineAt" gorm:"column:offline_at" doc:"离线时间 秒"`              // ws断开链接时记录
+	NetworkType string `json:"networkType" gorm:"column:network_type" doc:"网络类型:wifi/4G/5G"` // wifi/4G/5G
 	ScanCount   int64  `json:"scanCount" gorm:"column:scan_count" doc:"扫码次数"`
 	TopAt       int64  `json:"topAt" gorm:"column:top_at" doc:"置顶时间 >0则是置顶 秒"`
 	BlockAt     int64  `json:"blockAt" gorm:"column:block_at" doc:"拉黑时间 >0则是拉黑 秒"`
