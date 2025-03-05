@@ -9,10 +9,6 @@ type MessageBase struct {
 	Token     string `json:"token,omitempty"`     // token
 }
 
-func (m MessageBase) FromBackend() bool {
-	return m.Platform == constant.PlatformKfBe
-}
-
 type Message struct {
 	MessageBase
 	MsgType     string `json:"msgType"`     // text || image || video
@@ -23,6 +19,10 @@ type Message struct {
 	Content     string `json:"content"`     // 具体消息内容
 	KfId        string `json:"kfId"`        // 客服id
 	IsKf        int    `json:"isKf"`        // 1=客服，2=粉丝.
+}
+
+func (m MessageBase) FromBackend() bool {
+	return m.Platform == constant.PlatformKfBe
 }
 
 type Online struct {

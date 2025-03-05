@@ -54,7 +54,12 @@ for i = 1, #KEYS do
 end
 return results`
 	key := d.getKey(cardId)
-	iface, err := redis.GetRedisClient().Eval(ctx, script, nil, key, userId).Result()
+	args := make([]interface{}, len(userId)+1)
+	args[0] = key
+	for i, id := range userId {
+		args[i+1] = id
+	}
+	iface, err := redis.GetRedisClient().Eval(ctx, script, userId, args...).Result()
 	if err != nil {
 		return nil, err
 	}
@@ -63,6 +68,8 @@ return results`
 		for i, exists := range resultArray {
 			if exists.(int64) == 1 {
 				res[userId[i]] = true
+			} else {
+				res[userId[i]] = false
 			}
 		}
 	}

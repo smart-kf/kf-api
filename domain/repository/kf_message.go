@@ -71,7 +71,7 @@ func (r *KFMessageRepository) List(ctx context.Context, options *ListMsgOption) 
 	return msgList, nil
 }
 
-func (r *KFMessageRepository) ByIDs(ctx context.Context, cardID string, ids ...uint64) ([]*dao.KFMessage, error) {
+func (r *KFMessageRepository) ByIDs(ctx context.Context, cardID string, ids []string) ([]*dao.KFMessage, error) {
 	if len(ids) == 0 {
 		return nil, nil
 	}
@@ -83,7 +83,7 @@ func (r *KFMessageRepository) ByIDs(ctx context.Context, cardID string, ids ...u
 	}
 
 	tx = tx.Where("card_id = ?", cardID)
-	tx = tx.Where("id in ?", ids)
+	tx = tx.Where("msg_id in ?", ids)
 
 	res := make([]*dao.KFMessage, 0)
 	result := tx.

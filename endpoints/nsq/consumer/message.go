@@ -207,6 +207,9 @@ func (m *MessageConsumer) handleEventMessage(msg *dto.Message) {
 	_ = ctx
 
 	guestId := msg.GuestId
+	if guestId == "" {
+		guestId = msg.Token
+	}
 	// 插入db.
 	r := repository.KFMessageRepository{}
 	msgDao := dao.KFMessage{
@@ -306,6 +309,13 @@ func (m *MessageConsumer) handleEventMessage(msg *dto.Message) {
 		}
 		// 未读 + 1
 		caches.UserUnReadCacheInstance.IncrUserUnRead(ctx, cardId, msg.Token, 1)
+		caches.KfUserExtraCacheInstance.SetUserObj(
+			ctx, cardId, msg.Token, dao.UserExtra{
+				LastChatTime:  time.Now().Unix(),
+				LastMessageId: msgDao.MsgId,
+			},
+		)
+
 		newMessage = dto.Message{
 			MessageBase: dto.MessageBase{
 				Event:    constant.EventMessage,

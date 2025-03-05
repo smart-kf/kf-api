@@ -45,6 +45,30 @@ func (d *kfUserExtraCache) GetUserObj(ctx context.Context, cardId string, userId
 	return userObj, nil
 }
 
+func (d *kfUserExtraCache) GetUserObjs(ctx context.Context, cardId string, userIds []string) (
+	map[string]dao.UserExtra,
+	error,
+) {
+	key := d.getKey(cardId)
+	data, err := redis.GetRedisClient().HMGet(ctx, key, userIds...).Result()
+	if err != nil {
+		return nil, err
+	}
+	var userObj = make(map[string]dao.UserExtra)
+	for index, item := range data {
+		if item == nil {
+			continue
+		}
+		var extra dao.UserExtra
+		err = json.Unmarshal([]byte(item.(string)), &extra)
+		if err != nil {
+			return nil, err
+		}
+		userObj[userIds[index]] = extra
+	}
+	return userObj, nil
+}
+
 func (d *kfUserExtraCache) SetUserObj(ctx context.Context, cardId string, userId string, obj dao.UserExtra) error {
 	key := d.getKey(cardId)
 	data, err := json.Marshal(obj)

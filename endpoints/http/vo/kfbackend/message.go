@@ -77,10 +77,10 @@ const (
 )
 
 type Chat struct {
-	User         User     `json:"user" doc:"访客信息"`
-	LastChatAt   int64    `json:"lastChatAt" doc:"最近聊天时间 毫秒"`
-	LastMessage  *Message `json:"lastMessage" doc:"最近一次聊天的消息内容"`
-	UnreadMsgCnt int64    `json:"unreadMsgCnt" doc:"未读消息数"`
+	User         User   `json:"user" doc:"访客信息"`
+	LastChatAt   int64  `json:"lastChatAt" doc:"最近聊天时间 毫秒"`
+	LastMessage  string `json:"lastMessage" doc:"最近一次聊天的消息内容"`
+	UnreadMsgCnt int64  `json:"unreadMsgCnt" doc:"未读消息数"`
 }
 
 type MsgListRequest struct {

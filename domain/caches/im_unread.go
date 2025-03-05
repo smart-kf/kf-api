@@ -19,7 +19,7 @@ const (
 type userUnReadCache struct{}
 
 func (d *userUnReadCache) getKey(cardId string) string {
-	return fmt.Sprintf("kf_user_%s", cardId)
+	return fmt.Sprintf(userUnReadKey, cardId)
 }
 
 // IncrUserUnRead 增加用户的未读消息数量

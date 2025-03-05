@@ -9,7 +9,7 @@ import (
 // KFMessage 消息
 type KFMessage struct {
 	gorm.Model
-	MsgId   string             `gorm:"column:"`
+	MsgId   string             `gorm:"column:msg_id"`
 	MsgType common.MessageType `gorm:"column:msg_type;type:varchar(128)" json:"type"` // 消息类型
 	GuestId string             `gorm:"column:guest_id" json:"guestId"`                // 客服id
 	CardId  string             `gorm:"column:card_id" json:"cardId"`                  // 卡密id

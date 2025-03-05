@@ -25,7 +25,6 @@ type KfUser struct {
 	TopAt       int64  `json:"topAt" gorm:"column:top_at" doc:"置顶时间 >0则是置顶 秒"`
 	BlockAt     int64  `json:"blockAt" gorm:"column:block_at" doc:"拉黑时间 >0则是拉黑 秒"`
 	LastChatAt  int64  `json:"lastChatAt" gorm:"column:last_chat_at" doc:"最近聊天时间 毫秒"`
-	LastMsgID   uint64 `json:"lastMsgID" gorm:"column:last_msg_id;type:bigint unsigned" doc:"最近一次由该用户发送的消息id"`
 }
 
 func (KfUser) TableName() string {
@@ -34,7 +33,6 @@ func (KfUser) TableName() string {
 
 // UserExtra 用户持久化存储属性
 type UserExtra struct {
-	LastChatTime    int64  `json:"last_chat_time"`    // 最近聊天时间
-	LastOfflineTime int64  `json:"last_offline_time"` // 最近离线时间.
-	LastMessageId   string `json:"last_message_id"`   // 最近消息id.
+	LastChatTime  int64  `json:"last_chat_time"`  // 最近聊天时间
+	LastMessageId string `json:"last_message_id"` // 最近消息id.
 }
