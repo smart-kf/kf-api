@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/copier"
 
 	"github.com/smart-fm/kf-api/domain/caches"
 	"github.com/smart-fm/kf-api/domain/repository"
@@ -37,11 +38,10 @@ func (c *GuestController) GetKfUserInfo(ctx *gin.Context) {
 		c.Error(ctx, xerrors.NewCustomError("获取客户信息失败"))
 		return
 	}
-	user := user2VO(ctx, kfUser)
-	isOnline, err := caches.UserOnLineCacheInstance.IsUserOnline(reqCtx, cardId, kfUser.UUID)
-	if err == nil {
-		user.IsOnline = isOnline
-	}
+	var user kfbackend.User
+	copier.Copy(&user, kfUser)
+	ok, _ = caches.UserOnLineCacheInstance.IsUserOnline(ctx, cardId, user.UUID)
+	user.IsOnline = ok
 	c.Success(ctx, user)
 }
 

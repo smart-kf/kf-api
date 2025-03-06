@@ -12,7 +12,6 @@ var (
 	CaptchaCacheInstance     *CaptchaCache
 	KfCardCacheInstance      *kfCardCacheInstance
 	UserUnReadCacheInstance  *userUnReadCache
-	KfUserExtraCacheInstance *kfUserExtraCache
 	UserOnLineCacheInstance  *userOnLineCache
 	ImSessionCacheInstance   *imSessionCache
 	KfUserCacheInstance      *kfUserCache
@@ -28,7 +27,6 @@ func InitCacheInstances() {
 			CaptchaCacheInstance = NewCaptchaCache(redis.GetRedisClient())
 			KfCardCacheInstance = &kfCardCacheInstance{}
 			UserUnReadCacheInstance = &userUnReadCache{}
-			KfUserExtraCacheInstance = &kfUserExtraCache{}
 			UserOnLineCacheInstance = &userOnLineCache{}
 			ImSessionCacheInstance = &imSessionCache{}
 			KfUserCacheInstance = &kfUserCache{}

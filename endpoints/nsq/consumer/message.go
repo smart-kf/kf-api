@@ -205,13 +205,18 @@ func (m *MessageConsumer) handleOffline(msg *dto.Message) {
 func (m *MessageConsumer) handleEventMessage(msg *dto.Message) {
 	ctx := context.Background()
 	_ = ctx
+	var (
+		guestId        = msg.GuestId
+		msgRepository  = repository.KFMessageRepository{}
+		socketClient   = socketserver.NewSocketServerClient()
+		userRepository = repository.KFUserRepository{}
+		newMessage     dto.Message
+	)
 
-	guestId := msg.GuestId
 	if guestId == "" {
 		guestId = msg.Token
 	}
 	// 插入db.
-	r := repository.KFMessageRepository{}
 	msgDao := dao.KFMessage{
 		MsgId:   uuid2.NewString(),
 		MsgType: common.MessageType(msg.MsgType),
@@ -219,7 +224,6 @@ func (m *MessageConsumer) handleEventMessage(msg *dto.Message) {
 		Content: msg.Content,
 	}
 
-	client := socketserver.NewSocketServerClient()
 	// 1. 回复已收到ACK
 	var req = socketserver.PushMessageRequest{
 		SessionId: msg.SessionId,
@@ -234,12 +238,9 @@ func (m *MessageConsumer) handleEventMessage(msg *dto.Message) {
 			},
 		},
 	)
-	client.PushMessage(context.Background(), &req)
+	socketClient.PushMessage(context.Background(), &req)
 
 	req = socketserver.PushMessageRequest{}
-	var newMessage dto.Message
-	data, _ := json.Marshal(msg)
-	fmt.Println(string(data))
 	// 2. 推送给接收方.
 	if msg.FromBackend() {
 		fmt.Println("收到消息 后台->前台: ", msg.Content)
@@ -251,10 +252,20 @@ func (m *MessageConsumer) handleEventMessage(msg *dto.Message) {
 		}
 		msgDao.CardId = cardId
 		msgDao.IsKf = constant.IsKf
-		err = r.SaveOne(context.Background(), &msgDao)
+		err = msgRepository.SaveOne(context.Background(), &msgDao)
 		if err != nil {
 			return
 		}
+		// 更新用户信息.
+		opt := repository.UpdateColOption{}
+		opt.LastChatAt = time.Now().Unix()
+		opt.LastMessageId = msgDao.MsgId
+		opt.UUID = guestId
+		err = userRepository.UpdateCol(ctx, cardId, opt)
+		if err != nil {
+			xlogger.Error(ctx, "msgHandler 更新用户信息失败", xlogger.Err(err))
+		}
+
 		// 找前台的sessionid
 		sid, err := caches.ImSessionCacheInstance.GetKFFESessionIdByUserId(ctx, cardId, msg.GuestId)
 		if err != nil {
@@ -283,7 +294,7 @@ func (m *MessageConsumer) handleEventMessage(msg *dto.Message) {
 		req.SessionId = sid
 		req.Event = constant.EventMessage
 		req.SetData(newMessage)
-		client.PushMessage(context.Background(), &req)
+		socketClient.PushMessage(context.Background(), &req)
 	} else {
 		fmt.Println("收到消息：前台-> 后台: ", msg.Content)
 		// 发给后台
@@ -293,9 +304,19 @@ func (m *MessageConsumer) handleEventMessage(msg *dto.Message) {
 		}
 		msgDao.CardId = cardId
 		msgDao.IsKf = constant.IsNotKf
-		err = r.SaveOne(context.Background(), &msgDao)
+		err = msgRepository.SaveOne(context.Background(), &msgDao)
 		if err != nil {
 			return
+		}
+
+		// 更新用户信息.
+		opt := repository.UpdateColOption{}
+		opt.UUID = guestId
+		opt.LastChatAt = time.Now().Unix()
+		opt.LastMessageId = msgDao.MsgId
+		err = userRepository.UpdateCol(ctx, cardId, opt)
+		if err != nil {
+			xlogger.Error(ctx, "msgHandler 更新用户信息失败", xlogger.Err(err))
 		}
 
 		// 找后台的sessionid
@@ -304,17 +325,11 @@ func (m *MessageConsumer) handleEventMessage(msg *dto.Message) {
 			return
 		}
 		if len(sids) == 0 {
-			// TODO:: 离线消息操作
+			// TODO:: 客服后台离线，发送智能消息.
 			return
 		}
 		// 未读 + 1
 		caches.UserUnReadCacheInstance.IncrUserUnRead(ctx, cardId, msg.Token, 1)
-		caches.KfUserExtraCacheInstance.SetUserObj(
-			ctx, cardId, msg.Token, dao.UserExtra{
-				LastChatTime:  time.Now().Unix(),
-				LastMessageId: msgDao.MsgId,
-			},
-		)
 
 		newMessage = dto.Message{
 			MessageBase: dto.MessageBase{
@@ -333,7 +348,7 @@ func (m *MessageConsumer) handleEventMessage(msg *dto.Message) {
 		req.SessionIds = sids
 		req.Event = constant.EventMessage
 		req.SetData(newMessage)
-		client.PushMessage(context.Background(), &req)
+		socketClient.PushMessage(context.Background(), &req)
 	}
 
 }

@@ -77,20 +77,12 @@ func (r *KFMessageRepository) ByIDs(ctx context.Context, cardID string, ids []st
 	}
 
 	tx := mysql.GetDBFromContext(ctx)
-
-	if len(cardID) == 0 {
-		return nil, errors.New("cardID is required")
-	}
-
 	tx = tx.Where("card_id = ?", cardID)
 	tx = tx.Where("msg_id in ?", ids)
-
 	res := make([]*dao.KFMessage, 0)
-	result := tx.
-		Find(&res)
+	result := tx.Select("msg_type,content,msg_id").Find(&res)
 	if result.Error != nil {
 		return nil, result.Error
 	}
-
 	return res, nil
 }

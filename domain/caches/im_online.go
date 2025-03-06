@@ -3,11 +3,13 @@ package caches
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/smart-fm/kf-api/infrastructure/redis"
 )
 
 /* 数据解构为 set */
+// 过期时间为 2d
 /*
 	bucket = kf_online_$cardId
 	sets = (userId1,userId2,userId3...)
@@ -27,6 +29,8 @@ func (i *userOnLineCache) getKey(cardId string) string {
 // SetUserOnline 设置用户在线.
 func (d *userOnLineCache) SetUserOnline(ctx context.Context, cardId string, userId string) error {
 	_, err := redis.GetRedisClient().SAdd(ctx, d.getKey(cardId), userId).Result()
+	// 设置过期时间
+	redis.GetRedisClient().Expire(ctx, d.getKey(cardId), 86400*2*time.Second) // 设置2天的过期时间
 	return err
 }
 

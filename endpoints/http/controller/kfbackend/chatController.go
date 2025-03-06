@@ -1,9 +1,9 @@
 package kfbackend
 
 import (
-	"context"
 	"sort"
 	"time"
+	"unicode/utf8"
 
 	uuid2 "github.com/google/uuid"
 
@@ -38,116 +38,125 @@ func (c *ChatController) List(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
 	cardID := common.GetKFCardID(ctx)
 
-	var repo repository.KFUserRepository
+	var (
+		repo   repository.KFUserRepository
+		err    error
+		helper caches.UnReadHelper
+	)
 
 	// in 从redis中获取到的未读访客ids
-	var unreadUUIDs []string
+	var (
+		unreadUUIDs   []string
+		unreadUserMap map[string]int64
+	)
 	if req.ListType == kfbackend.ChatListTypeUnread {
-		uid2Cnt, err := caches.UserUnReadCacheInstance.GetUnReadUsers(ctx, cardID)
+		unreadUserMap, unreadUUIDs, err = helper.GetUnReadUserIDs(reqCtx, cardID)
 		if err != nil {
-			xlogger.Error(reqCtx, "查询粉丝未读消息失败", xlogger.Err(err), xlogger.Any("cardId", cardID))
-			c.Error(ctx, err)
-			return
+			xlogger.Error(ctx, "GetUnReadUserIDs failed", xlogger.Err(err))
 		}
-
-		uids := lo.MapToSlice(
-			uid2Cnt, func(k string, v int64) string {
-				return k
-			},
-		)
-		if len(uids) == 0 {
-			c.Success(
-				ctx, kfbackend.ChatListResponse{},
-			)
-			return
-		}
+	}
+	listOption := &repository.ListUserOption{
+		CardID:      cardID,
+		SearchBy:    req.SearchBy,
+		UnreadUUIDs: unreadUUIDs,
+		ListType:    req.ListType,
+		Page:        req.Page,
+		PageSize:    req.PageSize,
+	}
+	if req.ListType == kfbackend.ChatListTypeBlock {
+		listOption.Blocked = true
 	}
 
 	users, err := repo.List(
-		reqCtx, &repository.ListUserOption{
-			CardID:      cardID,
-			SearchBy:    req.SearchBy,
-			UnreadUUIDs: unreadUUIDs,
-			ListType:    req.ListType,
-			ScrollRequest: &common.ScrollRequest{
-				Sorters: []common.Sorter{
-					{
-						Key: "top_at", // 1. 置顶时间
-						Asc: false,
-					},
-					{
-						Key: "last_chat_at", // 2. 最近聊天时间
-						Asc: false,
-					},
-				},
-				ScrollID: req.ScrollID,
-				PageSize: req.PageSize,
-			},
-		},
+		reqCtx, listOption,
 	)
 	if err != nil {
 		xlogger.Error(reqCtx, "查询粉丝失败", xlogger.Err(err), xlogger.Any("cardId", cardID))
 		c.Error(ctx, err)
 		return
 	}
-	uids := make([]string, 0, len(users))
+
+	if len(users) == 0 {
+		c.Success(ctx, kfbackend.ChatListResponse{})
+		return
+	}
+
 	var (
-		lastMsgMap   map[string]*dao.KFMessage
-		onlineMap    map[string]bool
-		userExtraMap map[string]dao.UserExtra
+		lastMsgMap map[string]*dao.KFMessage
+		onlineMap  map[string]bool
+		listUids   []string
+		lastMsgIds []string
+		msgRepo    repository.KFMessageRepository
 	)
 	lo.ForEach(
 		users, func(item *dao.KfUser, index int) {
-			uids = append(uids, item.UUID)
+			if item.LastMessageId != "" {
+				lastMsgIds = append(lastMsgIds, item.LastMessageId)
+			}
+			listUids = append(listUids, item.UUID)
 		},
 	)
-	// 在线状态.
-	if len(uids) > 0 {
-		// 最近一条消息的用户信息.
-		userExtraMap, _ = caches.KfUserExtraCacheInstance.GetUserObjs(reqCtx, cardID, uids)
-		if userExtraMap != nil {
-			var msgIds []string
-			for _, item := range userExtraMap {
-				if item.LastMessageId != "" {
-					msgIds = append(msgIds, item.LastMessageId)
-				}
-			}
-			if len(msgIds) > 0 {
-				var msgRepo repository.KFMessageRepository
-				msgs, err := msgRepo.ByIDs(reqCtx, cardID, msgIds)
-				if err != nil {
-					xlogger.Error(
-						reqCtx,
-						"查询最近消息失败",
-						xlogger.Err(err),
-						xlogger.Any("cardId", cardID),
-						xlogger.Any("msgIDs", msgIds),
-					)
-				}
-				lastMsgMap = lo.SliceToMap(
-					msgs, func(item *dao.KFMessage) (string, *dao.KFMessage) {
-						return item.GuestId, item
-					},
-				)
-			}
-			onlineMap, _ = caches.UserOnLineCacheInstance.IsUsersOnline(reqCtx, cardID, uids)
+	if len(lastMsgIds) > 0 {
+		msgs, err := msgRepo.ByIDs(reqCtx, cardID, lastMsgIds)
+		if err != nil {
+			xlogger.Error(
+				reqCtx,
+				"查询最近消息失败",
+				xlogger.Err(err),
+				xlogger.Any("cardId", cardID),
+				xlogger.Any("msgIDs", lastMsgIds),
+			)
 		}
-	}
-
-	chats := lo.Map(
-		users, func(item *dao.KfUser, index int) *kfbackend.Chat {
-			uids = append(uids, item.UUID)
-			return user2ChatVO(reqCtx, item, userExtraMap, lastMsgMap)
-		},
-	)
-
-	if onlineMap != nil {
-		lo.ForEach(
-			chats, func(item *kfbackend.Chat, index int) {
-				item.User.IsOnline = onlineMap[item.User.UUID]
+		lastMsgMap = lo.SliceToMap(
+			msgs, func(item *dao.KFMessage) (string, *dao.KFMessage) {
+				return item.GuestId, item
 			},
 		)
 	}
+	// 在线状态.
+	if len(listUids) > 0 {
+		// 最近一条消息的用户信息.
+		onlineMap, _ = caches.UserOnLineCacheInstance.IsUsersOnline(reqCtx, cardID, listUids)
+	}
+	var chats []*kfbackend.Chat
+	lo.ForEach(
+		users, func(item *dao.KfUser, index int) {
+			var (
+				user kfbackend.User
+				chat kfbackend.Chat
+			)
+			copier.Copy(&user, item)
+
+			if onlineMap != nil {
+				user.IsOnline = onlineMap[item.UUID]
+			}
+			if lastMsgMap != nil {
+				msg, ok := lastMsgMap[item.UUID]
+				if ok {
+					if msg.MsgType == common.MessageTypeText {
+						if utf8.RuneCountInString(msg.Content) > 10 {
+							runes := []rune(msg.Content)
+							chat.LastMessage = string(runes[:10])
+						}
+					}
+					if msg.MsgType == common.MessageTypeVideo {
+						chat.LastMessage = "[视频消息]"
+					}
+					if msg.MsgType == common.MessageTypeVoice {
+						chat.LastMessage = "[语音消息]"
+					}
+				}
+			}
+			if unreadUserMap != nil {
+				unread, ok := unreadUserMap[item.UUID]
+				if ok {
+					chat.UnreadMsgCnt = unread
+				}
+			}
+			chat.User = user
+			chats = append(chats, &chat)
+		},
+	)
 
 	c.Success(
 		ctx, kfbackend.ChatListResponse{
@@ -206,122 +215,6 @@ func (c *ChatController) Msgs(ctx *gin.Context) {
 			Messages: msgsVO,
 		},
 	)
-}
-
-//  websocket 来做.
-// func (c *ChatController) MsgsRead(ctx *gin.Context) {
-// 	var req kfbackend.ReadMsgRequest
-// 	if !c.BindAndValidate(ctx, &req) {
-// 		return
-// 	}
-//
-// 	if len(req.MsgIDs) == 0 {
-// 		// do nothing
-// 		c.Success(ctx, kfbackend.ReadMsgResponse{})
-// 		return
-// 	}
-//
-// 	reqCtx := ctx.Request.Context()
-// 	cardID := common.GetKFCardID(ctx)
-//
-// 	var repo repository.KFMessageRepository
-//
-// 	msgs, err := repo.ByIDs(reqCtx, cardID, req.MsgIDs...)
-// 	if err != nil {
-// 		xlogger.Error(
-// 			reqCtx,
-// 			"ByIDs",
-// 			xlogger.Err(err),
-// 			xlogger.Any("cardId", cardID),
-// 			xlogger.Any("ids", req.MsgIDs),
-// 		)
-// 		c.Error(ctx, err)
-// 		return
-// 	}
-//
-// 	userIDs := lo.FilterMap(
-// 		msgs, func(item *dao.KFMessage, index int) (string, bool) {
-// 			if item.FromType == dao.ChatObjTypeUser && len(item.From) > 0 {
-// 				return item.From, true
-// 			}
-// 			return "", false
-// 		},
-// 	)
-//
-// 	userIDs = lo.Uniq(userIDs)
-//
-// 	eg := errgroup.Group{}
-// 	eg.SetLimit(len(userIDs) / 3)
-// 	for _, userID := range userIDs {
-// 		eg.Go(
-// 			func() error {
-// 				return caches.UserUnReadCacheInstance.IncrUserUnRead(reqCtx, cardID, userID, -1)
-// 			},
-// 		)
-// 	}
-//
-// 	if err := eg.Wait(); err != nil {
-// 		xlogger.Error(
-// 			reqCtx,
-// 			"删除已读失败",
-// 			xlogger.Err(err),
-// 			xlogger.Any("cardId", cardID),
-// 			xlogger.Any("ids", req.MsgIDs),
-// 		)
-// 		c.Error(ctx, err)
-// 		return
-// 	}
-//
-// 	err = repo.BatchUpdateReadAt(reqCtx, req.MsgIDs, time.Now().Unix())
-// 	if err != nil {
-// 		xlogger.Error(
-// 			reqCtx,
-// 			"更新已读时间失败",
-// 			xlogger.Err(err),
-// 			xlogger.Any("cardId", cardID),
-// 			xlogger.Any("ids", req.MsgIDs),
-// 		)
-// 		return
-// 	}
-//
-// 	c.Success(ctx, kfbackend.ReadMsgResponse{})
-// }
-
-func user2ChatVO(
-	ctx context.Context, u *dao.KfUser, extra map[string]dao.UserExtra, lastMsgMap map[string]*dao.
-		KFMessage,
-) *kfbackend.Chat {
-	unreadCnt, err := caches.UserUnReadCacheInstance.GetUserUnRead(ctx, u.CardID, u.UUID)
-	if err != nil {
-		xlogger.Error(ctx, "GetUserUnRead err", xlogger.Err(err))
-	}
-	chat := kfbackend.Chat{
-		User:         user2VO(ctx, u),
-		UnreadMsgCnt: unreadCnt,
-	}
-	if extra != nil {
-		chat.LastChatAt = extra[u.UUID].LastChatTime
-	}
-	if lastMsgMap != nil {
-		msg, ok := lastMsgMap[u.UUID]
-		if ok {
-			switch msg.MsgType {
-			case common.MessageTypeText:
-				chat.LastMessage = msg.Content
-			case common.MessageTypeVideo:
-				chat.LastMessage = "[视频消息]"
-			case common.MessageTypeVoice:
-				chat.LastMessage = "[语音消息]"
-			}
-		}
-	}
-	return &chat
-}
-
-func user2VO(ctx context.Context, u *dao.KfUser) kfbackend.User {
-	vo := kfbackend.User{}
-	copier.Copy(&vo, u)
-	return vo
 }
 
 func msg2VO(m *dao.KFMessage) *kfbackend.Message {

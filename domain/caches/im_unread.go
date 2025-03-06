@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/smart-fm/kf-api/infrastructure/redis"
 )
 
+// 过期时间为2天.
 // 数据结构为 hashMap
 // bucket = kf_user_unread_$cardId
 // bucket.key = $userId
@@ -29,7 +31,11 @@ func (d *userUnReadCache) IncrUserUnRead(ctx context.Context, cardId string, use
 	if n == -1 {
 		return redis.GetRedisClient().HDel(ctx, key, userId).Err()
 	}
-	return redis.GetRedisClient().HIncrBy(ctx, key, userId, n).Err()
+	redis.GetRedisClient().HIncrBy(ctx, key, userId, n).Err()
+
+	// 设置过期时间
+	redis.GetRedisClient().Expire(ctx, key, 86400*2*time.Second) // 设置2天的过期时间
+	return nil
 }
 
 // GetUserUnRead 获取某个用户的未读消息数量
