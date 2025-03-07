@@ -18,3 +18,7 @@ type QRCodeScanResponse struct {
 }
 
 type CheckResponse struct{}
+
+type MsgListRequest struct {
+	LastMsgTime int64 `json:"lastMsgTime"`
+}

@@ -47,7 +47,7 @@ func (c *kfAuthCache) SetFrontToken(ctx context.Context, token string, cardId st
 
 func (c *kfAuthCache) GetFrontToken(ctx context.Context, token string) (string, error) {
 	redisClient := redis.GetRedisClient()
-	res := redisClient.Get(ctx, c.getFrontKey(token)).String()
+	res, _ := redisClient.Get(ctx, c.getFrontKey(token)).Result()
 	if res == "" {
 		return "", fmt.Errorf("token not found")
 	}

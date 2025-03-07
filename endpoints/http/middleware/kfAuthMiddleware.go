@@ -77,6 +77,30 @@ func KFFeAuthMiddleware() gin.HandlerFunc {
 	}
 }
 
+// KFFeMustAuthMiddleware 必须有 有效 token
+func KFFeMustAuthMiddleware() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		var bc BaseController
+		token := ctx.GetHeader("Authorization")
+		// 空的也可以请求，由控制器生成 token 返回前端.
+		if token == "" {
+			ctx.Next()
+			return
+		}
+		// 可能造成数据库击穿.
+		cardId, err := caches.KfAuthCacheInstance.GetFrontToken(ctx.Request.Context(), token)
+		if err != nil || cardId == "" {
+			bc.Error(ctx, xerrors.AuthError)
+			return
+		}
+		// caches.KfAuthCacheInstance.SetFrontToken(ctx.Request.Context(), token, cardId)
+		newCtx := common.WithKfCardID(ctx.Request.Context(), cardId)
+		newCtx = common.WithKFToken(newCtx, token)
+		ctx.Request = ctx.Request.WithContext(newCtx)
+		ctx.Next()
+	}
+}
+
 // VerifyKFToken 前台用户的token
 func VerifyKFToken(ctx context.Context, token string) error {
 	_, err := caches.KfAuthCacheInstance.GetFrontToken(ctx, token)

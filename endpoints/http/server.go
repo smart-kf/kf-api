@@ -206,6 +206,13 @@ func registerRouter(g *gin.Engine) {
 		kffe.POST("/qrcode/scan", qr.Scan)
 		kffe.POST("/qrcode/check", qr.Check)
 	}
+	// 客服前台 鉴权API
+	kffe2 := api.Group("/kf-fe")
+	kffe2.Use(middleware.KFFeMustAuthMiddleware())
+	{
+		var qr kffrontend.MsgController
+		kffe2.POST("/msg/list", qr.MsgList)
+	}
 
 	// 计费前台.
 	billFe := api.Group("/bill-fe")

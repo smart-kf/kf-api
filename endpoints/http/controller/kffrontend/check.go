@@ -158,6 +158,7 @@ func (c *QRCodeController) scan(ctx *gin.Context, req *kffrontend.QRCodeScanRequ
 			c.Error(ctx, err)
 			return
 		}
+		kfToken = user.UUID
 		isNewUser = true
 		err = caches.KfAuthCacheInstance.SetFrontToken(reqCtx, kfToken, cardID)
 		if err != nil {
