@@ -80,7 +80,7 @@ func (r *KFMessageRepository) ByIDs(ctx context.Context, cardID string, ids []st
 	tx = tx.Where("card_id = ?", cardID)
 	tx = tx.Where("msg_id in ?", ids)
 	res := make([]*dao.KFMessage, 0)
-	result := tx.Select("msg_type,content,msg_id").Find(&res)
+	result := tx.Select("guest_id,msg_type,content,msg_id").Find(&res)
 	if result.Error != nil {
 		return nil, result.Error
 	}

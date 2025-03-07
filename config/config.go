@@ -20,6 +20,7 @@ type Config struct {
 	DomainPrice   float64       `json:"domainPrice"`
 	Ip2Region     Ip2Region     `json:"ip2Region"`
 	SocketIO      SocketIO      `json:"socketIo"`
+	Bleve         Bleve         `json:"bleve"`
 }
 
 type Ip2Region struct {
@@ -113,4 +114,8 @@ func (c Config) GetPackageByID(id string) (CardPackage, bool) {
 type SocketIO struct {
 	Host     string `json:"host"`     // 域名:
 	FullHost string `json:"fullHost"` // 完整域名带端口
+}
+
+type Bleve struct {
+	Path string `json:"path"` // 全文索引库, 用于智能回复查询.
 }

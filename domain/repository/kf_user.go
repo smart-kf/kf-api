@@ -65,7 +65,7 @@ func (r *KFUserRepository) List(ctx context.Context, options *ListUserOption) ([
 	// 用户id/昵称/手机号/备注
 	if options.SearchBy != "" {
 		searchBy := "%" + options.SearchBy + "%"
-		tx = tx.Where("nick_name LIKE ? or mobile like ?", searchBy)
+		tx = tx.Where("remark_name LIKE ? or mobile like ?", searchBy, searchBy)
 	}
 
 	if len(options.UnreadUUIDs) != 0 {
@@ -78,7 +78,7 @@ func (r *KFUserRepository) List(ctx context.Context, options *ListUserOption) ([
 		res []*dao.KfUser
 	)
 
-	tx = tx.Order("top_at desc, last_chat_at desc")
+	tx = tx.Order("top_at desc,block_at asc, last_chat_at desc")
 	err := tx.Limit(options.PageSize).Offset((options.Page - 1) * options.PageSize).Find(&res).Error
 	if err != nil {
 		return nil, err

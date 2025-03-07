@@ -15,7 +15,7 @@ web:
   kfManagerAddress: https://manager.smartkf.top
 
 redis:
-  db: 0
+  db: 3
   address: localhost:6379
   password: "238XSfh98xa"
 

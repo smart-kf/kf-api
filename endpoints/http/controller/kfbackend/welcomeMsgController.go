@@ -26,10 +26,8 @@ func (c *WelcomeMsgController) Upsert(ctx *gin.Context) {
 		return
 	}
 	reqCtx := ctx.Request.Context()
-
-	db := mysql.GetDBFromContext(reqCtx)
+	repo := repository.KfWelcomeMessageRepository{}
 	cardId := common.GetKFCardID(reqCtx)
-
 	var model = dao.KfWelcomeMessage{
 		Model: gorm.Model{
 			ID: uint(req.Id),
@@ -42,25 +40,7 @@ func (c *WelcomeMsgController) Upsert(ctx *gin.Context) {
 		MsgType: req.MsgType,
 		Title:   req.Title,
 	}
-
-	var err error
-	if req.Id > 0 {
-		var exist dao.KfWelcomeMessage
-		err := db.Where("id = ? and msg_type = ? and deleted_at is null", req.Id, req.MsgType).First(&exist).Error
-		if err != nil {
-			c.Error(ctx, err)
-			return
-		}
-		exist.Content = req.Content
-		exist.Type = req.Type
-		exist.Enable = req.Enable
-		exist.Sort = req.Sort
-		exist.Title = req.Title
-		err = db.Where("id = ? and msg_type = ?", req.Id, req.MsgType).Save(exist).Error
-	} else {
-		err = db.Create(&model).Error
-	}
-
+	err := repo.UpsertOne(reqCtx, &model)
 	if err != nil {
 		c.Error(ctx, err)
 		return
@@ -81,17 +61,15 @@ func (c *WelcomeMsgController) ListAll(ctx *gin.Context) {
 		return
 	}
 	reqCtx := ctx.Request.Context()
-	db := mysql.GetDBFromContext(reqCtx)
 	cardId := common.GetKFCardID(reqCtx)
+	repo := repository.KfWelcomeMessageRepository{}
 
-	var data []*dao.KfWelcomeMessage
-	var cnt int64
-	tx := db.Where("card_id = ? and msg_type = ?", cardId, req.MsgType).Order("sort asc")
-	tx = tx.Model(&dao.KfWelcomeMessage{}).Count(&cnt)
-	if req.Page != nil && req.PageSize != nil {
-		tx = tx.Limit(int(req.GetPage())).Offset(int((req.GetPage() - 1) * req.GetPageSize()))
+	data, cnt, err := repo.List(reqCtx, cardId, req.MsgType, req.GetPage(), req.GetPageSize())
+	if err != nil {
+		c.Error(ctx, err)
+		return
 	}
-	tx.Find(&data)
+
 	var rsp []*kfbackend.KfWelcomeMessageResp
 	for _, item := range data {
 		rsp = append(
@@ -121,24 +99,16 @@ func (c *WelcomeMsgController) Delete(ctx *gin.Context) {
 		return
 	}
 	reqCtx := ctx.Request.Context()
-	db := mysql.GetDBFromContext(reqCtx)
-
-	var msg dao.KfWelcomeMessage
-	err := db.Where("id = ? and card_id = ? and deleted_at is null").First(&msg).Error
-	if err != nil {
-		c.Error(ctx, xerrors.NewCustomError("数据不存在"))
-		return
-	}
-
 	cardId := common.GetKFCardID(reqCtx)
-	n := db.Where("id = ? and card_id = ?", req.Id, cardId).Delete(&dao.KfWelcomeMessage{}).RowsAffected
+	repo := repository.KfWelcomeMessageRepository{}
 
-	if n == 0 {
-		c.Error(ctx, xerrors.NewCustomError("数据不存在"))
+	deleted, err := repo.Delete(reqCtx, cardId, req.Id)
+	if err != nil {
 		return
 	}
 
-	kflog.AddKFLog(cardId, msg.MsgType, "删除了话术", utils.ClientIP(ctx))
+	kflog.AddKFLog(cardId, deleted.MsgType, "删除了话术", utils.ClientIP(ctx))
+
 	c.Success(ctx, nil)
 	return
 }
@@ -168,7 +138,7 @@ func (c *WelcomeMsgController) CopyCardMsg(ctx *gin.Context) {
 		tx.Rollback()
 	}()
 
-	var msgRepo repository.KfWelcomeMessage
+	var msgRepo repository.KfWelcomeMessageRepository
 
 	if req.QuickReply {
 		err = msgRepo.CopyFromCard(

@@ -5,19 +5,12 @@ import (
 	"time"
 	"unicode/utf8"
 
-	uuid2 "github.com/google/uuid"
-
-	"github.com/smart-fm/kf-api/domain/caches"
-	"github.com/smart-fm/kf-api/domain/dto"
-	"github.com/smart-fm/kf-api/endpoints/common/constant"
-	"github.com/smart-fm/kf-api/endpoints/cron/kflog"
-	"github.com/smart-fm/kf-api/infrastructure/httpClient/socketserver"
-	"github.com/smart-fm/kf-api/pkg/utils"
-
 	xlogger "github.com/clearcodecn/log"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
 	"github.com/samber/lo"
+
+	"github.com/smart-fm/kf-api/domain/caches"
 
 	"github.com/smart-fm/kf-api/domain/repository"
 	"github.com/smart-fm/kf-api/endpoints/common"
@@ -49,19 +42,19 @@ func (c *ChatController) List(ctx *gin.Context) {
 		unreadUUIDs   []string
 		unreadUserMap map[string]int64
 	)
-	if req.ListType == kfbackend.ChatListTypeUnread {
-		unreadUserMap, unreadUUIDs, err = helper.GetUnReadUserIDs(reqCtx, cardID)
-		if err != nil {
-			xlogger.Error(ctx, "GetUnReadUserIDs failed", xlogger.Err(err))
-		}
+	unreadUserMap, unreadUUIDs, err = helper.GetUnReadUserIDs(reqCtx, cardID)
+	if err != nil {
+		xlogger.Error(ctx, "GetUnReadUserIDs failed", xlogger.Err(err))
 	}
 	listOption := &repository.ListUserOption{
-		CardID:      cardID,
-		SearchBy:    req.SearchBy,
-		UnreadUUIDs: unreadUUIDs,
-		ListType:    req.ListType,
-		Page:        req.Page,
-		PageSize:    req.PageSize,
+		CardID:   cardID,
+		SearchBy: req.SearchBy,
+		ListType: req.ListType,
+		Page:     req.Page,
+		PageSize: req.PageSize,
+	}
+	if req.ListType == kfbackend.ChatListTypeUnread {
+		listOption.UnreadUUIDs = unreadUUIDs
 	}
 	if req.ListType == kfbackend.ChatListTypeBlock {
 		listOption.Blocked = true
@@ -137,6 +130,8 @@ func (c *ChatController) List(ctx *gin.Context) {
 						if utf8.RuneCountInString(msg.Content) > 10 {
 							runes := []rune(msg.Content)
 							chat.LastMessage = string(runes[:10])
+						} else {
+							chat.LastMessage = msg.Content
 						}
 					}
 					if msg.MsgType == common.MessageTypeVideo {
@@ -235,60 +230,60 @@ func (c *ChatController) BatchSend(ctx *gin.Context) {
 	if !c.BindAndValidate(ctx, &req) {
 		return
 	}
-	reqCtx := ctx.Request.Context()
+	// reqCtx := ctx.Request.Context()
 
-	cardId := common.GetKFCardID(reqCtx)
-	sessionIdMap, err := caches.ImSessionCacheInstance.GetKffeSessionIds(ctx, cardId, req.GuestId)
-	if err != nil {
-		return
-	}
-	var sessionIds []string
-	for _, item := range sessionIdMap {
-		sessionIds = append(sessionIds, item)
-	}
-	// 推给前台
-	newMessage := dto.Message{
-		MessageBase: dto.MessageBase{
-			Event:    constant.EventMessage,
-			Platform: constant.PlatformKfFe,
-		},
-		MsgType: string(req.Message.MsgType),
-		MsgId:   req.Message.MsgId,
-		GuestId: req.Message.GuestId,
-		Content: req.Message.Content,
-		IsKf:    constant.IsKf,
-	}
-	pushMsgRequest := socketserver.PushMessageRequest{
-		SessionIds: sessionIds,
-		Event:      constant.EventMessage,
-	}
-	pushMsgRequest.SetData(newMessage)
-	if err := socketserver.NewSocketServerClient().PushMessage(reqCtx, &pushMsgRequest); err != nil {
-		c.Error(ctx, err)
-		return
-	}
-	// 入库.
-	var msgs []*dao.KFMessage
-	for _, id := range req.GuestId {
-		msgs = append(
-			msgs, &dao.KFMessage{
-				MsgId:   uuid2.NewString(),
-				MsgType: req.Message.MsgType,
-				GuestId: id,
-				CardId:  cardId,
-				Content: req.Message.Content,
-				IsKf:    constant.IsKf,
-			},
-		)
-	}
-
-	var repo repository.KFMessageRepository
-	if err := repo.BatchCreate(reqCtx, msgs); err != nil {
-		c.Error(ctx, err)
-		return
-	}
-
-	kflog.AddKFLog(cardId, "客户", "群发了一条信息", utils.ClientIP(ctx))
+	// cardId := common.GetKFCardID(reqCtx)
+	// sessionIdMap, err := caches.ImSessionCacheInstance.GetKffeSessionIds(ctx, cardId, req.GuestId)
+	// if err != nil {
+	// 	return
+	// }
+	// var sessionIds []string
+	// for _, item := range sessionIdMap {
+	// 	sessionIds = append(sessionIds, item)
+	// }
+	// // 推给前台
+	// newMessage := dto.Message{
+	// 	MessageBase: dto.MessageBase{
+	// 		Event:    constant.EventMessage,
+	// 		Platform: constant.PlatformKfFe,
+	// 	},
+	// 	MsgType: string(req.Message.MsgType),
+	// 	MsgId:   req.Message.MsgId,
+	// 	GuestId: req.Message.GuestId,
+	// 	Content: req.Message.Content,
+	// 	IsKf:    constant.IsKf,
+	// }
+	// pushMsgRequest := socketserver.PushMessageRequest{
+	// 	SessionIds: sessionIds,
+	// 	Event:      constant.EventMessage,
+	// }
+	// pushMsgRequest.SetData(newMessage)
+	// if err := socketserver.NewSocketServerClient().PushMessage(reqCtx, &pushMsgRequest); err != nil {
+	// 	c.Error(ctx, err)
+	// 	return
+	// }
+	// // 入库.
+	// var msgs []*dao.KFMessage
+	// for _, id := range req.GuestId {
+	// 	msgs = append(
+	// 		msgs, &dao.KFMessage{
+	// 			MsgId:   uuid2.NewString(),
+	// 			MsgType: req.Message.MsgType,
+	// 			GuestId: id,
+	// 			CardId:  cardId,
+	// 			Content: req.Message.Content,
+	// 			IsKf:    constant.IsKf,
+	// 		},
+	// 	)
+	// }
+	//
+	// var repo repository.KFMessageRepository
+	// if err := repo.BatchCreate(reqCtx, msgs); err != nil {
+	// 	c.Error(ctx, err)
+	// 	return
+	// }
+	//
+	// kflog.AddKFLog(cardId, "客户", "群发了一条信息", utils.ClientIP(ctx))
 
 	c.Success(ctx, nil)
 }

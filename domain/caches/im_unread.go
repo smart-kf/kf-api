@@ -34,7 +34,7 @@ func (d *userUnReadCache) IncrUserUnRead(ctx context.Context, cardId string, use
 	redis.GetRedisClient().HIncrBy(ctx, key, userId, n).Err()
 
 	// 设置过期时间
-	redis.GetRedisClient().Expire(ctx, key, 86400*2*time.Second) // 设置2天的过期时间
+	redis.GetRedisClient().Expire(ctx, key, time.Hour*48) // 设置2天的过期时间
 	return nil
 }
 
