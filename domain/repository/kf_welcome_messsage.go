@@ -107,7 +107,7 @@ func (w *KfWelcomeMessageRepository) List(
 	tx = tx.Where("card_id = ? and msg_type = ?", cardId, msgType).Order("sort asc")
 	tx = tx.Model(&dao.KfWelcomeMessage{}).Count(&cnt)
 	if page != 0 && pageSize != 0 {
-		tx = tx.Limit(int(page)).Offset(int((page - 1) * pageSize))
+		tx = tx.Limit(int(pageSize)).Offset(int((page - 1) * pageSize))
 	}
 	err := tx.Find(&data).Error
 	if err != nil {
