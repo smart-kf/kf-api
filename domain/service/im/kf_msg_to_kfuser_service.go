@@ -2,7 +2,6 @@ package im
 
 import (
 	"context"
-	"time"
 
 	xlogger "github.com/clearcodecn/log"
 	uuid2 "github.com/google/uuid"
@@ -48,27 +47,12 @@ func (s *KfMsgToKfUserService) saveMessage(ctx context.Context) error {
 	return nil
 }
 
-func (s *KfMsgToKfUserService) updateUserInfo(ctx context.Context) error {
-	userRepository := repository.KFUserRepository{}
-	// 更新用户信息.
-	opt := repository.UpdateColOption{}
-	opt.UUID = s.guestId
-	opt.LastChatAt = time.Now().Unix()
-	opt.LastMessageId = s.newMessage.MsgId
-	err := userRepository.UpdateCol(ctx, s.cardId, opt)
-	if err != nil {
-		xlogger.Error(ctx, "msgHandler 更新用户信息失败", xlogger.Err(err))
-		return err
-	}
-	return nil
-}
-
 func (s *KfMsgToKfUserService) Handle(ctx context.Context) {
 	if err := s.saveMessage(ctx); err != nil {
 		return
 	}
 
-	if err := s.updateUserInfo(ctx); err != nil {
+	if err := s.updateUserLastMessage(ctx, s.newMessage.MsgId); err != nil {
 		return
 	}
 

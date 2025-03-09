@@ -2,11 +2,13 @@ package im
 
 import (
 	"context"
+	"time"
 
 	xlogger "github.com/clearcodecn/log"
 
 	"github.com/smart-fm/kf-api/domain/caches"
 	"github.com/smart-fm/kf-api/domain/dto"
+	"github.com/smart-fm/kf-api/domain/repository"
 	"github.com/smart-fm/kf-api/pkg/wsclient"
 )
 
@@ -69,4 +71,19 @@ func (s *KfImBaseService) pushMessage(
 	if err := pushClient.Push(ctx, event, message, sessionIds...); err != nil {
 		xlogger.Error(ctx, "pushManyMessage-failed", xlogger.Err(err))
 	}
+}
+
+func (s *KfImBaseService) updateUserLastMessage(ctx context.Context, msgId string) error {
+	userRepository := repository.KFUserRepository{}
+	// 更新用户信息.
+	opt := repository.UpdateColOption{}
+	opt.UUID = s.guestId
+	opt.LastChatAt = time.Now().Unix()
+	opt.LastMessageId = msgId
+	err := userRepository.UpdateCol(ctx, s.cardId, opt)
+	if err != nil {
+		xlogger.Error(ctx, "msgHandler 更新用户信息失败", xlogger.Err(err))
+		return err
+	}
+	return nil
 }

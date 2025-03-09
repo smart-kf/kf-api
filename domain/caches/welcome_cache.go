@@ -13,13 +13,37 @@ import (
 )
 
 var (
-	cacheKey = "kf:welcome:message:%s:%s"
+	cacheKey              = "kf:welcome:message:%s:%s"      // 存储后台的欢迎语缓存
+	needSendWelcomeMsgKey = "kf:user:welcome:message:%s:%s" // 存储新用户的key，过期时间10s钟，代表这个客户需要发送欢迎语
 )
 
 type WelcomeMessageCache struct{}
 
 func (c *WelcomeMessageCache) getKey(cardId string, msgType string) string {
 	return fmt.Sprintf(cacheKey, cardId, msgType)
+}
+
+func (c *WelcomeMessageCache) getNeedSendWelcomeMsgKey(cardID string, userID string) string {
+	return fmt.Sprintf(needSendWelcomeMsgKey, cardID, userID)
+}
+
+func (c *WelcomeMessageCache) SetUserNeedSendMsg(ctx context.Context, cardId string, userId string) {
+	key := c.getNeedSendWelcomeMsgKey(cardId, userId)
+	redis.GetRedisClient().Set(ctx, key, 1, time.Second*10)
+}
+
+func (c *WelcomeMessageCache) GetUserNeedSendMsg(ctx context.Context, cardId string, userId string) bool {
+	key := c.getNeedSendWelcomeMsgKey(cardId, userId)
+	_, err := redis.GetRedisClient().Get(ctx, key).Result()
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func (c *WelcomeMessageCache) DelUserNeedSendMsg(ctx context.Context, cardId string, userId string) {
+	key := c.getNeedSendWelcomeMsgKey(cardId, userId)
+	redis.GetRedisClient().Del(ctx, key)
 }
 
 func (c *WelcomeMessageCache) FindWelcomeMessages(ctx context.Context, cardId string) []*dao.KfWelcomeMessage {

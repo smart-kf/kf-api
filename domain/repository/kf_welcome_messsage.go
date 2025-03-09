@@ -88,6 +88,7 @@ func (w *KfWelcomeMessageRepository) UpsertOne(ctx context.Context, msg *dao.KfW
 		if err != nil {
 			return err
 		}
+		return nil
 	}
 	return db.Create(msg).Error
 }

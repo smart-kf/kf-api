@@ -166,6 +166,7 @@ func (c *QRCodeController) scan(ctx *gin.Context, req *kffrontend.QRCodeScanRequ
 			c.Error(ctx, err)
 			return
 		}
+		caches.WelcomeMessageCacheInstance.SetUserNeedSendMsg(reqCtx, cardID, kfToken)
 	} else {
 		user, err = caches.KfUserCacheInstance.GetDBUser(ctx, cardID, kfToken)
 		if err != nil {

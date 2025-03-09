@@ -65,6 +65,11 @@ func (s *KFUserOnlineService) Handle(ctx context.Context) {
 }
 
 func (s *KFUserOnlineService) pushWelcomeMessage(ctx context.Context, dbUser *dao.KfUser) {
+	ok := caches.WelcomeMessageCacheInstance.GetUserNeedSendMsg(ctx, s.cardId, dbUser.UUID)
+	if !ok {
+		return
+	}
+	caches.WelcomeMessageCacheInstance.DelUserNeedSendMsg(ctx, s.cardId, dbUser.UUID)
 	// 查找欢迎语.
 	welcomeMsg := caches.WelcomeMessageCacheInstance.FindWelcomeMessages(ctx, s.cardId)
 	if len(welcomeMsg) == 0 {
@@ -74,7 +79,7 @@ func (s *KFUserOnlineService) pushWelcomeMessage(ctx context.Context, dbUser *da
 	for _, msg := range welcomeMsg {
 		dbMsg := dao.KFMessage{
 			MsgId:   uuid2.NewString(),
-			MsgType: common.MessageType(msg.MsgType),
+			MsgType: common.MessageType(msg.Type),
 			GuestId: dbUser.UUID,
 			CardId:  s.cardId,
 			Content: msg.Content,
@@ -92,4 +97,5 @@ func (s *KFUserOnlineService) pushWelcomeMessage(ctx context.Context, dbUser *da
 		pushMsg := dto.NewPushMessage(string(msg.MsgType), msg.MsgId, msg.Content, dbUser)
 		s.pushMessage(ctx, constant.EventMessage, pushMsg, s.guestSessionId)
 	}
+	s.updateUserLastMessage(ctx, dbMsgs[len(dbMsgs)-1].MsgId)
 }

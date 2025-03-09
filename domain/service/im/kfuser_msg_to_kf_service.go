@@ -2,7 +2,6 @@ package im
 
 import (
 	"context"
-	"time"
 
 	xlogger "github.com/clearcodecn/log"
 	uuid2 "github.com/google/uuid"
@@ -49,21 +48,6 @@ func (s *KfUserMsgToKfService) saveMessage() error {
 	return nil
 }
 
-func (s *KfUserMsgToKfService) updateUserInfo(ctx context.Context) error {
-	userRepository := repository.KFUserRepository{}
-	// 更新用户信息.
-	opt := repository.UpdateColOption{}
-	opt.UUID = s.guestId
-	opt.LastChatAt = time.Now().Unix()
-	opt.LastMessageId = s.newMessage.MsgId
-	err := userRepository.UpdateCol(ctx, s.cardId, opt)
-	if err != nil {
-		xlogger.Error(ctx, "msgHandler 更新用户信息失败", xlogger.Err(err))
-		return err
-	}
-	return nil
-}
-
 func (s *KfUserMsgToKfService) increaseUnRead(ctx context.Context) {
 	// 未读 + 1
 	caches.UserUnReadCacheInstance.IncrUserUnRead(ctx, s.cardId, s.guestId, 1)
@@ -76,7 +60,7 @@ func (s *KfUserMsgToKfService) Handle(ctx context.Context) {
 		return
 	}
 	// 2. 更新用户信息
-	if err := s.updateUserInfo(ctx); err != nil {
+	if err := s.updateUserLastMessage(ctx, s.newMessage.MsgId); err != nil {
 		return
 	}
 	s.increaseUnRead(ctx)

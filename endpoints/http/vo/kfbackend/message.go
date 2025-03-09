@@ -1,6 +1,10 @@
 package kfbackend
 
 import (
+	"unicode/utf8"
+
+	"github.com/samber/lo"
+
 	"github.com/smart-fm/kf-api/endpoints/common"
 	"github.com/smart-fm/kf-api/endpoints/common/constant"
 	"github.com/smart-fm/kf-api/pkg/xerrors"
@@ -64,6 +68,7 @@ const (
 	ChatListTypeDefault ChatListType = 0
 	ChatListTypeUnread  ChatListType = 1
 	ChatListTypeBlock   ChatListType = 2
+	ChatListOnline      ChatListType = 3
 )
 
 type ChatListResponse struct {
@@ -166,4 +171,28 @@ type User struct {
 type BatchSendRequest struct {
 	GuestId []string `json:"guestId" doc:"客户id" binding:"required"`
 	Message Message  `json:"message" doc:"消息体" binding:"required"`
+}
+
+func (r *BatchSendRequest) Validate() error {
+	if len(r.GuestId) == 0 {
+		return nil
+	}
+	if len(r.Message.Content) == 0 {
+		return xerrors.NewCustomError("消息内容不能为空")
+	}
+	if r.Message.MsgType == "" {
+		return xerrors.NewCustomError("消息类型不能为空")
+	}
+	if !lo.Contains(
+		[]common.MessageType{common.MessageTypeText, common.MessageTypeImage, common.MessageTypeVideo},
+		r.Message.MsgType,
+	) {
+		return xerrors.NewCustomError("消息类型错误")
+	}
+
+	if r.Message.MsgType == common.MessageTypeText && utf8.RuneCountInString(r.Message.Content) > 500 {
+		return xerrors.NewCustomError("消息内容不能超过500字")
+	}
+
+	return nil
 }

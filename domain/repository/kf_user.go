@@ -49,13 +49,13 @@ func (r *KFUserRepository) FindByToken(ctx context.Context, cardId string, token
 }
 
 type ListUserOption struct {
-	CardID      string
-	SearchBy    string
-	UnreadUUIDs []string
-	Blocked     bool
-	ListType    kfbackend.ChatListType
-	Page        int
-	PageSize    int
+	CardID   string
+	SearchBy string
+	UUids    []string
+	Blocked  bool
+	ListType kfbackend.ChatListType
+	Page     int
+	PageSize int
 }
 
 func (r *KFUserRepository) List(ctx context.Context, options *ListUserOption) ([]*dao.KfUser, error) {
@@ -68,8 +68,8 @@ func (r *KFUserRepository) List(ctx context.Context, options *ListUserOption) ([
 		tx = tx.Where("remark_name LIKE ? or mobile like ?", searchBy, searchBy)
 	}
 
-	if len(options.UnreadUUIDs) != 0 {
-		tx = tx.Where("uuid in ?", options.UnreadUUIDs) // 有未读消息的访客
+	if len(options.UUids) != 0 {
+		tx = tx.Where("uuid in ?", options.UUids) // 有未读消息的访客
 	}
 	if options.Blocked {
 		tx = tx.Where("block_at > 0") // 用拉黑时间来判断
