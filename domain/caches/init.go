@@ -7,17 +7,18 @@ import (
 )
 
 var (
-	BillSettingCacheInstance *BillSettingCache
-	cacheOnce                = sync.Once{}
-	CaptchaCacheInstance     *CaptchaCache
-	KfCardCacheInstance      *kfCardCacheInstance
-	UserUnReadCacheInstance  *userUnReadCache
-	UserOnLineCacheInstance  *userOnLineCache
-	ImSessionCacheInstance   *imSessionCache
-	KfUserCacheInstance      *kfUserCache
-	KfAuthCacheInstance      *kfAuthCache
-	IdAtomicCacheInstance    *idAtomicCache
-	KfSettingCache           *kfSettingCache
+	BillSettingCacheInstance    *BillSettingCache
+	cacheOnce                   = sync.Once{}
+	CaptchaCacheInstance        *CaptchaCache
+	KfCardCacheInstance         *kfCardCacheInstance
+	UserUnReadCacheInstance     *userUnReadCache
+	UserOnLineCacheInstance     *userOnLineCache
+	ImSessionCacheInstance      *imSessionCache
+	KfUserCacheInstance         *kfUserCache
+	KfAuthCacheInstance         *kfAuthCache
+	IdAtomicCacheInstance       *idAtomicCache
+	KfSettingCache              *kfSettingCache
+	WelcomeMessageCacheInstance *WelcomeMessageCache
 )
 
 func InitCacheInstances() {
@@ -33,6 +34,7 @@ func InitCacheInstances() {
 			KfAuthCacheInstance = &kfAuthCache{}
 			IdAtomicCacheInstance = &idAtomicCache{}
 			KfSettingCache = &kfSettingCache{}
+			WelcomeMessageCacheInstance = &WelcomeMessageCache{}
 		},
 	)
 }

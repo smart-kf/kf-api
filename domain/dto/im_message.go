@@ -3,6 +3,7 @@ package dto
 import (
 	"github.com/smart-fm/kf-api/config"
 	"github.com/smart-fm/kf-api/endpoints/common/constant"
+	"github.com/smart-fm/kf-api/infrastructure/mysql/dao"
 )
 
 type Message struct {
@@ -58,6 +59,20 @@ func NewMessage(oldMessage *Message, toPlatform string) *Message {
 		Content:     oldMessage.Content,
 		KfId:        oldMessage.KfId,
 		IsKf:        oldMessage.IsKf,
+	}
+}
+
+func NewPushMessage(msgType string, msgId string, content string, user *dao.KfUser) *Message {
+	return &Message{
+		Event:       constant.EventMessage,
+		Platform:    constant.PlatformKfFe,
+		MsgType:     msgType,
+		MsgId:       msgId,
+		GuestName:   user.NickName,
+		GuestAvatar: config.GetConfig().Web.CdnHost + user.Avatar,
+		GuestId:     user.UUID,
+		Content:     content,
+		IsKf:        constant.IsKf,
 	}
 }
 

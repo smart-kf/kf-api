@@ -46,6 +46,10 @@ func (c *WelcomeMsgController) Upsert(ctx *gin.Context) {
 		return
 	}
 
+	if req.MsgType == constant.WelcomeMsg {
+		caches.WelcomeMessageCacheInstance.DeleteCache(ctx, cardId)
+	}
+
 	if req.Id > 0 {
 		kflog.AddKFLog(cardId, req.MsgType, "创建了话术", utils.ClientIP(ctx))
 	} else {
@@ -107,6 +111,7 @@ func (c *WelcomeMsgController) Delete(ctx *gin.Context) {
 		return
 	}
 
+	caches.WelcomeMessageCacheInstance.DeleteCache(ctx, cardId)
 	kflog.AddKFLog(cardId, deleted.MsgType, "删除了话术", utils.ClientIP(ctx))
 
 	c.Success(ctx, nil)
@@ -204,6 +209,7 @@ func (c *WelcomeMsgController) CopyCardMsg(ctx *gin.Context) {
 		caches.KfSettingCache.DeleteOne(ctx, cardId)
 	}
 
+	caches.WelcomeMessageCacheInstance.DeleteCache(ctx, cardId)
 	kflog.AddKFLog(cardId, "话术复制", "从卡密:"+kflog.MaskContent(req.CardID)+" 复制了话术", utils.ClientIP(ctx))
 	tx.Commit()
 	c.Success(ctx, nil)

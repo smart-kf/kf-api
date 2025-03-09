@@ -4,10 +4,14 @@ import (
 	"context"
 
 	xlogger "github.com/clearcodecn/log"
+	uuid2 "github.com/google/uuid"
 
 	"github.com/smart-fm/kf-api/domain/caches"
 	"github.com/smart-fm/kf-api/domain/dto"
+	"github.com/smart-fm/kf-api/domain/repository"
+	"github.com/smart-fm/kf-api/endpoints/common"
 	"github.com/smart-fm/kf-api/endpoints/common/constant"
+	"github.com/smart-fm/kf-api/infrastructure/mysql/dao"
 )
 
 type KFUserOnlineService struct {
@@ -55,5 +59,37 @@ func (s *KFUserOnlineService) Handle(ctx context.Context) {
 	}
 	onlineMsg := dto.NewGuestOnlineMessage(dbUser.NickName, dbUser.UUID, dbUser.Avatar, s.cardId, s.guestSessionId)
 	s.pushMessage(ctx, constant.EventOnline, onlineMsg, kfSessionIds...)
+
+	s.pushWelcomeMessage(ctx, dbUser)
 	return
+}
+
+func (s *KFUserOnlineService) pushWelcomeMessage(ctx context.Context, dbUser *dao.KfUser) {
+	// 查找欢迎语.
+	welcomeMsg := caches.WelcomeMessageCacheInstance.FindWelcomeMessages(ctx, s.cardId)
+	if len(welcomeMsg) == 0 {
+		return
+	}
+	dbMsgs := make([]*dao.KFMessage, 0, len(welcomeMsg))
+	for _, msg := range welcomeMsg {
+		dbMsg := dao.KFMessage{
+			MsgId:   uuid2.NewString(),
+			MsgType: common.MessageType(msg.MsgType),
+			GuestId: dbUser.UUID,
+			CardId:  s.cardId,
+			Content: msg.Content,
+			IsKf:    constant.IsKf,
+		}
+		dbMsgs = append(dbMsgs, &dbMsg)
+	}
+
+	var msgRepo repository.KFMessageRepository
+	if err := msgRepo.BatchCreate(ctx, dbMsgs); err != nil {
+		xlogger.Error(ctx, "处理消息失败-BatchCreate", xlogger.Err(err))
+		return
+	}
+	for _, msg := range dbMsgs {
+		pushMsg := dto.NewPushMessage(string(msg.MsgType), msg.MsgId, msg.Content, dbUser)
+		s.pushMessage(ctx, constant.EventMessage, pushMsg, s.guestSessionId)
+	}
 }
