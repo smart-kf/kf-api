@@ -139,6 +139,15 @@ func registerRouter(g *gin.Engine) {
 		{
 			settingGroup.GET("/get", settingController.Get)
 			settingGroup.POST("/update", settingController.Set)
+
+			// 地址管理.
+			settingGroup.GET("/address/list", settingController.AddressList)
+			settingGroup.POST("/address/del", settingController.DelAddress)
+			settingGroup.POST("/address/upsert", settingController.UpsertAddress)
+
+			// tron 配置.
+			settingGroup.GET("/tron/get", settingController.GetTron)
+			settingGroup.POST("/tron/update", settingController.UpsertTron)
 		}
 	}
 

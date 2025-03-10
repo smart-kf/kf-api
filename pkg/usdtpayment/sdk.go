@@ -78,7 +78,7 @@ func (r *CreateOrderRequest) Validate() error {
 type CreateOrderResponse struct {
 	Data CreateOrderData `json:"data"`
 	Code int             `json:"code"`
-	Msg  string          `json:"msg"`
+	Msg  string          `json:"message"`
 }
 
 type CreateOrderData struct {
@@ -134,7 +134,7 @@ type QueryOrderRequest struct {
 type QueryOrderResponse struct {
 	Data TradeOrders `json:"data"`
 	Code int         `json:"code"`
-	Msg  string      `json:"msg"`
+	Msg  string      `json:"message"`
 }
 
 func (c *UsdtPaymentClient) QueryOrder(ctx context.Context, req *QueryOrderRequest) (*TradeOrders, error) {
@@ -162,7 +162,7 @@ type SendMailRequest struct {
 
 type SendMailResponse struct {
 	Code int    `json:"code"`
-	Msg  string `json:"msg"`
+	Msg  string `json:"message"`
 }
 
 func (c *UsdtPaymentClient) SendMail(ctx context.Context, req *SendMailRequest) error {
