@@ -23,4 +23,12 @@ func SwaggerDoc(group *swaggos.Group) {
 	bg.Post("/msg/list").Body(kffrontend.MsgListRequest{}).JSON(kfbackend.MsgListResponse{}).Description(
 		"前台消息列表",
 	)
+
+	bg.Post("/upload").Tag("公共接口").
+		FormFile(
+			"file",
+			swaggos.Attribute{Required: true, Description: "文件, 不超过32M"},
+		).
+		Form("fileType", swaggos.Attribute{Required: true, Description: "文件类型: image || video"}).
+		JSON(kfbackend.UploadResponse{}).Description("文件上传")
 }
