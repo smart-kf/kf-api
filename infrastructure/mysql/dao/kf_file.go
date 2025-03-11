@@ -10,6 +10,7 @@ type KfFile struct {
 	Md5        string `json:"md5" gorm:"column:md5"`                // md5字符串.
 	CardId     string `json:"cardId" gorm:"column:card_id"`         // 卡密id
 	PublicPath string `json:"publicPath" gorm:"column:public_path"` // 访问路径.
+	UUID       string `json:"uuid" gorm:"column:uuid"`              // uuid
 }
 
 func (KfFile) TableName() string {
