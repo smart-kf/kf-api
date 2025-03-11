@@ -214,7 +214,7 @@ func registerRouter(g *gin.Engine) {
 		var qr kffrontend.QRCodeController
 		kffe.POST("/qrcode/scan", qr.Scan)
 		kffe.POST("/qrcode/check", qr.Check)
-		kf.POST("/upload", qr.Upload)
+		kffe.POST("/upload", qr.Upload)
 	}
 	// 客服前台 鉴权API
 	kffe2 := api.Group("/kf-fe")
