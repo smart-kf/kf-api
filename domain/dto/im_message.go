@@ -1,7 +1,6 @@
 package dto
 
 import (
-	"github.com/smart-fm/kf-api/config"
 	"github.com/smart-fm/kf-api/endpoints/common/constant"
 	"github.com/smart-fm/kf-api/infrastructure/mysql/dao"
 )
@@ -54,7 +53,7 @@ func NewMessage(oldMessage *Message, toPlatform string) *Message {
 		MsgType:     oldMessage.MsgType,
 		MsgId:       oldMessage.MsgId,
 		GuestName:   oldMessage.GuestName,
-		GuestAvatar: config.GetConfig().Web.CdnHost + oldMessage.GuestAvatar,
+		GuestAvatar: oldMessage.GuestAvatar,
 		GuestId:     oldMessage.Token,
 		Content:     oldMessage.Content,
 		KfId:        oldMessage.KfId,
@@ -69,22 +68,9 @@ func NewPushMessage(msgType string, msgId string, content string, user *dao.KfUs
 		MsgType:     msgType,
 		MsgId:       msgId,
 		GuestName:   user.NickName,
-		GuestAvatar: config.GetConfig().Web.CdnHost + user.Avatar,
+		GuestAvatar: user.Avatar,
 		GuestId:     user.UUID,
 		Content:     content,
 		IsKf:        constant.IsKf,
 	}
 }
-
-//
-// type Online struct {
-// 	Event       string `json:"event"`
-// 	Platform    string `json:"platform,omitempty"`  // platform  来源平台.
-// 	SessionId   string `json:"sessionId,omitempty"` // sessionId
-// 	Token       string `json:"token,omitempty"`     // token
-// 	GuestName   string `json:"guestName"`           // 客户名称
-// 	GuestAvatar string `json:"guestNvatar"`         // 客户头像
-// 	GuestId     string `json:"guestId"`             // 客户id
-// 	IsKf        int    `json:"isKf"`                // 1=客服，2=粉丝.
-// 	KfId        string `json:"kfId"`                // 客服id
-// }

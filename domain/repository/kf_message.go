@@ -7,8 +7,6 @@ import (
 
 	xlogger "github.com/clearcodecn/log"
 
-	"github.com/smart-fm/kf-api/config"
-	"github.com/smart-fm/kf-api/endpoints/common"
 	"github.com/smart-fm/kf-api/infrastructure/mysql"
 	"github.com/smart-fm/kf-api/infrastructure/mysql/dao"
 )
@@ -61,12 +59,6 @@ func (r *KFMessageRepository) List(ctx context.Context, options *ListMsgOption) 
 
 	if err != nil {
 		return nil, err
-	}
-	cdn := config.GetConfig().Web.CdnHost
-	for _, msg := range msgList {
-		if msg.MsgType == common.MessageTypeImage || msg.MsgType == common.MessageTypeVideo {
-			msg.Content = cdn + msg.Content
-		}
 	}
 	return msgList, nil
 }

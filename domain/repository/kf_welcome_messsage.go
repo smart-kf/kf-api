@@ -84,6 +84,7 @@ func (w *KfWelcomeMessageRepository) UpsertOne(ctx context.Context, msg *dao.KfW
 		exist.Enable = msg.Enable
 		exist.Sort = msg.Sort
 		exist.Title = msg.Title
+		exist.Keyword = msg.Keyword
 		err = db.Where("id = ? and msg_type = ?", msg.ID, msg.MsgType).Save(exist).Error
 		if err != nil {
 			return err

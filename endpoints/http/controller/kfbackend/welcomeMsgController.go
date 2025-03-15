@@ -39,6 +39,7 @@ func (c *WelcomeMsgController) Upsert(ctx *gin.Context) {
 		Enable:  req.Enable,
 		MsgType: req.MsgType,
 		Title:   req.Title,
+		Keyword: req.Keyword,
 	}
 	err := repo.UpsertOne(reqCtx, &model)
 	if err != nil {

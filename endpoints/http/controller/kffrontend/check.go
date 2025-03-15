@@ -184,6 +184,7 @@ func (c *QRCodeController) scan(ctx *gin.Context, req *kffrontend.QRCodeScanRequ
 			WsFullHost: config.GetConfig().SocketIO.FullHost,
 		},
 		IsNewUser: isNewUser,
+		CdnHost:   config.GetConfig().Web.CdnHost,
 	}
 
 	c.Success(ctx, resp)

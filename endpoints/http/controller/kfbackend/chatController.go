@@ -154,8 +154,8 @@ func (c *ChatController) List(ctx *gin.Context) {
 					if msg.MsgType == common.MessageTypeVideo {
 						chat.LastMessage = "[视频消息]"
 					}
-					if msg.MsgType == common.MessageTypeVoice {
-						chat.LastMessage = "[语音消息]"
+					if msg.MsgType == common.MessageTypeImage {
+						chat.LastMessage = "[图片消息]"
 					}
 				}
 			}
