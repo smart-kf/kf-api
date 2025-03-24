@@ -3,7 +3,9 @@ package kfbackend
 import (
 	"github.com/gin-gonic/gin"
 
-	"github.com/smart-fm/kf-api/config"
+	"github.com/smart-fm/kf-api/domain/caches"
+	"github.com/smart-fm/kf-api/domain/service/orders"
+	"github.com/smart-fm/kf-api/endpoints/common"
 	"github.com/smart-fm/kf-api/endpoints/http/vo/kfbackend"
 )
 
@@ -12,7 +14,8 @@ type DomainOrderController struct {
 }
 
 func (c *DomainOrderController) GetDomainPrice(ctx *gin.Context) {
-	c.Success(ctx, config.GetConfig().DomainPrice)
+	price := caches.BillSettingCacheInstance.GetDomainPrice()
+	c.Success(ctx, price)
 }
 
 func (c *DomainOrderController) CreateOrder(ctx *gin.Context) {
@@ -21,13 +24,33 @@ func (c *DomainOrderController) CreateOrder(ctx *gin.Context) {
 		return
 	}
 
-	// reqCtx := ctx.Request.Context()
-	//
-	// var domainRepo repository.BillDomainRepository
-	// cnt, err := domainRepo.CountPrivateDomain(reqCtx)
-	// if err != nil {
-	// 	c.Error(ctx, err)
-	// 	return
-	// }
-	// tx, newCtx := mysql.Begin(reqCtx)
+	reqCtx := ctx.Request.Context()
+
+	rsp, err := orders.CreateDomainOrder(
+		reqCtx, orders.CreateDomainDTO{
+			FromAddress: req.PayAddress,
+		},
+	)
+
+	if err != nil {
+		c.Error(ctx, err)
+		return
+	}
+
+	c.Success(ctx, rsp)
+}
+
+func (c *DomainOrderController) OrderList(ctx *gin.Context) {
+	reqCtx := ctx.Request.Context()
+
+	rsp, err := orders.ListOrder(
+		reqCtx, common.GetKFCardID(ctx),
+	)
+
+	if err != nil {
+		c.Error(ctx, err)
+		return
+	}
+
+	c.Success(ctx, rsp)
 }

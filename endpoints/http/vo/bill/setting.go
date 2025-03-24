@@ -6,6 +6,7 @@ type SettingRequest struct {
 	MonthlyPackage Package `json:"monthlyPackage" doc:"月卡套餐"`
 	Payment        Payment `json:"payment" doc:"支付配置"`
 	Notice         Notice  `json:"notice" doc:"公告"`
+	DomainPrice    int     `json:"domainPrice" doc:"域名支付配置"`
 }
 
 type Package struct {

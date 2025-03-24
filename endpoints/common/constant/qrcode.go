@@ -1,5 +1,7 @@
 package constant
 
+import "time"
+
 // 二维码状态
 const (
 	QRCodeNormal         = 1 // 正常
@@ -9,8 +11,13 @@ const (
 
 // 域名状态
 const (
-	DomainStatusNormal = iota + 1
-	DomainStatusDisable
+	DomainStatusNormal  = iota + 1
+	DomainStatusDisable = 2
+	DomainStatusLocked  = 3
+)
+
+const (
+	DomainExpireTime = 10 * time.Second
 )
 
 const (

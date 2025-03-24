@@ -92,6 +92,7 @@ func (r *BillSettingRepository) InitDefault() {
 			Content: "testing content",
 			Enable:  false,
 		},
+		DomainPrice: 10,
 	}
 
 	r.UpsertSettings(context.Background(), model, false)

@@ -84,9 +84,10 @@ type RedisConfig struct {
 type NSQ struct {
 	Addrs             []string `json:"addrs"`
 	Timeout           int      `json:"timeout" default:"60"`
-	MessageTopic      string   `json:"messageTopic"`
-	MessageTopicGroup string   `json:"messageTopicGroup"`
-	OrderExpireTopic  string   `json:"orderExpireTopic"`
+	MessageTopic      string   `json:"messageTopic" default:"im_message"`
+	MessageTopicGroup string   `json:"messageTopicGroup" default:"im_message_group"`
+	OrderExpireTopic  string   `json:"orderExpireTopic" default:"order_expire_notify"`
+	OrderExpireGroup  string   `json:"orderExpireGroup" default:"order_expire_notify_group"`
 }
 
 type HttpClient struct {

@@ -30,3 +30,14 @@ func (r *BillAccountRepository) FindOneByUsername(ctx context.Context, username 
 
 	return &res, true, nil
 }
+
+func (r *BillAccountRepository) Save(ctx context.Context, account *dao.BillAccount) error {
+	tx := r.getDB(ctx)
+	if err := tx.Where("id = ?", account.ID).Save(account).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return err
+		}
+		return nil
+	}
+	return nil
+}

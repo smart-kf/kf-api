@@ -23,6 +23,15 @@ func (c *BillSettingCache) GetNotice() dao.Notice {
 	return setting.Notice
 }
 
+func (c *BillSettingCache) GetDomainPrice() int {
+	ctx := context.Background()
+	setting := c.getSetting(ctx)
+	if setting == nil {
+		return 0
+	}
+	return setting.DomainPrice
+}
+
 func (c BillSettingCache) GetTestingCardMinute() int {
 	ctx := context.Background()
 	setting := c.getSetting(ctx)

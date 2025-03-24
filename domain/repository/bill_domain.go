@@ -5,6 +5,7 @@ import (
 	"math/rand"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	"github.com/smart-fm/kf-api/endpoints/common"
 	"github.com/smart-fm/kf-api/endpoints/common/constant"
@@ -95,4 +96,29 @@ func (r *BillDomainRepository) CountPrivateDomain(ctx context.Context) (int64, e
 		return 0, err
 	}
 	return cnt, nil
+}
+
+func (r *BillDomainRepository) LockOnePrivateDomain(ctx context.Context) (*dao.BillDomain, bool, error) {
+	var (
+		domain dao.BillDomain
+	)
+	tx := mysql.GetDBFromContext(ctx)
+	err := tx.Model(&dao.BillDomain{}).Clauses(clause.Locking{Strength: "UPDATE"}).
+		Where(
+			"is_public = ? and status = ?", false,
+			constant.DomainStatusNormal,
+		).First(&domain).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, false, nil
+		}
+		return nil, false, err
+	}
+	return &domain, true, nil
+}
+
+func (r *BillDomainRepository) Update(ctx context.Context, domain *dao.BillDomain) error {
+	tx := mysql.GetDBFromContext(ctx)
+	err := tx.Model(&dao.BillDomain{}).Where("id = ?", domain.ID).Save(domain).Error
+	return err
 }

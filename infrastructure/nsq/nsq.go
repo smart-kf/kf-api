@@ -17,6 +17,7 @@ var (
 
 func InitNSQ() {
 	nsqConsumers = append(nsqConsumers, messageConsumer())
+	nsqConsumers = append(nsqConsumers, orderCancelConsumer())
 }
 
 func StartConsume(stopChan chan struct{}) {
@@ -44,6 +45,30 @@ func messageConsumer() *nsq.Consumer {
 		panic(err)
 	}
 	consumer.AddHandler(&consumer2.MessageConsumer{})
+	err = consumer.ConnectToNSQDs(conf.Addrs)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return consumer
+}
+
+func orderCancelConsumer() *nsq.Consumer {
+	hostname, _ := os.Hostname()
+	conf := config.GetConfig().NSQ
+
+	cfg := nsq.NewConfig()
+	cfg.DialTimeout = time.Duration(conf.Timeout) * time.Second
+	cfg.ReadTimeout = time.Duration(conf.Timeout) * time.Second
+	cfg.WriteTimeout = time.Duration(conf.Timeout) * time.Second
+	cfg.ClientID = hostname
+	cfg.Hostname = hostname + "-order-consumer"
+	cfg.UserAgent = "go-" + hostname + "-order-consumer"
+
+	consumer, err := nsq.NewConsumer(conf.OrderExpireTopic, conf.OrderExpireGroup, cfg)
+	if err != nil {
+		panic(err)
+	}
+	consumer.AddHandler(&consumer2.OrderExpireConsumer{})
 	err = consumer.ConnectToNSQDs(conf.Addrs)
 	if err != nil {
 		log.Fatal(err)

@@ -148,6 +148,7 @@ func registerRouter(g *gin.Engine) {
 			// tron 配置.
 			settingGroup.GET("/tron/get", settingController.GetTron)
 			settingGroup.POST("/tron/update", settingController.UpsertTron)
+			settingGroup.POST("/change-password", settingController.UpdatePassword)
 		}
 	}
 
@@ -162,11 +163,15 @@ func registerRouter(g *gin.Engine) {
 		kf.POST("/logout", authController.Logout)
 
 		var qrcodeController kfbackend.QRCodeController
+		var domainController kfbackend.DomainOrderController
 		qrCodeGroup := kf.Group("/qrcode")
 		{
 			qrCodeGroup.GET("", qrcodeController.List)
 			qrCodeGroup.POST("/switch", qrcodeController.Switch)
 			qrCodeGroup.POST("/on-off", qrcodeController.OnOff)
+			qrCodeGroup.GET("/domain-price", domainController.GetDomainPrice)
+			qrCodeGroup.POST("/create-domain-order", domainController.CreateOrder)
+			qrCodeGroup.GET("/domain-order-list", domainController.OrderList)
 		}
 
 		var chatController kfbackend.ChatController

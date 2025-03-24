@@ -4,12 +4,15 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/smart-fm/kf-api/config"
 	"github.com/smart-fm/kf-api/domain/caches"
 	"github.com/smart-fm/kf-api/domain/repository"
+	"github.com/smart-fm/kf-api/endpoints/http/middleware"
 	"github.com/smart-fm/kf-api/endpoints/http/vo/bill"
 	sdk "github.com/smart-fm/kf-api/pkg/usdtpayment"
+	"github.com/smart-fm/kf-api/pkg/xerrors"
 )
 
 type SettingController struct {
@@ -58,6 +61,8 @@ func (c SettingController) Set(ctx *gin.Context) {
 
 	setting.Notice.Enable = req.Notice.Enable
 	setting.Notice.Content = req.Notice.Content
+
+	setting.DomainPrice = req.DomainPrice
 
 	err = repo.UpsertSettings(reqCtx, setting, true)
 	if err != nil {
@@ -199,4 +204,53 @@ func (c SettingController) UpsertTron(ctx *gin.Context) {
 	}
 	ctx.Header("Content-Type", "application/json")
 	ctx.String(200, string(rsp))
+}
+
+type UpdatePasswordRequest struct {
+	OldPassword    string `json:"old_password" binding:"required"`
+	NewPassword    string `json:"new_password"  binding:"required"`
+	RepeatPassword string `json:"repeat_password"  binding:"required"`
+}
+
+func (c SettingController) UpdatePassword(ctx *gin.Context) {
+	var req UpdatePasswordRequest
+	if !c.BindAndValidate(ctx, &req) {
+		return
+	}
+	reqCtx := ctx.Request.Context()
+
+	if req.NewPassword != req.RepeatPassword {
+		c.Error(ctx, xerrors.NewCustomError("两次密码不一致"))
+		return
+	}
+
+	account := middleware.GetBillAccount(ctx)
+
+	var br repository.BillAccountRepository
+	acc, ok, err := br.FindOneByUsername(reqCtx, account.Username)
+	if err != nil {
+		c.Error(ctx, err)
+		return
+	}
+	if !ok {
+		c.Error(ctx, xerrors.NewCustomError("账号不存在"))
+		return
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(acc.Password), []byte(req.OldPassword)); err != nil {
+		c.Error(ctx, xerrors.NewCustomError("密码错误"))
+		return
+	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
+
+	if err != nil {
+		return
+	}
+
+	acc.Password = string(hash)
+
+	err = br.Save(reqCtx, acc)
+
+	c.Success(ctx, nil)
 }
