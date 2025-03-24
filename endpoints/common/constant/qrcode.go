@@ -17,7 +17,7 @@ const (
 )
 
 const (
-	DomainExpireTime = 10 * time.Second
+	DomainExpireTime = 240 * time.Second
 )
 
 const (
