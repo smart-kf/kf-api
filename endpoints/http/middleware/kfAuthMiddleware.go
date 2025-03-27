@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -26,10 +27,22 @@ func KFBeAuthMiddleware() gin.HandlerFunc {
 			bc.Error(ctx, xerrors.AuthError)
 			return
 		}
+		// 获取卡密更新密码的时间，如果密码小于这个时间，则直接返回authError。
+		ti := caches.KfCardCacheInstance.GetCardChangePasswordTime(ctx.Request.Context(), cardId)
+		if ti != 0 {
+			arr := strings.Split(token, "|")
+			if len(arr) == 2 {
+				tokenTime, _ := strconv.ParseInt(arr[1], 10, 64)
+				if tokenTime < ti {
+					bc.Error(ctx, xerrors.PasswordChangedError)
+					return
+				}
+			}
+		}
+
 		newCtx := common.WithKfCardID(ctx.Request.Context(), cardId)
 		newCtx = common.WithKFToken(newCtx, token)
 		ctx.Request = ctx.Request.WithContext(newCtx)
-		// TODO:: 验证 card 的有效期, 这里给token续期.
 		ctx.Next()
 	}
 }

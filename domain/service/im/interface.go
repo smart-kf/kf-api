@@ -18,6 +18,9 @@ func FactoryMessageHandler(eventType string, platform string, msgType string) Me
 		if msgType == constant.MsgTypeRead {
 			return &KfReadService{}
 		}
+		if msgType == constant.MsgKeyword {
+			// return &kfUserKeywordService{}
+		}
 		if platform == constant.PlatformKfBe {
 			return &KfMsgToKfUserService{}
 		} else {

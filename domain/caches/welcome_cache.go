@@ -64,6 +64,27 @@ func (c *WelcomeMessageCache) FindWelcomeMessages(ctx context.Context, cardId st
 	return msgs
 }
 
+func (c *WelcomeMessageCache) FindSmartMsg(
+	ctx context.Context,
+	cardId string,
+	primaryId int64,
+) *dao.KfWelcomeMessage {
+	key := c.getKey(cardId, fmt.Sprintf("%s:%d", constant.SmartMsg, primaryId))
+	result, err := redis.GetRedisClient().Get(ctx, key).Bytes()
+	if err != nil {
+		msg := c.findSmartMsgFromRepository(ctx, cardId, primaryId)
+		if msg == nil {
+			return nil
+		}
+		data, _ := json.Marshal(msg)
+		redis.GetRedisClient().Set(ctx, key, string(data), 5*time.Minute)
+		return msg
+	}
+	var msgs dao.KfWelcomeMessage
+	json.Unmarshal(result, &msgs)
+	return &msgs
+}
+
 func (c *WelcomeMessageCache) DeleteCache(ctx context.Context, cardId string) {
 	redis.GetRedisClient().Del(context.Background(), c.getKey(cardId, constant.WelcomeMsg))
 }
@@ -74,6 +95,18 @@ func (c *WelcomeMessageCache) findFromRepository(
 ) []*dao.KfWelcomeMessage {
 	var repo repository.KfWelcomeMessageRepository
 	msg, _, err := repo.List(ctx, cardId, constant.WelcomeMsg, 1, 10)
+	if err != nil {
+		return nil
+	}
+	return msg
+}
+
+func (c *WelcomeMessageCache) findSmartMsgFromRepository(
+	ctx context.Context, cardId string,
+	id int64,
+) *dao.KfWelcomeMessage {
+	var repo repository.KfWelcomeMessageRepository
+	msg, err := repo.FindById(ctx, cardId, id)
 	if err != nil {
 		return nil
 	}

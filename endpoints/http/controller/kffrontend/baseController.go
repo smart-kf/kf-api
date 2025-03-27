@@ -3,9 +3,12 @@ package kffrontend
 import (
 	xlogger "github.com/clearcodecn/log"
 	"github.com/gin-gonic/gin"
+	"github.com/samber/lo"
 
 	"github.com/smart-fm/kf-api/domain/caches"
 	"github.com/smart-fm/kf-api/domain/repository"
+	"github.com/smart-fm/kf-api/endpoints/common"
+	"github.com/smart-fm/kf-api/endpoints/common/constant"
 	"github.com/smart-fm/kf-api/endpoints/http/middleware"
 	"github.com/smart-fm/kf-api/endpoints/http/vo/kffrontend"
 	"github.com/smart-fm/kf-api/infrastructure/mysql/dao"
@@ -47,4 +50,34 @@ func (c *BaseController) getCard(ctx *gin.Context, req *kffrontend.QRCodeScanReq
 	}
 
 	return true, qrcodeDomain, card
+}
+
+func (c *BaseController) GetSmartReplyKeywords(ctx *gin.Context) {
+	var (
+		reqCtx  = ctx.Request.Context()
+		repo    repository.KfWelcomeMessageRepository
+		kfToken = common.GetKFToken(reqCtx)
+	)
+
+	cardId, err := caches.KfAuthCacheInstance.GetFrontToken(ctx.Request.Context(), kfToken)
+	msgs, _, err := repo.List(reqCtx, cardId, constant.SmartMsg, 1, 10)
+	if err != nil {
+		xlogger.Error(reqCtx, "FindAll failed", xlogger.Err(err))
+		c.Error(ctx, err)
+		return
+	}
+
+	var voList []kffrontend.SmartMsg
+	lo.ForEach(
+		msgs, func(item *dao.KfWelcomeMessage, index int) {
+			voList = append(
+				voList, kffrontend.SmartMsg{
+					Id:      int64(item.ID),
+					Keyword: item.Keyword,
+				},
+			)
+		},
+	)
+
+	c.Success(ctx, voList)
 }

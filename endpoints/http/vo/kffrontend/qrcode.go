@@ -23,3 +23,8 @@ type CheckResponse struct{}
 type MsgListRequest struct {
 	LastMsgTime int64 `json:"lastMsgTime"`
 }
+
+type SmartMsg struct {
+	Id      int64  `json:"id"`
+	Keyword string `json:"keyword"`
+}

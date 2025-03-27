@@ -54,3 +54,12 @@ type ListLogResponse struct {
 	List  []*LogResponse `json:"list"`
 	Total int64          `json:"total"`
 }
+
+type ChangePasswordRequest struct {
+	OldPassword    string `json:"oldPassword" doc:"旧密码"`
+	NewPassword    string `json:"newPassword" binding:"required" doc:"新密码" validate:"required"`
+	RepeatPassword string `json:"repeatPassword" binding:"required" doc:"重复密码" validate:"required"`
+}
+
+type ChangePasswordResponse struct {
+}

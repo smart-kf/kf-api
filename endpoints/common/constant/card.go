@@ -25,5 +25,5 @@ const (
 const (
 	WelcomeMsg = "welcome_msg"
 	QuickReply = "quick_reply"
-	SmartReply = "smart_reply"
+	SmartMsg   = "smart_msg"
 )

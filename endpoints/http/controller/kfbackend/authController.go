@@ -52,7 +52,6 @@ func (c *AuthController) Login(ctx *gin.Context) {
 		return
 	}
 	// 更新登录时间.
-	// TODO:: 将这段逻辑，放到出售卡密的地方，这里暂时先这样处理了.
 	// 不放也可以，不放的问题，有可能延长卡密时间
 	card.LastLoginTime = time.Now().Unix()
 	if card.LoginStatus == constant.LoginStatusUnLogin {
@@ -91,10 +90,12 @@ func (c *AuthController) Login(ctx *gin.Context) {
 		return
 	}
 	kflog.AddKFLog(card.CardID, "login", "登录成功", utils.ClientIP(ctx))
-
-	token := uuid.New().String()
-
-	err = caches.KfAuthCacheInstance.SetBackendToken(reqCtx, token, card.CardID)
+	token := fmt.Sprintf("%s|%d", uuid.New().String(), time.Now().Unix())
+	err = caches.KfAuthCacheInstance.SetBackendToken(
+		reqCtx,
+		token,
+		card.CardID,
+	)
 	if err != nil {
 		xlogger.Error(reqCtx, "SetBackendToken-failed", xlogger.Err(err))
 		c.Error(ctx, xerrors.NewCustomError("登录失败，请重试"))
@@ -129,4 +130,59 @@ func (c *AuthController) Logout(ctx *gin.Context) {
 	c.Success(
 		ctx, nil,
 	)
+}
+
+func (c *AuthController) ChangePassword(ctx *gin.Context) {
+	var req kfbackend.ChangePasswordRequest
+	if !c.BindAndValidate(ctx, &req) {
+		return
+	}
+
+	if req.RepeatPassword != req.NewPassword {
+		c.Error(ctx, xerrors.NewCustomError("两次密码不一致"))
+		return
+	}
+
+	if req.NewPassword == "" {
+		c.Error(ctx, xerrors.NewCustomError("新密码不能为空"))
+		return
+	}
+
+	reqCtx := ctx.Request.Context()
+	cardID := common.GetKFCardID(reqCtx)
+
+	// 查询数据库
+	var cardRepo repository.KFCardRepository
+	card, ok, err := cardRepo.FindByCardID(reqCtx, cardID)
+	if err != nil {
+		xlogger.Error(reqCtx, "查询卡密失败", xlogger.Err(err), xlogger.Any("cardId", cardID))
+		c.Error(ctx, err)
+		return
+	}
+	if !ok {
+		c.Error(ctx, xerrors.NewCustomError("卡密不存在"))
+		return
+	}
+	if card.Password != "" {
+		if err := bcrypt.CompareHashAndPassword([]byte(card.Password), []byte(req.OldPassword)); err != nil {
+			c.Error(ctx, xerrors.NewCustomError("旧密码错误"))
+			return
+		}
+	}
+	hash, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		c.Error(ctx, err)
+		return
+	}
+	card.Password = string(hash)
+	if err := cardRepo.UpdateOne(reqCtx, card); err != nil {
+		c.Error(ctx, err)
+		return
+	}
+	kflog.AddKFLog(card.CardID, "客户", "修改密码", utils.ClientIP(ctx))
+
+	caches.KfCardCacheInstance.Delete(reqCtx, cardID)
+	caches.KfCardCacheInstance.SetCardChangePasswordTime(reqCtx, cardID)
+
+	c.Success(ctx, nil)
 }

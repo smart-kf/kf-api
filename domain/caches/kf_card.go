@@ -14,6 +14,8 @@ import (
 const kfCardCacheKey = "kf_card_cache_%s"
 const kfCardMainIdCacheKey = "kf_card_main_id_%d"
 
+const kfChangePasswordKey = "kf_card_changepswd_%s"
+
 type kfCardCacheInstance struct{}
 
 func (c *kfCardCacheInstance) getKey(cardID string) string {
@@ -82,4 +84,17 @@ func (c *kfCardCacheInstance) GetCardIDByMainID(ctx context.Context, id int64) (
 	}
 	setCacheByKey[string](ctx, cacheKey, card.CardID, 24*time.Hour)
 	return card.CardID, nil
+}
+
+// 记录一下更新卡密密码的时间，在这个时间之前的卡密
+func (c *kfCardCacheInstance) SetCardChangePasswordTime(ctx context.Context, cardId string) {
+	key := fmt.Sprintf(kfChangePasswordKey, cardId)
+	redis.GetRedisClient().Set(ctx, key, time.Now().Unix(), 24*time.Hour)
+}
+
+// GetCardChangePasswordTime 获取卡密密码更新时间
+func (c *kfCardCacheInstance) GetCardChangePasswordTime(ctx context.Context, cardId string) int64 {
+	key := fmt.Sprintf(kfChangePasswordKey, cardId)
+	ti, _ := redis.GetRedisClient().Get(ctx, key).Int64()
+	return ti
 }

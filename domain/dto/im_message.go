@@ -74,3 +74,20 @@ func NewPushMessage(msgType string, msgId string, content string, user *dao.KfUs
 		IsKf:        constant.IsKf,
 	}
 }
+
+func NewReplyMessage(platform string, msgType string, msgId string, content string, uuid string) *Message {
+	return &Message{
+		Event:    constant.EventMessage,
+		Platform: platform,
+		MsgType:  msgType,
+		MsgId:    msgId,
+		GuestId:  uuid,
+		Content:  content,
+		IsKf:     constant.IsKf,
+	}
+}
+
+type KeywordData struct {
+	Id      int    `json:"id"`
+	Keyword string `json:"keyword"`
+}

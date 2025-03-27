@@ -183,7 +183,7 @@ func (c *WelcomeMsgController) CopyCardMsg(ctx *gin.Context) {
 				ToCardId:             cardId,
 				ReplaceTargetContent: req.ReplaceTargetContent,
 				ReplaceContent:       req.ReplaceContent,
-				MsgType:              constant.SmartReply,
+				MsgType:              constant.SmartMsg,
 			},
 		)
 		if err != nil {

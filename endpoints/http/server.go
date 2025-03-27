@@ -161,6 +161,7 @@ func registerRouter(g *gin.Engine) {
 		var publicController kfbackend.PublicController
 		kf.POST("/upload", publicController.Upload)
 		kf.POST("/logout", authController.Logout)
+		kf.POST("/change-password", authController.ChangePassword)
 
 		var qrcodeController kfbackend.QRCodeController
 		var domainController kfbackend.DomainOrderController
@@ -219,6 +220,7 @@ func registerRouter(g *gin.Engine) {
 		var qr kffrontend.QRCodeController
 		kffe.POST("/qrcode/scan", qr.Scan)
 		kffe.POST("/qrcode/check", qr.Check)
+		kffe.GET("/smartmsg", qr.GetSmartReplyKeywords)
 	}
 	// 客服前台 鉴权API
 	kffe2 := api.Group("/kf-fe")

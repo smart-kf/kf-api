@@ -14,7 +14,8 @@ const (
 )
 
 const (
-	MsgTypeRead = "read" // 读取消息事件
+	MsgTypeRead = "read"    // 读取消息事件
+	MsgKeyword  = "keyword" // 读取消息事件
 )
 
 const (

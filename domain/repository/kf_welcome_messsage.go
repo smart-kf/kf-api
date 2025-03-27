@@ -137,7 +137,20 @@ func (w *KfWelcomeMessageRepository) Delete(ctx context.Context, cardId string, 
 
 // 同步处理 全文索引.
 func (w *KfWelcomeMessageRepository) upsertIndex(ctx context.Context, msg *dao.KfWelcomeMessage) {
-	if msg.MsgType != constant.SmartReply {
+	if msg.MsgType != constant.SmartMsg {
 		return
 	}
+}
+
+func (w *KfWelcomeMessageRepository) FindById(ctx context.Context, cardId string, id int64) (
+	*dao.KfWelcomeMessage,
+	error,
+) {
+	db := mysql.GetDBFromContext(ctx)
+	var exist dao.KfWelcomeMessage
+	err := db.Where("id = ? and card_id = ? and deleted_at is null", id, cardId).First(&exist).Error
+	if err != nil {
+		return nil, err
+	}
+	return &exist, nil
 }
