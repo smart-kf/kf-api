@@ -34,6 +34,7 @@ func main() {
 	flag.Parse()
 	conf := config.Load(configName)
 	initLogger(conf)
+	caches.InitCacheInstances()
 	mysql.Load()
 	redis.InitRedis()
 	nsq.InitNSQ()
@@ -43,7 +44,6 @@ func main() {
 		doGenerateFakeMessage()
 		return
 	}
-	caches.InitCacheInstances()
 
 	go func() {
 		setRepo := repository.BillSettingRepository{}

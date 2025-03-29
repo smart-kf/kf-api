@@ -81,3 +81,32 @@ func (c *BaseController) GetSmartReplyKeywords(ctx *gin.Context) {
 
 	c.Success(ctx, voList)
 }
+
+func (c *BaseController) GetNotice(ctx *gin.Context) {
+	var (
+		reqCtx  = ctx.Request.Context()
+		kfToken = common.GetKFToken(reqCtx)
+	)
+
+	cardId, err := caches.KfAuthCacheInstance.GetFrontToken(ctx.Request.Context(), kfToken)
+	if err != nil {
+		c.Error(ctx, err)
+		return
+	}
+
+	setting, err := caches.KfSettingCache.GetOne(reqCtx, cardId)
+	if err != nil {
+		c.Success(
+			ctx, gin.H{
+				"notice": "",
+			},
+		)
+		return
+	}
+
+	c.Success(
+		ctx, gin.H{
+			"notice": setting.Notice,
+		},
+	)
+}

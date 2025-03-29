@@ -58,9 +58,12 @@ func (r *QRCodeDomainRepository) FindByIdAndCardID(ctx context.Context, id int64
 func (r *QRCodeDomainRepository) FindDomain(ctx context.Context, cardId string) ([]*dao.KFQRCodeDomain, error) {
 	tx := mysql.GetDBFromContext(ctx)
 	var data []*dao.KFQRCodeDomain
-	if err := tx.Where("card_id = ?", cardId).Find(&data).Error; err != nil {
-		return nil, err
-	}
+	sql := `SELECT *
+FROM (SELECT *,
+             ROW_NUMBER() OVER (PARTITION BY domain ORDER BY version DESC) AS rn
+      FROM kf_qrcode_domain where card_id = ?) sub
+WHERE rn = 1;`
+	tx.Raw(sql, cardId).Find(&data)
 	return data, nil
 }
 

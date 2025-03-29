@@ -44,7 +44,7 @@ func (c *QRCodeController) Check(ctx *gin.Context) {
 
 	// 1. 全局开关检测
 	if !setting.QRCodeEnabled {
-		c.Error(ctx, xerrors.CheckError.Append("qrcode is disabled"))
+		c.Error(ctx, xerrors.CheckError.Append("二维码失效"))
 		return
 	}
 	// 2.检测扫码引粉
@@ -53,12 +53,12 @@ func (c *QRCodeController) Check(ctx *gin.Context) {
 		case constant.QRCodeDisable:
 			// 二维码停用.
 			xlogger.Info(reqCtx, "禁止访问", xlogger.Any("cause", "二维码停用"))
-			c.Error(ctx, xerrors.CheckError.Append("qrcode is disabled"))
+			c.Error(ctx, xerrors.CheckError.Append("二维码失效"))
 			return
 		case constant.QRCodeStopGetNewFans:
 			if kfToken == "" {
 				xlogger.Info(reqCtx, "禁止访问", xlogger.Any("cause", "暂停引新粉"))
-				c.Error(ctx, xerrors.CheckError.Append("qrcode stop new fans"))
+				c.Error(ctx, xerrors.CheckError.Append("二维码失效"))
 				return
 			}
 		}
@@ -70,24 +70,24 @@ func (c *QRCodeController) Check(ctx *gin.Context) {
 		if err == nil {
 			if setting.IPProxyFilter {
 				if info.IsProxy || info.IsVpn {
-					c.Error(ctx, xerrors.CheckError.Append("proxy or vpn"))
+					c.Error(ctx, xerrors.CheckError.Append("禁止访问"))
 					return
 				}
 			}
 			switch setting.QRCodeScanFilter {
 			case constant.QRCodeFilterRoom:
 				if info.IsCloudProvider {
-					c.Error(ctx, xerrors.CheckError.Append("cloud provider"))
+					c.Error(ctx, xerrors.CheckError.Append("禁止访问"))
 					return
 				}
 			case constant.QRCodeFilterNonMainland:
 				if !info.IsChina {
-					c.Error(ctx, xerrors.CheckError.Append("non mainland"))
+					c.Error(ctx, xerrors.CheckError.Append("禁止访问"))
 					return
 				}
 			case constant.QRCodeFilterRoomAndNonMainland:
 				if info.IsCloudProvider || !info.IsChina {
-					c.Error(ctx, xerrors.CheckError.Append("cloud provider or non mainland"))
+					c.Error(ctx, xerrors.CheckError.Append("禁止访问"))
 					return
 				}
 			}
@@ -99,19 +99,19 @@ func (c *QRCodeController) Check(ctx *gin.Context) {
 			lowerUA,
 			"simulator",
 		) {
-			c.Error(ctx, xerrors.CheckError.Append("simulator"))
+			c.Error(ctx, xerrors.CheckError.Append("禁止访问"))
 			return
 		}
 	}
 	if setting.AppleFilter {
 		if !strings.Contains(lowerUA, "iphone") {
-			c.Error(ctx, xerrors.CheckError.Append("not iphone"))
+			c.Error(ctx, xerrors.CheckError.Append("禁止访问"))
 			return
 		}
 	}
 	if setting.WechatFilter {
 		if !strings.Contains(lowerUA, "micromessenger") {
-			c.Error(ctx, xerrors.CheckError.Append("not wechat"))
+			c.Error(ctx, xerrors.CheckError.Append("禁止访问"))
 			return
 		}
 	}

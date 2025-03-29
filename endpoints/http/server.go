@@ -221,6 +221,7 @@ func registerRouter(g *gin.Engine) {
 		kffe.POST("/qrcode/scan", qr.Scan)
 		kffe.POST("/qrcode/check", qr.Check)
 		kffe.GET("/smartmsg", qr.GetSmartReplyKeywords)
+		kffe.GET("/notice", qr.GetNotice)
 	}
 	// 客服前台 鉴权API
 	kffe2 := api.Group("/kf-fe")
